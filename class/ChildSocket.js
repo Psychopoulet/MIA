@@ -12,22 +12,12 @@
 	
 		// attributes
 			
-			var m_nPort = 81,
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, 'logs')),
+			var m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, 'logs')),
 				m_sTocken = '';
 				
 		// methodes
 			
 			// public
-				
-				this.setPort = function (p_nPort) {
-					m_nPort = p_nPort;
-					return this;
-				};
-				
-				this.getPort = function () {
-					return m_nPort;
-				};
 				
 				this.start = function (p_clHTTPServer) {
 					

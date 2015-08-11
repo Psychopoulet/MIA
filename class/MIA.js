@@ -27,11 +27,11 @@
 
 					try {
 
-						m_clHTTPServer.setPort(1337).start(function () {
+						m_clHTTPServer.start(function () {
 
-							m_clHTTPSocket.setHTTPServer(m_clHTTPServer.getHTTPServer()).start(function () {
+							m_clHTTPSocket.start(m_clHTTPServer.getServer(), function () {
 
-								m_clChildSocket.setPort(m_clHTTPServer.getPort() + 1).start(function () {
+								m_clChildSocket.start(function () {
 
 									if ('function' === typeof p_fCallback) {
 										p_fCallback();

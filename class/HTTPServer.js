@@ -14,8 +14,7 @@
 	
 		// attributes
 			
-			var m_clHTTPServer,
-				m_nPort = 80,
+			var m_clServer,
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs'));
 				
 		// methodes
@@ -182,17 +181,8 @@
 
 			// public
 				
-				this.setPort = function (p_nPort) {
-					m_nPort = p_nPort;
-					return this;
-				};
-				
-				this.getPort = function () {
-					return m_nPort;
-				};
-				
-				this.getHTTPServer = function () {
-					return m_clHTTPServer;
+				this.getServer = function () {
+					return m_clServer;
 				};
 				
 				this.start = function (p_fCallback) {
@@ -201,9 +191,9 @@
 
 						// lancement
 
-						m_clHTTPServer = CST_DEP_HTTP.createServer();
+						m_clServer = CST_DEP_HTTP.createServer();
 						
-						m_clHTTPServer.listen(m_nPort, function () {
+						m_clServer.listen(1337, function () {
 
 							m_clLog.success('-- [HTTP server] started');
 
@@ -215,7 +205,7 @@
 						
 						// requete
 
-						m_clHTTPServer.on('request', function (p_clRequest, p_clResponse) {
+						m_clServer.on('request', function (p_clRequest, p_clResponse) {
 							_router(p_clResponse, CST_DEP_Url.parse(p_clRequest.url).pathname);
 						});
 						
