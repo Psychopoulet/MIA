@@ -6,8 +6,7 @@
 		CST_DEP_Path = require('path'),
 		CST_DEP_Url = require('url'),
 		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, 'Log.js')),
-		CST_DEP_HTTP = require('http'),
-		CST_DEP_SocketServer = require(CST_DEP_Path.join(__dirname, 'SocketServer.js'));
+		CST_DEP_HTTP = require('http');
 		
 // module
 	
@@ -16,8 +15,8 @@
 		// attributes
 			
 			var m_clHTTPServer,
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs')),
-				m_clSocketServer = new CST_DEP_SocketServer();
+				m_nPort = 80,
+				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs'));
 				
 		// methodes
 
@@ -63,7 +62,7 @@
 							var sFileName = CST_DEP_Path.join(__dirname, '..', 'web', p_sDirectory, p_sFileName);
 
 							if (!CST_DEP_FileStream.existsSync(sFileName)) {
-								m_clLog.err('-- [http server] The ' + sFileName + ' file does not exist');
+								m_clLog.err('-- [HTTP server] The ' + sFileName + ' file does not exist');
 							}
 							else {
 								sResult = CST_DEP_FileStream.readFileSync(sFileName);
@@ -100,7 +99,7 @@
 							switch (tabURI.length) {
 
 								case 0:
-									m_clLog.log('-- [http server] query');
+									m_clLog.log('-- [HTTP server] query');
 									_sendHTMLResponse(p_clResponse, 200, _readFile('templates', 'index.tpl'));
 								break;
 
@@ -183,18 +182,34 @@
 
 			// public
 				
-				this.start = function () {
-					
+				this.setPort = function (p_nPort) {
+					m_nPort = p_nPort;
+					return this;
+				};
+				
+				this.getPort = function () {
+					return m_nPort;
+				};
+				
+				this.getHTTPServer = function () {
+					return m_clHTTPServer;
+				};
+				
+				this.start = function (p_fCallback) {
+
 					try {
 
 						// lancement
 
 						m_clHTTPServer = CST_DEP_HTTP.createServer();
 						
-						m_clHTTPServer.listen(1337, function () {
-							
-							m_clLog.success('-- [http server] started');
-							m_clSocketServer.start(m_clHTTPServer);
+						m_clHTTPServer.listen(m_nPort, function () {
+
+							m_clLog.success('-- [HTTP server] started');
+
+							if ('function' === typeof p_fCallback) {
+								p_fCallback();
+							}
 							
 						});
 						
@@ -203,6 +218,21 @@
 						m_clHTTPServer.on('request', function (p_clRequest, p_clResponse) {
 							_router(p_clResponse, CST_DEP_Url.parse(p_clRequest.url).pathname);
 						});
+						
+					}
+					catch (e) {
+						m_clLog.err(e);
+					}
+					
+				};
+				
+				this.stop = function (p_fCallback) {
+
+					try {
+
+						if ('function' === typeof p_fCallback) {
+							p_fCallback();
+						}
 						
 					}
 					catch (e) {
