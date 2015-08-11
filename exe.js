@@ -1,4 +1,4 @@
-
+// ce n'est qu'une comédie
 // dépendances
 
 	var
