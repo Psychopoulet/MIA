@@ -27,9 +27,14 @@ jQuery(document).ready(function() {
 
 	socket
 		.on('connect', _displayIsConnected)
-		.on('logged', function () {
+		.on('login_ok', function () {
 			socket.logged = true;
 			_displayIsConnected();
+		})
+		.on('login_ko', function (m_sError) {
+			socket.logged = false;
+			_displayIsConnected();
+			alert(m_sError);
 		})
 		.on('disconnect', function () {
 			socket.logged = false;

@@ -5,7 +5,7 @@
 		CST_DEP_FileStream = require('fs'),
 		CST_DEP_Path = require('path'),
 		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, 'Log.js')),
-		CST_DEP_HTTPServer = require(CST_DEP_Path.join(__dirname, 'HTTPServer.js'));
+		CST_DEP_MIA = require(CST_DEP_Path.join(__dirname, 'MIA.js'));
 		
 // module
 	
@@ -15,8 +15,7 @@
 			
 			var m_sCommandFile = CST_DEP_Path.join(__dirname, '../', 'command.tmp'),
 				m_sLaunchType = process.argv.slice(2)[0],
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, 'logs')),
-				m_clHTTPServer = new CST_DEP_HTTPServer();
+				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, 'logs'));
 				
 		// methodes
 			
@@ -37,7 +36,7 @@
 								m_clLog.err(p_vError);
 							}
 							else {
-								m_clHTTPServer.start();
+								new CST_DEP_MIA().start();
 							}
 							
 						});
@@ -66,25 +65,27 @@
 
 								CST_DEP_FileStream.unlink(m_sCommandFile, function (p_vError) {
 
-									var sPID;
-									
 									if (p_vError) {
 										m_clLog.err(p_vError);
 									}
 									else {
 
-										sPID = p_sData.toString();
+										new CST_DEP_MIA().stop(function () {
 
-										try {
-											process.kill(sPID);
-										}
-										catch (e) {}
+											var sPID = p_sData.toString();
 
-										m_clLog.log('[END ' + sPID + ']');
+											try {
+												process.kill(sPID);
+											}
+											catch (e) {}
 
-										if ('function' === typeof p_fCallback) {
-											p_fCallback();
-										}
+											m_clLog.log('[END ' + sPID + ']');
+
+											if ('function' === typeof p_fCallback) {
+												p_fCallback();
+											}
+
+										});
 
 									}
 									
