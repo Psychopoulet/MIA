@@ -15,7 +15,7 @@
 			
 			var m_sCommandFile = CST_DEP_Path.join(__dirname, '../', 'command.tmp'),
 				m_sLaunchType = process.argv.slice(2)[0],
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, 'logs'));
+				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs'));
 				
 		// methodes
 			
