@@ -74,7 +74,9 @@
 									
 								});
 
-								m_clChildSocket.start(1338, p_fCallback);
+								m_clChildSocket.start(1338, function () {
+									m_clW3VoicesManager.playRandomCharacter('ready', p_fCallback);
+								});
 
 							});
 
