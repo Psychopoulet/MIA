@@ -5,9 +5,7 @@ jQuery(document).ready(function() {
 	var status = jQuery('#status'),
 		login_form = jQuery('#login_form');
 
-	var socket = io(function () {
-		console.log('test');
-	});
+	var socket;
 
 	function _displayIsConnected() {
 
@@ -25,13 +23,17 @@ jQuery(document).ready(function() {
 
 	}
 
+	socket = io.connect('//' + window.location.hostname + ':1337');
+
 	socket
 		.on('connect', _displayIsConnected)
 		.on('login_ok', function () {
+			login_form.find('input').removeAttr('disable');
 			socket.logged = true;
 			_displayIsConnected();
 		})
 		.on('login_ko', function (m_sError) {
+			login_form.find('input').removeAttr('disable');
 			socket.logged = false;
 			_displayIsConnected();
 			alert(m_sError);
@@ -42,6 +44,7 @@ jQuery(document).ready(function() {
 		});
 
 	login_form.submit(function (e) {
+		login_form.find('input').attr('disable', 'disable');
 		socket.emit('login', { email : jQuery('#login_email').val(), password : jQuery('#login_password').val() });
 		return false;
 	});
