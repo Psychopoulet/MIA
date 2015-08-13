@@ -40,6 +40,11 @@
 								m_clLog.info('-- [child socket client] ' + socket.id + ' disconnected');
 								socket = null;
 							});
+
+							socket.on('test', function () {
+								m_clLog.success('ca marche !');
+								socket.emit('test_ok');
+							})
 							
 						});
 						
