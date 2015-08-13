@@ -62,6 +62,8 @@
 
 					try {
 
+						m_clW3VoicesManager.playRandomCharacter('ready');
+
 						m_clHTTPServer.start(1337, function () {
 
 							m_clHTTPSocket.start(m_clHTTPServer.getServer(), function () {
