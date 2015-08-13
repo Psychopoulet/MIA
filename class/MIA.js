@@ -5,6 +5,7 @@
 		CST_DEP_Path = require('path'),
 		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, 'Log.js')),
 		CST_DEP_SIKY = require(CST_DEP_Path.join(__dirname, '..', 'node_modules', 'SIKY-API-node', 'api.js')),
+		CST_DEP_W3VoicesManager = require(CST_DEP_Path.join(__dirname, 'W3VoicesManager.js')),
 		CST_DEP_HTTPServer = require(CST_DEP_Path.join(__dirname, 'HTTPServer.js')),
 		CST_DEP_HTTPSocket = require(CST_DEP_Path.join(__dirname, 'HTTPSocket.js')),
 		CST_DEP_ChildSocket = require(CST_DEP_Path.join(__dirname, 'ChildSocket.js'));
@@ -17,6 +18,7 @@
 			
 			var m_stSIKYUser,
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'MIA')),
+				m_clW3VoicesManager = new CST_DEP_W3VoicesManager(),
 				m_clHTTPServer = new CST_DEP_HTTPServer(),
 				m_clHTTPSocket = new CST_DEP_HTTPSocket(),
 				m_clChildSocket = new CST_DEP_ChildSocket();
