@@ -62,8 +62,6 @@
 
 					try {
 
-						m_clW3VoicesManager.playRandomCharacter('ready');
-
 						m_clHTTPServer.start(1337, function () {
 
 							m_clHTTPSocket.start(m_clHTTPServer.getServer(), function () {
@@ -76,7 +74,9 @@
 									
 								});
 
-								m_clChildSocket.start(1338, p_fCallback);
+								m_clChildSocket.start(1338, function () {
+									m_clW3VoicesManager.playRandomCharacter('ready', p_fCallback);
+								});
 
 							});
 
