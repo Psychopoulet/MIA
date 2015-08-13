@@ -15,7 +15,7 @@
 		// attributes
 			
 			var m_clServer,
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs'));
+				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'httpserver'));
 				
 		// methodes
 
@@ -180,12 +180,12 @@
 					}
 
 			// public
-				
+
 				this.getServer = function () {
 					return m_clServer;
 				};
 				
-				this.start = function (p_fCallback) {
+				this.start = function (p_nPort, p_fCallback) {
 
 					try {
 
@@ -193,7 +193,7 @@
 
 						m_clServer = CST_DEP_HTTP.createServer();
 						
-						m_clServer.listen(1337, function () {
+						m_clServer.listen(p_nPort, function () {
 
 							m_clLog.success('-- [HTTP server] started');
 

@@ -16,7 +16,7 @@
 		// attributes
 			
 			var m_stSIKYUser,
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs')),
+				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'MIA')),
 				m_clHTTPServer = new CST_DEP_HTTPServer(),
 				m_clHTTPSocket = new CST_DEP_HTTPSocket(),
 				m_clChildSocket = new CST_DEP_ChildSocket();
@@ -28,7 +28,6 @@
 				function _login(p_stSocket, p_stData) {
 
 					if (m_stSIKYUser && m_stSIKYUser.email == p_stData.email && m_stSIKYUser.password == p_stData.password) {
-						m_clLog.success('-- [socket server] logged to SIKY');
 						p_stSocket.emit('login_ok');
 					}
 					else {
@@ -61,7 +60,7 @@
 
 					try {
 
-						m_clHTTPServer.start(function () {
+						m_clHTTPServer.start(1337, function () {
 
 							m_clHTTPSocket.start(m_clHTTPServer.getServer(), function () {
 
@@ -73,13 +72,7 @@
 									
 								});
 
-								m_clChildSocket.start(function () {
-
-									if ('function' === typeof p_fCallback) {
-										p_fCallback();
-									}
-
-								});
+								m_clChildSocket.start(1338, p_fCallback);
 
 							});
 
@@ -96,11 +89,19 @@
 
 					try {
 
-						m_clHTTPServer.stop(function () {
+						if ('function' === typeof p_fCallback) {
+							p_fCallback();
+						}
 
-							if ('function' === typeof p_fCallback) {
-								p_fCallback();
-							}
+						return;
+						
+						m_clChildSocket.stop(function () {
+
+							m_clHTTPSocket.stop(function () {
+
+								m_clHTTPServer.stop(p_fCallback);
+
+							});
 
 						});
 

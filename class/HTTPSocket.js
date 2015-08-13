@@ -5,7 +5,7 @@
 		CST_DEP_Path = require('path'),
 		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, 'Log.js')),
 		CST_DEP_SocketIO = require('socket.io');
-		
+
 // module
 	
 	module.exports = function () {
@@ -13,7 +13,7 @@
 		// attributes
 			
 			var m_clSocketServer,
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs'));
+				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'httpsocket'));
 				
 		// methodes
 
@@ -24,9 +24,9 @@
 					try {
 
 						m_clSocketServer = CST_DEP_SocketIO.listen(p_clHTTPServer);
-						
+
 						m_clLog.success('-- [HTTP socket server] started');
-						
+
 						if ('function' === typeof p_fCallback) {
 							p_fCallback();
 						}
@@ -42,7 +42,7 @@
 							});
 							
 						});
-						
+
 					}
 					catch (e) {
 						m_clLog.err(e);

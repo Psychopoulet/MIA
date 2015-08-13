@@ -13,18 +13,18 @@
 		// attributes
 			
 			var m_clSocketServer,
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs'));
+				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'childsocket'));
 				
 		// methodes
 			
 			// public
 				
-				this.start = function (p_clHTTPServer) {
+				this.start = function (p_nPort, p_fCallback) {
 					
 					try {
 
-						m_clSocketServer = CST_DEP_SocketIO.listen(1338);
-						
+						m_clSocketServer = CST_DEP_SocketIO.listen(p_nPort);
+
 						m_clLog.success('-- [child socket server] started');
 						
 						if ('function' === typeof p_fCallback) {
@@ -40,6 +40,11 @@
 								m_clLog.info('-- [child socket client] ' + socket.id + ' disconnected');
 								socket = null;
 							});
+
+							socket.on('test', function () {
+								m_clLog.success('ca marche !');
+								socket.emit('test_ok');
+							})
 							
 						});
 						
