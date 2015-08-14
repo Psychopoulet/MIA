@@ -41,11 +41,6 @@
 								socket = null;
 							});
 
-							socket.on('test', function () {
-								m_clLog.success('ca marche !');
-								socket.emit('test_ok');
-							})
-							
 						});
 						
 					}
