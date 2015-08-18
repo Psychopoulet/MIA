@@ -24,8 +24,8 @@
 		// methodes
 
 			// protected
-
-				function _login(p_stSocket, p_stData) {
+				
+				function _runLogin(p_stSocket, p_stData) {
 
 					if (m_stSIKYUser && m_stSIKYUser.email == p_stData.email && m_stSIKYUser.password == p_stData.password) {
 						p_stSocket.emit('login_ok');
@@ -53,7 +53,25 @@
 					}
 
 				}
-			
+				
+				function _runW3 () {
+
+					m_clChildSocket.onConnection(function (socket) {
+						
+						socket
+							.on('temperature', function (data) {
+								console.log(data);
+							})
+							.on('w3', function (data) {
+								console.log(data);
+							});
+							
+						socket.emit('w3', { action : 'get_musics' });
+						
+					});
+					
+				}
+				
 			// public
 				
 				this.start = function (p_fCallback) {
@@ -67,17 +85,25 @@
 								m_clHTTPSocket.onConnection(function (socket) {
 
 									socket.on('login', function (p_stData) {
-										_login(socket, p_stData);
+										_runLogin(socket, p_stData);
 									});
 									
 								});
-
-								m_clChildSocket.start(1338, p_fCallback);
+								
+								m_clChildSocket.start(1338, function () {
+									
+									_runW3();
+									
+									if ('function' === typeof p_fCallback) {
+										p_fCallback();
+									}
+									
+								});
 
 							});
 
 						});
-
+						
 					}
 					catch (e) {
 						m_clLog.err(e);
