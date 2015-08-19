@@ -19,7 +19,7 @@
 
 			// public
 				
-				this.start = function (p_clHTTPServer, p_fCallback) {
+				this.start = function (p_clHTTPServer, p_fCallback, p_fCallbackOnConnection) {
 
 					try {
 
@@ -31,9 +31,13 @@
 							p_fCallback();
 						}
 
-						this.onConnection(function (socket) {
-
+						m_clSocketServer.sockets.on('connection', function (socket) {
+							
 							m_clLog.success('-- [HTTP socket client] ' + socket.id + ' connected');
+
+							if ('function' === typeof p_fCallbackOnConnection) {
+								p_fCallbackOnConnection(socket);
+							}
 
 							socket.on('disconnect', function () {
 								socket.removeAllListeners();
@@ -61,25 +65,6 @@
 							p_fCallback();
 						}
 						
-					}
-					catch (e) {
-						m_clLog.err(e);
-					}
-					
-				};
-				
-				this.onConnection = function (p_fCallback) {
-
-					try {
-
-						if (m_clSocketServer && 'function' === typeof p_fCallback) {
-
-							m_clSocketServer.sockets.on('connection', function (socket) {
-								p_fCallback(socket);
-							});
-
-						}
-
 					}
 					catch (e) {
 						m_clLog.err(e);

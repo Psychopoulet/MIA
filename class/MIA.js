@@ -24,11 +24,11 @@
 		// methodes
 
 			// protected
-
-				function _login(p_stSocket, p_stData) {
+				
+				function _runLogin(p_stHTTPSocket, p_stData) {
 
 					if (m_stSIKYUser && m_stSIKYUser.email == p_stData.email && m_stSIKYUser.password == p_stData.password) {
-						p_stSocket.emit('login_ok');
+						p_stHTTPSocket.emit('login_ok');
 					}
 					else {
 
@@ -42,18 +42,56 @@
 								};
 
 								m_clLog.success('-- [socket server] logged to SIKY');
-								p_stSocket.emit('login_ok');
+								p_stHTTPSocket.emit('login_ok');
 								
 							})
 							.catch(function (m_sError) {
 								m_clLog.err(m_sError);
-								p_stSocket.emit('login_ko', m_sError);
+								p_stHTTPSocket.emit('login_ko', m_sError);
 							});
 							
 					}
 
 				}
-			
+				
+				function _runTemperature (p_stChildSocket) {
+
+					p_stChildSocket
+						.on('temperature', function (data) {
+							console.log(data);
+						});
+						
+				}
+				
+				function _runW3 (p_stChildSocket) {
+
+					p_stChildSocket
+						.on('w3', function (data) {
+							
+							if (data.action) {
+
+								switch (data.action) {
+
+									case 'get_races' :
+									
+										console.log(data.races);
+
+									break;
+
+									case 'get_musics' :
+									
+										console.log(data.musics);
+
+									break;
+
+								}
+
+							}
+
+						});
+						
+				}
+				
 			// public
 				
 				this.start = function (p_fCallback) {
@@ -64,20 +102,29 @@
 
 							m_clHTTPSocket.start(m_clHTTPServer.getServer(), function () {
 
-								m_clHTTPSocket.onConnection(function (socket) {
-
-									socket.on('login', function (p_stData) {
-										_login(socket, p_stData);
-									});
+								m_clChildSocket.start(1338, function () {
+									
+									if ('function' === typeof p_fCallback) {
+										p_fCallback();
+									}
+									
+								}, function (socket) {
+									
+									_runTemperature(socket);
+									_runW3(socket);
 									
 								});
 
-								m_clChildSocket.start(1338, p_fCallback);
-
+							}, function (socket) {
+								
+								socket.on('login', function (p_stData) {
+									_runLogin(socket, p_stData);
+								});
+								
 							});
 
 						});
-
+						
 					}
 					catch (e) {
 						m_clLog.err(e);
