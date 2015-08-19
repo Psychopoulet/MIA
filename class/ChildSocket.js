@@ -3,7 +3,7 @@
 	
 	var
 		CST_DEP_Path = require('path'),
-		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, 'Log.js')),
+		CST_DEP_Log = require('logs'),
 		CST_DEP_SocketIO = require('socket.io');
 		
 // module
