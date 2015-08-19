@@ -12,14 +12,15 @@
 	
 		// attributes
 			
-			var m_clSocketServer,
+			var m_clThis = this,
+				m_clSocketServer,
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'childsocket'));
 				
 		// methodes
 			
 			// public
 				
-				this.start = function (p_nPort, p_fCallback) {
+				this.start = function (p_nPort, p_fCallback, p_fCallbackOnConnection) {
 					
 					try {
 
@@ -31,22 +32,26 @@
 							p_fCallback();
 						}
 						
-						this.onConnection(function (socket) {
-
+						m_clSocketServer.sockets.on('connection', function (socket) {
+							
 							m_clLog.success('-- [child socket client] ' + socket.id + ' connected');
-
+							
+							if ('function' === typeof p_fCallbackOnConnection) {
+								p_fCallbackOnConnection(socket);
+							}
+							
 							socket.on('disconnect', function () {
-								socket.removeAllListeners();
 								m_clLog.info('-- [child socket client] ' + socket.id + ' disconnected');
-								socket = null;
 							});
 
 						});
-						
+
 					}
 					catch (e) {
 						m_clLog.err(e);
 					}
+					
+					return m_clThis;
 					
 				};
 				
@@ -66,24 +71,7 @@
 						m_clLog.err(e);
 					}
 					
-				};
-				
-				this.onConnection = function (p_fCallback) {
-
-					try {
-
-						if (m_clSocketServer && 'function' === typeof p_fCallback) {
-
-							m_clSocketServer.sockets.on('connection', function (socket) {
-								p_fCallback(socket);
-							});
-
-						}
-
-					}
-					catch (e) {
-						m_clLog.err(e);
-					}
+					return m_clThis;
 					
 				};
 				
