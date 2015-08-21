@@ -31,16 +31,14 @@
 
 						m_clHTTPServer.start(1337, function () {
 
+							var sPluginsPath = CST_DEP_Path.join(__dirname, '..', 'plugins');
+
+							CST_DEP_FileSync.readdirSync(sPluginsPath).forEach(function (file) {
+								require(CST_DEP_Path.join(sPluginsPath, file))(m_clHTTPSocket, m_clChildSocket, CST_DEP_SIKY);
+							});
+
 							m_clHTTPSocket.start(m_clHTTPServer.getServer(), function () {
-
 								m_clChildSocket.start(1338, p_fCallback);
-
-								var sPluginsPath = CST_DEP_Path.join(__dirname, '..', 'plugins');
-
-								CST_DEP_FileSync.readdirSync(sPluginsPath).forEach(function (file) {
-									require(CST_DEP_Path.join(sPluginsPath, file))(m_clHTTPSocket, m_clChildSocket, CST_DEP_SIKY);
-								});
-
 							});
 
 						});
