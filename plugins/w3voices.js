@@ -3,56 +3,60 @@
 	
 // module
 	
-	module.exports = function (p_clSocket, p_clW3VoicesManager) {
+	module.exports = function (p_clHTTPSocket, p_clChildSocket) {
 
-		p_clSocket.on('w3', function (data) {
+		p_clChildSocket.onConnection(function(socket) {
 
-			if (data.action) {
+			socket.on('w3', function (data) {
 
-				switch (data.action) {
+				if (data.action) {
 
-					case 'get_races' :
-					
-						console.log(data.races);
+					switch (data.action) {
 
-					break;
+						case 'get_races' :
+						
+							console.log(data.races);
 
-					case 'get_musics' :
-					
-						console.log(data.musics);
+						break;
 
-					break;
+						case 'get_musics' :
+						
+							console.log(data.musics);
 
-					case 'get_warnings' :
-					
-						console.log(data.warnings);
+						break;
 
-					break;
+						case 'get_warnings' :
+						
+							console.log(data.warnings);
 
-					case 'get_characters' :
-					
-						console.log(data.characters);
+						break;
 
-					break;
+						case 'get_characters' :
+						
+							console.log(data.characters);
 
-					case 'get_actions' :
-					
-						console.log(data.actions);
+						break;
 
-					break;
+						case 'get_actions' :
+						
+							console.log(data.actions);
 
-					case 'get_action_codes' :
-					
-						console.log(data.action_codes);
+						break;
 
-					break;
+						case 'get_action_codes' :
+						
+							console.log(data.action_codes);
+
+						break;
+
+					}
 
 				}
 
-			}
+			});
+			
+			// socket.emit('w3', { action : 'play_music', race : 'human', music : '1' } );
 
 		});
-		
-		// p_clSocket.emit('w3', { action : 'play_music', race : 'human', music : '1' } );
 
 	};
