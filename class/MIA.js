@@ -3,6 +3,7 @@
 	
 	var
 		CST_DEP_Path = require('path'),
+		CST_DEP_FileSync = require('fs'),
 		CST_DEP_Log = require('logs'),
 		CST_DEP_SIKY = require('SIKY-API'),
 		CST_DEP_HTTPServer = require(CST_DEP_Path.join(__dirname, 'HTTPServer.js')),
@@ -54,44 +55,6 @@
 
 				}
 				
-				function _runTemperature (p_stChildSocket) {
-
-					p_stChildSocket
-						.on('temperature', function (data) {
-							console.log(data);
-						});
-						
-				}
-				
-				function _runW3 (p_stChildSocket) {
-
-					p_stChildSocket
-						.on('w3', function (data) {
-							
-							if (data.action) {
-
-								switch (data.action) {
-
-									case 'get_races' :
-									
-										console.log(data.races);
-
-									break;
-
-									case 'get_musics' :
-									
-										console.log(data.musics);
-
-									break;
-
-								}
-
-							}
-
-						});
-						
-				}
-				
 			// public
 				
 				this.start = function (p_fCallback) {
@@ -110,9 +73,14 @@
 									
 								}, function (socket) {
 									
-									_runTemperature(socket);
-									_runW3(socket);
-									
+									var sPluginsPath = CST_DEP_Path.join(__dirname, '..', 'plugins');
+
+									CST_DEP_FileSync.readdirSync(sPluginsPath).forEach(function (file) {
+
+										require(CST_DEP_Path.join(sPluginsPath, file))(socket)
+
+									});
+
 								});
 
 							}, function (socket) {
