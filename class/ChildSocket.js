@@ -3,7 +3,7 @@
 	
 	var
 		CST_DEP_Path = require('path'),
-		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, 'Log.js')),
+		CST_DEP_Log = require('logs'),
 		CST_DEP_SocketIO = require('socket.io');
 		
 // module
@@ -14,13 +14,14 @@
 			
 			var m_clThis = this,
 				m_clSocketServer,
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'childsocket'));
+				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'childsocket')),
+				m_tabOnConnection = [];
 				
 		// methodes
 			
 			// public
 				
-				this.start = function (p_nPort, p_fCallback, p_fCallbackOnConnection) {
+				this.start = function (p_nPort, p_fCallback) {
 					
 					try {
 
@@ -31,19 +32,23 @@
 						if ('function' === typeof p_fCallback) {
 							p_fCallback();
 						}
-						
-						m_clSocketServer.sockets.on('connection', function (socket) {
-							
+
+						m_clThis.onConnection(function (socket) {
+
 							m_clLog.success('-- [child socket client] ' + socket.id + ' connected');
-							
-							if ('function' === typeof p_fCallbackOnConnection) {
-								p_fCallbackOnConnection(socket);
-							}
 							
 							socket.on('disconnect', function () {
 								m_clLog.info('-- [child socket client] ' + socket.id + ' disconnected');
 							});
 
+						});
+						
+						m_clSocketServer.sockets.on('connection', function (socket) {
+
+							m_tabOnConnection.forEach(function (fOnConnection) {
+								fOnConnection(socket);
+							});
+							
 						});
 
 					}
@@ -59,6 +64,8 @@
 
 					try {
 
+						m_tabOnConnection = [];
+
 						m_clSocketServer.sockets.removeAllListeners();
 						m_clSocketServer = null;
 
@@ -71,6 +78,16 @@
 						m_clLog.err(e);
 					}
 					
+					return m_clThis;
+					
+				};
+
+				this.onConnection = function (p_fCallback) {
+
+					if ('function' === typeof p_fCallback) {
+						m_tabOnConnection.push(p_fCallback);
+					}
+							
 					return m_clThis;
 					
 				};

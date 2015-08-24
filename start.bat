@@ -1,1 +1,1 @@
-node %~dp0exe.js start
+node %~dp0exe.js --start

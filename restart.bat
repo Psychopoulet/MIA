@@ -1,1 +1,1 @@
-node %~dp0exe.js restart
+node %~dp0exe.js --restart
