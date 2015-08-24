@@ -1,1 +1,1 @@
-node %~dp0exe.js stop
+node %~dp0exe.js --end

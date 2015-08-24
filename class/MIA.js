@@ -3,7 +3,7 @@
 	
 	var
 		CST_DEP_Path = require('path'),
-		CST_DEP_FileSync = require('fs'),
+		CST_DEP_FileSystem = require('fs'),
 		CST_DEP_Log = require('logs'),
 		CST_DEP_SIKY = require('SIKY-API'),
 		CST_DEP_HTTPServer = require(CST_DEP_Path.join(__dirname, 'HTTPServer.js')),
@@ -24,21 +24,21 @@
 		// methodes
 
 			// public
-				
-				this.start = function (p_fCallback) {
+
+				this.start = function (p_stConf, p_fCallback) {
 
 					try {
 
-						m_clHTTPServer.start(1337, function () {
+						m_clHTTPServer.start(p_stConf.portweb, function () {
 
 							var sPluginsPath = CST_DEP_Path.join(__dirname, '..', 'plugins');
 
-							CST_DEP_FileSync.readdirSync(sPluginsPath).forEach(function (file) {
+							CST_DEP_FileSystem.readdirSync(sPluginsPath).forEach(function (file) {
 								require(CST_DEP_Path.join(sPluginsPath, file))(m_clHTTPSocket, m_clChildSocket, CST_DEP_SIKY);
 							});
 
 							m_clHTTPSocket.start(m_clHTTPServer.getServer(), function () {
-								m_clChildSocket.start(1338, p_fCallback);
+								m_clChildSocket.start(p_stConf.portchildren, p_fCallback);
 							});
 
 						});
@@ -75,6 +75,10 @@
 						m_clLog.err(e);
 					}
 					
+				};
+				
+				this.getVersion = function () {
+					return '0.0.1'
 				};
 				
 	};
