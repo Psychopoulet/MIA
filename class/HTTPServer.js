@@ -66,7 +66,7 @@
 							else {
 								sResult = CST_DEP_FileStream.readFileSync(sFileName);
 							}
-					
+							
 						return sResult;
 
 					}
@@ -188,7 +188,7 @@
 				this.start = function (p_nPort, p_fCallback) {
 
 					try {
-
+						
 						// lancement
 
 						m_clServer = CST_DEP_HTTP.createServer();

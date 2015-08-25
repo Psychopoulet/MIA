@@ -23,7 +23,7 @@ jQuery(document).ready(function() {
 
 	}
 
-	socket = io.connect('//' + window.location.hostname + ':1337');
+	socket = io.connect();
 
 	socket
 		.on('connect', _displayIsConnected)
@@ -41,6 +41,9 @@ jQuery(document).ready(function() {
 		.on('disconnect', function () {
 			socket.logged = false;
 			_displayIsConnected();
+		})
+		.on('temperature', function (data) {
+			console.log(data);
 		});
 
 	login_form.submit(function (e) {
