@@ -30,6 +30,10 @@
 					try {
 
 						m_clHTTPServer.start(p_stConf.portweb, function () {
+							
+							m_clChildSocket.onConnection(function(socket) {
+								socket.emit('w3', { order : 'play_actioncode', race : 'random', character : 'random', action : 'ready', actioncode : 'random' });
+							});
 
 							var sPluginsPath = CST_DEP_Path.join(__dirname, '..', 'plugins');
 
