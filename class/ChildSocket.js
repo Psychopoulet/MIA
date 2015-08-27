@@ -3,6 +3,7 @@
 	
 	var
 		CST_DEP_Path = require('path'),
+		CST_DEP_Q = require('q'),
 		CST_DEP_Log = require('logs'),
 		CST_DEP_SocketIO = require('socket.io');
 		
@@ -12,8 +13,8 @@
 	
 		// attributes
 			
-			var m_clThis = this,
-				m_clSocketServer,
+			var
+				m_clThis = this,
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'childsocket')),
 				m_tabOnConnection = [];
 				
@@ -23,63 +24,70 @@
 				
 				this.start = function (p_nPort, p_fCallback) {
 					
-					try {
+					var deferred = CST_DEP_Q.defer();
 
-						m_clSocketServer = CST_DEP_SocketIO.listen(p_nPort);
+						try {
 
-						m_clLog.success('-- [child socket server] started');
-						
-						if ('function' === typeof p_fCallback) {
-							p_fCallback();
+							var clSocketServer = CST_DEP_SocketIO.listen(p_nPort);
+
+							m_clThis.onConnection(function (socket) {
+
+								m_clLog.success('-- [child socket client] ' + socket.id + ' connected');
+								
+								socket.on('disconnect', function () {
+									m_clLog.info('-- [child socket client] ' + socket.id + ' disconnected');
+								});
+
+							});
+							
+							clSocketServer.sockets.on('connection', function (socket) {
+								
+								socket.MIA = {};
+
+								m_tabOnConnection.forEach(function (fOnConnection) {
+									fOnConnection(socket);
+								});
+								
+							});
+
+							m_clLog.success('-- [child socket server] started');
+							
+							deferred.resolve();
+
 						}
-
-						m_clThis.onConnection(function (socket) {
-
-							m_clLog.success('-- [child socket client] ' + socket.id + ' connected');
-							
-							socket.on('disconnect', function () {
-								m_clLog.info('-- [child socket client] ' + socket.id + ' disconnected');
-							});
-
-						});
+						catch (e) {
+							if (e.message) {
+								deferred.reject(e.message);
+							}
+							else {
+								deferred.reject(e);
+							}
+						}
 						
-						m_clSocketServer.sockets.on('connection', function (socket) {
+					return deferred.promise;
 
-							m_tabOnConnection.forEach(function (fOnConnection) {
-								fOnConnection(socket);
-							});
-							
-						});
-
-					}
-					catch (e) {
-						m_clLog.err(e);
-					}
-					
-					return m_clThis;
-					
 				};
 				
 				this.stop = function (p_fCallback) {
 
-					try {
+					var deferred = CST_DEP_Q.defer();
 
-						m_tabOnConnection = [];
+						try {
 
-						m_clSocketServer.sockets.removeAllListeners();
-						m_clSocketServer = null;
-
-						if ('function' === typeof p_fCallback) {
-							p_fCallback();
+							deferred.resolve();
+					
 						}
-					
-					}
-					catch (e) {
-						m_clLog.err(e);
-					}
-					
-					return m_clThis;
-					
+						catch (e) {
+							if (e.message) {
+								deferred.reject(e.message);
+							}
+							else {
+								deferred.reject(e);
+							}
+						}
+						
+					return deferred.promise;
+
 				};
 
 				this.onConnection = function (p_fCallback) {
@@ -87,7 +95,7 @@
 					if ('function' === typeof p_fCallback) {
 						m_tabOnConnection.push(p_fCallback);
 					}
-							
+					
 					return m_clThis;
 					
 				};
