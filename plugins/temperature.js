@@ -5,36 +5,45 @@
 	
 	module.exports = function (p_clHTTPSocket, p_clChildSocket) {
 		
-		var tabHTTPSockets = [];
-		
-		p_clHTTPSocket.onConnection(function(socket) {
+		// attributes
 			
-			tabHTTPSockets.push(socket);
+			var
+				tabHTTPSockets = [];
 			
-			socket.on('disconnect', function () {
-				
-				tabHTTPSockets.forEach(function(value, key) {
-					
-					if (value.id === socket.id) {
-						tabHTTPSockets.splice(key, 1);
-					}
-					
-				});
-				
-			});
-			
-		});
+		// constructor
 
-		p_clChildSocket.onConnection(function(childSocket) {
-
-			childSocket.on('temperature', function (data) {
+			p_clHTTPSocket.onConnection(function(socket) {
 				
-				tabHTTPSockets.forEach(function (HTTPSocket) {
-					HTTPSocket.emit('temperature', data);
-				});
+				tabHTTPSockets.push(socket);
 				
+				socket
+					.on('disconnect', function () {
+						
+						tabHTTPSockets.forEach(function(value, key) {
+							
+							if (value.id === socket.id) {
+								tabHTTPSockets.splice(key, 1);
+							}
+							
+						});
+						
+					});
+					
 			});
-			
-		});
+
+			p_clChildSocket.onConnection(function(socket) {
+
+				socket.removeAllListeners('token_get');
+
+				socket
+					.on('temperature', function (data) {
+						
+						tabHTTPSockets.forEach(function (HTTPSocket) {
+							HTTPSocket.emit('temperature', data);
+						});
+						
+					});
+					
+			});
 
 	};

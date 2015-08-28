@@ -41,7 +41,9 @@
 							});
 							
 							clSocketServer.sockets.on('connection', function (socket) {
-								
+
+								socket.removeAllListeners();
+
 								socket.MIA = {};
 
 								m_tabOnConnection.forEach(function (fOnConnection) {
