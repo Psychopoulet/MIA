@@ -2,11 +2,12 @@
 // dépendances
 	
 	var
-		CST_DEP_FileStream = require('fs'),
 		CST_DEP_Path = require('path'),
+		CST_DEP_FileStream = require('fs'),
 		CST_DEP_Url = require('url'),
-		CST_DEP_Log = require('logs'),
-		CST_DEP_HTTP = require('http');
+		CST_DEP_Q = require('q'),
+		CST_DEP_HTTP = require('http'),
+		CST_DEP_Log = require('logs');
 		
 // module
 	
@@ -14,7 +15,8 @@
 	
 		// attributes
 			
-			var m_clServer,
+			var
+				m_clServer,
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'httpserver'));
 				
 		// methodes
@@ -185,50 +187,62 @@
 					return m_clServer;
 				};
 				
-				this.start = function (p_nPort, p_fCallback) {
+				this.start = function (p_nPort) {
 
-					try {
-						
-						// lancement
+					var deferred = CST_DEP_Q.defer();
 
-						m_clServer = CST_DEP_HTTP.createServer();
-						
-						m_clServer.listen(p_nPort, function () {
+						try {
 
-							m_clLog.success('-- [HTTP server] started');
+							// lancement
 
-							if ('function' === typeof p_fCallback) {
-								p_fCallback();
-							}
+								m_clServer = CST_DEP_HTTP.createServer();
+								
+								m_clServer.listen(p_nPort, function () {
+									m_clLog.success('-- [HTTP server] started');
+								});
 							
-						});
-						
-						// requete
+							// requete
 
-						m_clServer.on('request', function (p_clRequest, p_clResponse) {
-							_router(p_clResponse, CST_DEP_Url.parse(p_clRequest.url).pathname);
-						});
+								m_clServer.on('request', function (p_clRequest, p_clResponse) {
+									_router(p_clResponse, CST_DEP_Url.parse(p_clRequest.url).pathname);
+								});
 						
-					}
-					catch (e) {
-						m_clLog.err(e);
-					}
-					
+							deferred.resolve();
+
+						}
+						catch (e) {
+							if (e.message) {
+								deferred.reject(e.message);
+							}
+							else {
+								deferred.reject(e);
+							}
+						}
+						
+					return deferred.promise;
+
 				};
 				
 				this.stop = function (p_fCallback) {
 
-					try {
+					var deferred = CST_DEP_Q.defer();
 
-						if ('function' === typeof p_fCallback) {
-							p_fCallback();
+						try {
+
+							deferred.resolve();
+					
+						}
+						catch (e) {
+							if (e.message) {
+								deferred.reject(e.message);
+							}
+							else {
+								deferred.reject(e);
+							}
 						}
 						
-					}
-					catch (e) {
-						m_clLog.err(e);
-					}
-					
+					return deferred.promise;
+
 				};
 				
 	};
