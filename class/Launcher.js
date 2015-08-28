@@ -6,7 +6,8 @@
 		CST_DEP_FileSystem = require('fs'),
 		CST_DEP_Q = require('q'),
 		CST_DEP_Log = require('logs'),
-		CST_DEP_MIA = require(CST_DEP_Path.join(__dirname, 'MIA.js'));
+		CST_DEP_MIA = require(CST_DEP_Path.join(__dirname, 'MIA.js')),
+		CST_DEP_Conf = require(CST_DEP_Path.join(__dirname, 'Conf.js'));
 		
 // module
 	
@@ -111,16 +112,22 @@
 											}
 											else {
 
-												var sPID = p_sData.toString();
+												m_clMIA.stop()
+													.then(function () {
 
-												try {
-													process.kill(sPID);
-												}
-												catch (e) {}
+														var sPID = p_sData.toString();
 
-												m_clLog.log('[END ' + sPID + ']');
+														try {
+															process.kill(sPID);
+														}
+														catch (e) {}
 
-												deferred.resolve();
+														m_clLog.log('[END ' + sPID + ']');
+
+														deferred.resolve();
+
+													})
+													.catch(deferred.reject);
 
 											}
 											
@@ -182,7 +189,7 @@
 
 							if (m_tabArgs[1]) {
 
-								m_clMIA.setWebPort(m_tabArgs[1])
+								new CST_DEP_Conf().setConfOption('portweb', parseInt(m_tabArgs[1])).save()
 									.then(deferred.resolve)
 									.catch(deferred.reject);
 
@@ -213,7 +220,7 @@
 
 							if (m_tabArgs[1]) {
 
-								m_clMIA.setChildrenPort(m_tabArgs[1])
+								new CST_DEP_Conf().setConfOption('portchildren', parseInt(m_tabArgs[1])).save()
 									.then(deferred.resolve)
 									.catch(deferred.reject);
 
