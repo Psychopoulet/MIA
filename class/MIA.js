@@ -84,37 +84,6 @@
 											require(CST_DEP_Path.join(sPluginsPath, file))(m_clHTTPSocket, m_clChildSocket, CST_DEP_SIKY);
 										});
 
-									// on child connection
-										
-										m_clChildSocket.onConnection(function(socket) {
-											
-											socket
-												.on('token_get', function (token) {
-													socket.MIA.token = token;
-													console.log(token);
-													socket.emit('w3', { order : 'play_actioncode', race : 'random', character : 'random', action : 'ready', actioncode : 'random' });
-												})
-												.on('token_empty', function () {
-													
-													var sAlpha = 'abcdefghijklmnopqrstuvwxyz0123456789', sToken = '';
-													
-													for (var i = 0; i < 10; ++i) {
-														var al = Math.floor(Math.random() * sAlpha.length);
-															al = (al < 0) ? 0 : (al >= sAlpha.length) ? sAlpha.length - 1 : al;
-														sToken += sAlpha.substring(al, al+1);
-													}
-													
-													socket.emit('token_set', sToken);
-													
-												})
-												.on('token_error', function (err) {
-													new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'MIA')).err(err);
-												});
-												
-											socket.emit('token_get');
-											
-										});
-										
 									// start
 										
 										m_clHTTPSocket.start(m_clHTTPServer.getServer())
