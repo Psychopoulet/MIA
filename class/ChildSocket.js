@@ -16,7 +16,8 @@
 			var
 				m_clThis = this,
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'childsocket')),
-				m_tabOnConnection = [];
+				m_tabOnConnection = [],
+				m_tabOnDisconnect = [];
 				
 		// methodes
 			
@@ -30,25 +31,66 @@
 
 							var clSocketServer = CST_DEP_SocketIO.listen(p_nPort);
 
-							m_clThis.onConnection(function (socket) {
+							clSocketServer.sockets.on('connection', function (socket) {
+
+								socket.MIA = {};
 
 								m_clLog.success('-- [child socket client] ' + socket.id + ' connected');
 								
 								socket.on('disconnect', function () {
+									
 									m_clLog.info('-- [child socket client] ' + socket.id + ' disconnected');
+									
+									socket.removeAllListeners('w3');
+									socket.removeAllListeners('token_get');
+									socket.removeAllListeners('token_empty');
+									socket.removeAllListeners('token_error');
+
+									m_tabOnDisconnect.forEach(function (fOnDisconnect) {
+										fOnDisconnect(socket);
+									});
+
 								});
 
-							});
-							
-							clSocketServer.sockets.on('connection', function (socket) {
+								socket
+									.on('token_get', function (sToken) {
+										
+										socket.MIA.token = sToken;
+										
+										m_clLog.success('-- [child socket client] get token \'' + sToken + '\'');
 
-								socket.removeAllListeners();
+										m_tabOnConnection.forEach(function (fOnConnection) {
+											fOnConnection(socket);
+										});
+										
+										socket.emit('w3', { order : 'play_actioncode', race : 'random', character : 'random', action : 'ready', actioncode : 'random' });
+										
+									})
+									.on('token_empty', function () {
+										
+										var sAlpha = 'abcdefghijklmnopqrstuvwxyz0123456789', sToken = '';
+										
+										for (var i = 0; i < 10; ++i) {
+											var al = Math.floor(Math.random() * sAlpha.length);
+												al = (al < 0) ? 0 : (al >= sAlpha.length) ? sAlpha.length - 1 : al;
+											sToken += sAlpha.substring(al, al+1);
+										}
+										
+										socket.emit('token_set', sToken);
+										
+									})
+									.on('token_error', function (err) {
+										m_clLog.err(err);
+									})
+									.on('w3', function (data) {
 
-								socket.MIA = {};
+										if (data && data.error) {
+											m_clLog.err(data.error);
+										}
 
-								m_tabOnConnection.forEach(function (fOnConnection) {
-									fOnConnection(socket);
-								});
+									});
+									
+								socket.emit('token_get');
 								
 							});
 
@@ -98,6 +140,16 @@
 						m_tabOnConnection.push(p_fCallback);
 					}
 					
+					return m_clThis;
+					
+				};
+				
+				this.onDisconnect = function (p_fCallback) {
+
+					if ('function' === typeof p_fCallback) {
+						m_tabOnDisconnect.push(p_fCallback);
+					}
+							
 					return m_clThis;
 					
 				};
