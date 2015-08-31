@@ -31,9 +31,12 @@
 					
 			});
 
-			p_clChildSocket.onConnection(function(socket) {
-
+			p_clChildSocket.onDisconnect(function(socket) {
+				console.log(socket);
 				socket.removeAllListeners('token_get');
+			});
+
+			p_clChildSocket.onConnection(function(socket) {
 
 				socket
 					.on('temperature', function (data) {

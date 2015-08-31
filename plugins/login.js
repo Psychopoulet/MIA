@@ -16,10 +16,12 @@
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'plugins', 'login'));
 				
 		// constructor
+		
+			p_clChildSocket.onDisconnect(function(socket) {
+				socket.removeAllListeners('login');
+			});
 
 			p_clHTTPSocket.onConnection(function(socket) {
-
-				childSocket.removeAllListeners('login');
 
 				socket
 					.on('login', function (p_stData) {
@@ -50,7 +52,7 @@
 						}
 
 					});
-										
+					
 			});
 
 	};
