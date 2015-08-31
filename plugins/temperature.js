@@ -32,7 +32,6 @@
 			});
 
 			p_clChildSocket.onDisconnect(function(socket) {
-				console.log(socket);
 				socket.removeAllListeners('token_get');
 			});
 

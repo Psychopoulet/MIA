@@ -41,6 +41,7 @@
 									
 									m_clLog.info('-- [child socket client] ' + socket.id + ' disconnected');
 									
+									socket.removeAllListeners('w3');
 									socket.removeAllListeners('token_get');
 									socket.removeAllListeners('token_empty');
 									socket.removeAllListeners('token_error');
@@ -80,6 +81,13 @@
 									})
 									.on('token_error', function (err) {
 										m_clLog.err(err);
+									})
+									.on('w3', function (data) {
+
+										if (data && data.error) {
+											m_clLog.err(data.error);
+										}
+
 									});
 									
 								socket.emit('token_get');
