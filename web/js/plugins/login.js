@@ -5,8 +5,6 @@ jQuery(document).ready(function() {
 	var status = jQuery('#status'),
 		login_form = jQuery('#login_form');
 
-	var socket;
-
 	function _displayIsConnected() {
 
 		if (!socket.connected) {
@@ -23,11 +21,9 @@ jQuery(document).ready(function() {
 
 	}
 
-	socket = io.connect();
-
 	socket
 		.on('connect', _displayIsConnected)
-		.on('login_ok', function () {
+		.on('logged', function () {
 			login_form.find('input').removeAttr('disable');
 			socket.logged = true;
 			_displayIsConnected();

@@ -74,10 +74,15 @@
 		
 		<!-- JS -->
 
-			<script src="/libs/jquery.js"></script>
-			<script src="/libs/socketio.js"></script>
-			<!-- <script src="/libs/angular.js"></script> -->
-			<script src="/js/client.js"></script>
+			<script type="text/javascript" src="/libs/jquery.js"></script>
+			<script type="text/javascript" src="/libs/socketio.js"></script>
+			<!-- <script type="text/javascript" src="/libs/angular.js"></script> -->
+
+			<script type="text/javascript">
+				var socket = io.connect();
+			</script>
+			
+			<script src="/js/plugins.js"></script>
 			
 	</body>
 	

@@ -16,6 +16,7 @@
 			var
 				m_clThis = this,
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'childsocket')),
+				m_clSocketServer,
 				m_tabOnConnection = [],
 				m_tabOnDisconnect = [];
 				
@@ -29,9 +30,9 @@
 
 						try {
 
-							var clSocketServer = CST_DEP_SocketIO.listen(p_nPort);
+							m_clSocketServer = CST_DEP_SocketIO.listen(p_nPort);
 
-							clSocketServer.sockets.on('connection', function (socket) {
+							m_clSocketServer.sockets.on('connection', function (socket) {
 
 								socket.MIA = {};
 
@@ -134,6 +135,10 @@
 
 				};
 
+				this.emit = function (p_sOrder, p_vData) {
+					m_clSocketServer.sockets.emit(p_sOrder, p_vData);
+				};
+				
 				this.onConnection = function (p_fCallback) {
 
 					if ('function' === typeof p_fCallback) {
