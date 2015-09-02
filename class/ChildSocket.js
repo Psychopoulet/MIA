@@ -17,6 +17,7 @@
 				m_clThis = this,
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'childsocket')),
 				m_clSocketServer,
+				m_stSocketsConnected = {},
 				m_tabOnConnection = [],
 				m_tabOnDisconnect = [];
 				
@@ -51,13 +52,17 @@
 										fOnDisconnect(socket);
 									});
 
+									delete m_stSocketsConnected[socket.MIA.token];
+
 								});
 
 								socket
 									.on('token_get', function (sToken) {
 										
 										socket.MIA.token = sToken;
-										
+
+										m_stSocketsConnected[sToken] = socket;
+
 										m_clLog.success('-- [child socket client] get token \'' + sToken + '\'');
 
 										m_tabOnConnection.forEach(function (fOnConnection) {
@@ -157,6 +162,18 @@
 							
 					return m_clThis;
 					
+				};
+				
+				this.getConnectedChilds = function () {
+
+					var tabResult = [];
+
+						for (var token in m_stSocketsConnected) {
+							tabResult.push(m_stSocketsConnected[token].MIA);
+						}
+
+					return tabResult;
+
 				};
 				
 	};

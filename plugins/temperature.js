@@ -8,14 +8,15 @@
 		// constructor
 
 			p_clChildSocket.onDisconnect(function(socket) {
-				socket.removeAllListeners('token_get');
+				socket.removeAllListeners('temperature');
 			});
 
 			p_clChildSocket.onConnection(function(socket) {
 
 				socket
 					.on('temperature', function (data) {
-						p_clHTTPSocket.emit('temperature', data);
+						socket.MIA.temperature = data;
+						p_clHTTPSocket.emit('temperature', socket.MIA);
 					});
 					
 			});

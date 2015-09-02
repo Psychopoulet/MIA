@@ -66,6 +66,8 @@
 
 					</form>
 
+					<ul id="children" class="hidden"></ul>
+
 				</div>
 
 			</div>

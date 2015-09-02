@@ -41,7 +41,7 @@
 									};
 
 									m_clLog.success('-- [socket server] logged to SIKY');
-									socket.emit('login_ok');
+									socket.emit('logged');
 									
 								})
 								.catch(function (m_sError) {
