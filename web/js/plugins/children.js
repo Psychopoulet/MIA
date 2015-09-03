@@ -1,39 +1,66 @@
-jQuery(document).ready(function() {
-	
-	"use strict";
+app.controller('ControllerChildren', ['$scope', function($scope) {
 
+	$scope.children = [];
+
+	$scope.play = function (token, url) {
+		socket.emit('youtube.play', { token : token, url : url });
+	};
+	
 	socket
 		.on('disconnect', function () {
-
-			jQuery('#children').empty().addClass('hidden');
-			jQuery('#login_form').removeClass('hidden');
 
 			socket.removeAllListeners('logged');
 
 			socket.removeAllListeners('child.connection');
 			socket.removeAllListeners('child.getconnected');
 			socket.removeAllListeners('child.disconnected');
+			socket.removeAllListeners('youtube.error');
+			socket.removeAllListeners('temperature');
 
 		})
 		.on('connect', function () {
 
-			socket.on('logged', function () {
+			socket.on('logged', function (socketData) {
 
-				jQuery('#children').empty().removeClass('hidden');
+				socket.on('youtube.error', function (error) {
+					alert(error);
+				});
 
+				socket.on('temperature', function (child) {
+
+					for (var i = 0; i < $scope.children.length; ++i) {
+
+						if (child.token == $scope.children[i].token) {
+							$scope.children[i].temperature = child.temperature;
+						}
+
+					}
+
+					$scope.$apply();
+
+				});
+				
 				socket
 					.on('child.getconnected', function(children) {
-
-						jQuery.each(children, function (key, value) {
-							jQuery('#children').append('<li id="child' + value.token + '">' + value.token + ', <span id="child' + value.token + 'temp"></span>°C</li>');
-						});
-
+						$scope.children = children;
+						$scope.$apply();
 					})
 					.on('child.connection', function(child) {
-						jQuery('#children').append('<li id="child' + child.token + '">' + child.token + ', <span id="child' + value.token + 'temp"></span>°C</li>');
+						$scope.children.push(child);
+						$scope.$apply();
 					})
-					.on('child.disconnected', function(value) {
-						jQuery('#child' + value.token).remove();
+					.on('child.disconnected', function(child) {
+						
+						for (var i = 0; i < $scope.children.length; ++i) {
+
+							if (child.token == $scope.children[i].token) {
+								$scope.children.splice(i, 1);
+							}
+
+						}
+
+						$scope.$apply();
+
 					});
 
 				socket.emit('child.getconnected');
@@ -42,5 +69,4 @@ jQuery(document).ready(function() {
 
 		});
 		
-
-});
+}]);

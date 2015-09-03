@@ -60,6 +60,7 @@
 									.on('token_get', function (sToken) {
 										
 										socket.MIA.token = sToken;
+										socket.MIA.name = sToken;
 
 										m_stSocketsConnected[sToken] = socket;
 
@@ -142,6 +143,14 @@
 
 				this.emit = function (p_sOrder, p_vData) {
 					m_clSocketServer.sockets.emit(p_sOrder, p_vData);
+				};
+				
+				this.emitTo = function (p_sToken, p_sOrder, p_vData) {
+
+					if (m_stSocketsConnected[p_sToken]) {
+						m_stSocketsConnected[p_sToken].emit(p_sOrder, p_vData);
+					}
+
 				};
 				
 				this.onConnection = function (p_fCallback) {

@@ -9,14 +9,17 @@ jQuery(document).ready(function() {
 
 		if (!socket.connected) {
 			status.removeClass('label-success').addClass('label-danger').text('disconnected');
+			jQuery('#children').addClass('hidden');
 		}
 		else if (!socket.logged) {
 			status.removeClass('label-success').removeClass('label-danger').addClass('label-warning').text('connected');
 			login_form.removeClass('hidden');
+			jQuery('#children').addClass('hidden');
 		}
 		else {
 			status.removeClass('label-warning').removeClass('label-danger').addClass('label-success').text('logged');
 			login_form.addClass('hidden');
+			jQuery('#children').removeClass('hidden');
 		}
 
 	}
