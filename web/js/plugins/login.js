@@ -5,51 +5,62 @@ jQuery(document).ready(function() {
 	var status = jQuery('#status'),
 		login_form = jQuery('#login_form');
 
-	var socket;
-
 	function _displayIsConnected() {
 
 		if (!socket.connected) {
 			status.removeClass('label-success').addClass('label-danger').text('disconnected');
+			jQuery('#children').addClass('hidden');
 		}
 		else if (!socket.logged) {
 			status.removeClass('label-success').removeClass('label-danger').addClass('label-warning').text('connected');
 			login_form.removeClass('hidden');
+			jQuery('#children').addClass('hidden');
 		}
 		else {
 			status.removeClass('label-warning').removeClass('label-danger').addClass('label-success').text('logged');
 			login_form.addClass('hidden');
+			jQuery('#children').removeClass('hidden');
 		}
 
 	}
 
-	socket = io.connect();
-
 	socket
-		.on('connect', _displayIsConnected)
-		.on('login_ok', function () {
-			login_form.find('input').removeAttr('disable');
-			socket.logged = true;
-			_displayIsConnected();
-		})
-		.on('login_ko', function (m_sError) {
-			login_form.find('input').removeAttr('disable');
-			socket.logged = false;
-			_displayIsConnected();
-			alert(m_sError);
-		})
 		.on('disconnect', function () {
+
+			socket.removeAllListeners('logged');
+			socket.removeAllListeners('login_ko');
+
 			socket.logged = false;
 			_displayIsConnected();
+
 		})
-		.on('temperature', function (data) {
-			console.log(data);
+
+		.on('connect', function() {
+
+			socket
+				.on('logged', function () {
+
+					socket.logged = true;
+					_displayIsConnected();
+					login_form.find('input, button, select, checkbox').removeAttr('disabled', 'disabled').removeClass('disabled');
+
+				})
+				.on('login_ko', function (m_sError) {
+					login_form.find('input, button, select, checkbox').removeAttr('disabled', 'disabled').removeClass('disabled');
+					socket.logged = false;
+					_displayIsConnected();
+					alert(m_sError);
+				});
+
+			_displayIsConnected();
+
 		});
 
 	login_form.submit(function (e) {
-		login_form.find('input').attr('disable', 'disable');
+		login_form.find('input, button, select, checkbox').attr('disabled', 'disabled').addClass('disabled');
 		socket.emit('login', { email : jQuery('#login_email').val(), password : jQuery('#login_password').val() });
 		return false;
+
 	});
 
 });

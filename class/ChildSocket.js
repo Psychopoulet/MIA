@@ -16,6 +16,8 @@
 			var
 				m_clThis = this,
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'childsocket')),
+				m_clSocketServer,
+				m_stSocketsConnected = {},
 				m_tabOnConnection = [],
 				m_tabOnDisconnect = [];
 				
@@ -29,9 +31,9 @@
 
 						try {
 
-							var clSocketServer = CST_DEP_SocketIO.listen(p_nPort);
+							m_clSocketServer = CST_DEP_SocketIO.listen(p_nPort);
 
-							clSocketServer.sockets.on('connection', function (socket) {
+							m_clSocketServer.sockets.on('connection', function (socket) {
 
 								socket.MIA = {};
 
@@ -50,13 +52,18 @@
 										fOnDisconnect(socket);
 									});
 
+									delete m_stSocketsConnected[socket.MIA.token];
+
 								});
 
 								socket
 									.on('token_get', function (sToken) {
 										
 										socket.MIA.token = sToken;
-										
+										socket.MIA.name = sToken;
+
+										m_stSocketsConnected[sToken] = socket;
+
 										m_clLog.success('-- [child socket client] get token \'' + sToken + '\'');
 
 										m_tabOnConnection.forEach(function (fOnConnection) {
@@ -134,6 +141,18 @@
 
 				};
 
+				this.emit = function (p_sOrder, p_vData) {
+					m_clSocketServer.sockets.emit(p_sOrder, p_vData);
+				};
+				
+				this.emitTo = function (p_sToken, p_sOrder, p_vData) {
+
+					if (m_stSocketsConnected[p_sToken]) {
+						m_stSocketsConnected[p_sToken].emit(p_sOrder, p_vData);
+					}
+
+				};
+				
 				this.onConnection = function (p_fCallback) {
 
 					if ('function' === typeof p_fCallback) {
@@ -152,6 +171,18 @@
 							
 					return m_clThis;
 					
+				};
+				
+				this.getConnectedChilds = function () {
+
+					var tabResult = [];
+
+						for (var token in m_stSocketsConnected) {
+							tabResult.push(m_stSocketsConnected[token].MIA);
+						}
+
+					return tabResult;
+
 				};
 				
 	};
