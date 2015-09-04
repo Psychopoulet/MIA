@@ -27,8 +27,8 @@ jQuery(document).ready(function() {
 	socket
 		.on('disconnect', function () {
 
-			socket.removeAllListeners('logged');
-			socket.removeAllListeners('login_ko');
+			socket.removeAllListeners('child.logged');
+			socket.removeAllListeners('child.login.error');
 
 			socket.logged = false;
 			_displayIsConnected();
@@ -38,14 +38,14 @@ jQuery(document).ready(function() {
 		.on('connect', function() {
 
 			socket
-				.on('logged', function () {
+				.on('child.logged', function () {
 
 					socket.logged = true;
 					_displayIsConnected();
 					login_form.find('input, button, select, checkbox').removeAttr('disabled', 'disabled').removeClass('disabled');
 
 				})
-				.on('login_ko', function (m_sError) {
+				.on('child.login.error', function (m_sError) {
 					login_form.find('input, button, select, checkbox').removeAttr('disabled', 'disabled').removeClass('disabled');
 					socket.logged = false;
 					_displayIsConnected();
@@ -58,7 +58,7 @@ jQuery(document).ready(function() {
 
 	login_form.submit(function (e) {
 		login_form.find('input, button, select, checkbox').attr('disabled', 'disabled').addClass('disabled');
-		socket.emit('login', { email : jQuery('#login_email').val(), password : jQuery('#login_password').val() });
+		socket.emit('child.login', { email : jQuery('#login_email').val(), password : jQuery('#login_password').val() });
 		return false;
 
 	});

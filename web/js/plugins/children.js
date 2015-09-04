@@ -3,30 +3,30 @@ app.controller('ControllerChildren', ['$scope', function($scope) {
 	$scope.children = [];
 
 	$scope.play = function (token, url) {
-		socket.emit('youtube.play', { token : token, url : url });
+		socket.emit('child.youtube.play', { token : token, url : url });
 	};
 	
 	socket
 		.on('disconnect', function () {
 
-			socket.removeAllListeners('logged');
+			socket.removeAllListeners('child.logged');
 
 			socket.removeAllListeners('child.connection');
 			socket.removeAllListeners('child.getconnected');
 			socket.removeAllListeners('child.disconnected');
-			socket.removeAllListeners('youtube.error');
-			socket.removeAllListeners('temperature');
+			socket.removeAllListeners('child.temperature');
+			socket.removeAllListeners('child.youtube.error');
 
 		})
 		.on('connect', function () {
 
-			socket.on('logged', function (socketData) {
+			socket.on('child.logged', function (socketData) {
 
-				socket.on('youtube.error', function (error) {
+				socket.on('child.youtube.error', function (error) {
 					alert(error);
 				});
 
-				socket.on('temperature', function (child) {
+				socket.on('child.temperature', function (child) {
 
 					for (var i = 0; i < $scope.children.length; ++i) {
 
