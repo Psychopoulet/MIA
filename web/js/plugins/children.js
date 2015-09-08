@@ -9,6 +9,9 @@ app.controller('ControllerChildren', ['$scope', function($scope) {
 	socket
 		.on('disconnect', function () {
 
+			jQuery('.only-logged, .only-connected').addClass('hidden');
+			jQuery('.only-disconnected').removeClass('hidden');
+
 			socket.removeAllListeners('child.logged');
 
 			socket.removeAllListeners('child.connection');
@@ -20,7 +23,13 @@ app.controller('ControllerChildren', ['$scope', function($scope) {
 		})
 		.on('connect', function () {
 
+			jQuery('.only-disconnected, .only-logged').addClass('hidden');
+			jQuery('.only-connected').removeClass('hidden');
+
 			socket.on('child.logged', function (socketData) {
+
+				jQuery('.only-disconnected, .only-connected').addClass('hidden');
+				jQuery('.only-logged').removeClass('hidden');
 
 				socket.on('child.youtube.error', function (error) {
 					alert(error);

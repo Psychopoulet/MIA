@@ -259,7 +259,18 @@
 												
 												case 'jquery.js':
 
-													_readFile('libs/jquery', 'jquery.min.js')
+													_readAllFiles(CST_DEP_Path.join(m_sDirWeb, 'libs', 'jquery'))
+														.then(function (data) {
+															_sendJSResponse(p_clResponse, 200, data);
+														})
+														.catch(function (error) {
+															_sendJSResponse(p_clResponse, 500, error);
+														});
+
+												break;
+												case 'bootstrap.js':
+
+													_readAllFiles(CST_DEP_Path.join(m_sDirWeb, 'libs', 'bootstrap', 'js'))
 														.then(function (data) {
 															_sendJSResponse(p_clResponse, 200, data);
 														})
