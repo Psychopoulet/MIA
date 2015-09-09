@@ -257,16 +257,6 @@ app.controller('ControllerYoutubeList', ['$scope', '$sce', 'ModelYoutube', funct
 
 			};
 
-			$scope.preview = function (p_stData) {
-				jQuery('#modalYoutubePreviewIframe').empty().append('<iframe class="embed-responsive-item" src="' + p_stData.address + '" frameborder="0" allowfullscreen></iframe>');
-                jQuery('#modalYoutubePreview').modal('show');
-			};
-
-			$scope.closePreview = function () {
-				jQuery('#modalYoutubePreviewIframe').empty();
-                jQuery('#modalYoutubePreview').modal('hide');
-			};
-
 			$scope.delete = function (p_stData) {
 
                 $scope.loading = true;
@@ -278,6 +268,16 @@ app.controller('ControllerYoutubeList', ['$scope', '$sce', 'ModelYoutube', funct
                     });
 
 			};
+
+            $scope.preview = function (p_stData) {
+                jQuery('#modalYoutubePreviewIframe').empty().append('<iframe class="embed-responsive-item" src="' + p_stData.address + '" frameborder="0" allowfullscreen></iframe>');
+                jQuery('#modalYoutubePreview').modal('show');
+            };
+
+            $scope.closePreview = function () {
+                jQuery('#modalYoutubePreviewIframe').empty();
+                jQuery('#modalYoutubePreview').modal('hide');
+            };
 
     // constructor
 
@@ -313,4 +313,23 @@ app.controller('ControllerYoutubeList', ['$scope', '$sce', 'ModelYoutube', funct
 
                 });
 
+        // socket
+
+            socket
+                .on('disconnect', function () {
+                    socket.removeAllListeners('child.logged');
+                    socket.removeAllListeners('child.youtube.error');
+                })
+                .on('connect', function () {
+
+                    socket.on('child.logged', function (socketData) {
+
+                        socket.on('child.youtube.error', function (error) {
+                            alert(error);
+                        });
+
+                    });
+                    
+                });
+        
 }]);

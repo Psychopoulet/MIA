@@ -18,7 +18,6 @@ app.controller('ControllerChildren', ['$scope', function($scope) {
 			socket.removeAllListeners('child.getconnected');
 			socket.removeAllListeners('child.disconnected');
 			socket.removeAllListeners('child.temperature');
-			socket.removeAllListeners('child.youtube.error');
 
 		})
 		.on('connect', function () {
@@ -30,10 +29,6 @@ app.controller('ControllerChildren', ['$scope', function($scope) {
 
 				jQuery('.only-disconnected, .only-connected').addClass('hidden');
 				jQuery('.only-logged').removeClass('hidden');
-
-				socket.on('child.youtube.error', function (error) {
-					alert(error);
-				});
 
 				socket.on('child.temperature', function (child) {
 
