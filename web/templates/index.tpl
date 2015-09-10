@@ -125,7 +125,13 @@
 							<div class="panel-heading">Youtube</div>
 
 							<div class="panel-body">
-								<input type="text" placeholder="url" data-ng-model="urlyoutube" />
+								<select class="form-control"
+	                                data-ng-model="urlyoutube"
+	                                data-ng-options="video.name for video in youtubevideos track by video.id"
+	                                data-ng-hide="loadingYoutubeVideos"
+		                        >
+		                            <option value="">- NC -</option>
+		                        </select>
 								<button data-ng-click="play(child.token, urlyoutube)">Play</button>
 							</div>
 
@@ -156,7 +162,7 @@
 			                    </div>
 
 			                    <div class="form-group">
-			                    	<input type="text" data-ng-model="video.address" class="form-control" />
+			                    	<input type="text" data-ng-model="video.url" class="form-control" />
 			                    </div>
 
 			                    <button type="button" class="btn btn-primary" data-ng-click="add(video)">
@@ -188,7 +194,7 @@
 									<tr data-ng-show="videos.length" data-ng-repeat="video in videos" data-ng-class="{ 'info' : video.selected }" data-ng-click="select(video)">
 
 										<td>{{video.name}}</td>
-										<td>{{video.address}}</td>
+										<td>{{video.url}}</td>
 										<td>
 											<input type="button" value="Preview" class="btn btn-primary col-xs-6" data-ng-click="preview(video)" />
 											<input type="button" value="Delete" class="btn btn-primary col-xs-6" data-ng-click="delete(video)" />

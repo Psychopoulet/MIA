@@ -1,9 +1,10 @@
-app.controller('ControllerChildren', ['$scope', function($scope) {
+app.controller('ControllerChildren', ['$scope', 'ModelYoutube', function($scope, ModelYoutube) {
 
 	$scope.children = [];
+	$scope.youtubevideos = [];
 
-	$scope.play = function (token, url) {
-		socket.emit('child.youtube.play', { token : token, url : url });
+	$scope.play = function (token, youtubevideo) {
+		socket.emit('child.youtube.play', { token : token, url : youtubevideo.url });
 	};
 	
 	socket
@@ -26,6 +27,12 @@ app.controller('ControllerChildren', ['$scope', function($scope) {
 			jQuery('.only-connected').removeClass('hidden');
 
 			socket.on('child.logged', function (socketData) {
+
+				ModelYoutube.getAll()
+                    .then(function(p_tabData) {
+                        $scope.youtubevideos = p_tabData;
+                    })
+                    .catch(alert);
 
 				jQuery('.only-disconnected, .only-connected').addClass('hidden');
 				jQuery('.only-logged').removeClass('hidden');

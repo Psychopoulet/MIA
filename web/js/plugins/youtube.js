@@ -114,12 +114,12 @@ app.service('ModelYoutube', ['$q', function($q) {
 	                        	{
 									id : 1,
 									name : 'witcher 9',
-									address : 'https://www.youtube.com/embed/x6go-o0TNd4'
+									url : 'https://www.youtube.com/embed/x6go-o0TNd4'
 								},
 								{
 									id : 2,
 									name : 'witcher 10',
-									address : 'https://www.youtube.com/embed/gTgVcK8E7tM'
+									url : 'https://www.youtube.com/embed/gTgVcK8E7tM'
 								}
 							];
 
@@ -141,7 +141,7 @@ app.service('ModelYoutube', ['$q', function($q) {
 
                     	video = {
                     		name : p_stData.name,
-                    		address : p_stData.address
+                    		url : p_stData.url
                     					.replace('http://', 'https://').replace('http://', 'https://').replace('https://youtu', 'https://www.youtu')
                     					.replace('youtu.be', 'youtube.com')
                     					.replace('.com/', '.com/embed/')
@@ -207,7 +207,7 @@ app.service('ModelYoutube', ['$q', function($q) {
 
 }]);
 
-app.controller('ControllerYoutubeList', ['$scope', '$sce', 'ModelYoutube', function($scope, $sce, ModelYoutube) {
+app.controller('ControllerYoutubeList', ['$scope', 'ModelYoutube', function($scope, ModelYoutube) {
 
 	"use strict";
 
@@ -270,7 +270,7 @@ app.controller('ControllerYoutubeList', ['$scope', '$sce', 'ModelYoutube', funct
 			};
 
             $scope.preview = function (p_stData) {
-                jQuery('#modalYoutubePreviewIframe').empty().append('<iframe class="embed-responsive-item" src="' + p_stData.address + '" frameborder="0" allowfullscreen></iframe>');
+                jQuery('#modalYoutubePreviewIframe').empty().append('<iframe class="embed-responsive-item" src="' + p_stData.url + '" frameborder="0" allowfullscreen></iframe>');
                 jQuery('#modalYoutubePreview').modal('show');
             };
 
