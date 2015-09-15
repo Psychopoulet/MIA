@@ -1,12 +1,115 @@
-app.controller('ControllerChildren', ['$scope', 'ModelYoutube', function($scope, ModelYoutube) {
+app.service('ModelChildren', function() {
+
+    "use strict";
+
+    // attributes
+
+        var
+            CST_THAT = this,
+            m_tabOnChange = [],
+            m_tabData = [];
+
+    // methods
+
+        // protected
+
+            function _execOnChange() {
+
+                angular.forEach(m_tabOnChange, function (p_fCallback) {
+                    p_fCallback(m_tabData);
+                });
+
+                return CST_THAT;
+
+            }
+
+        // public
+
+            this.onChange = function (p_fCallback) {
+
+                if ('function' === typeof p_fCallback) {
+                    m_tabOnChange.push(p_fCallback);
+                }
+
+                return CST_THAT;
+
+            };
+
+    // constructor
+
+		socket
+			.on('disconnect', function () {
+
+				socket.removeAllListeners('child.logged');
+
+				socket.removeAllListeners('child.connection');
+				socket.removeAllListeners('child.getconnected');
+				socket.removeAllListeners('child.disconnected');
+
+			})
+			.on('connect', function () {
+
+				socket.on('child.logged', function (socketData) {
+
+					socket
+						.on('child.getconnected', function(children) {
+
+							m_tabData = children;
+
+							angular.forEach(m_tabData, function(value) {
+								value.connected = true;
+							});
+							
+							_execOnChange();
+
+						})
+						.on('child.connection', function(child) {
+
+							var bExists = false;
+
+							for (var i = 0; i < m_tabData.length; ++i) {
+
+								if (child.token == m_tabData[i].token) {
+									m_tabData[i].connected = true;
+									bExists = true;
+								}
+
+							}
+
+							if (!bExists) {
+								child.connected = true;
+								m_tabData.push(child);
+							}
+
+							_execOnChange();
+
+						})
+						.on('child.disconnected', function(child) {
+
+							angular.forEach(m_tabData, function(value) {
+
+								if (child.token == value.token) {
+									value.connected = false;
+								}
+
+							});
+							
+							_execOnChange();
+
+						});
+
+					socket.emit('child.getconnected');
+					
+				});
+
+			});
+
+});
+
+app.controller('ControllerChildren', ['$scope', 'ModelChildren', function($scope, ModelChildren) {
 
 	$scope.children = [];
-	$scope.youtubevideos = [];
 
-	$scope.play = function (token, youtubevideo) {
-		socket.emit('child.youtube.play', { token : token, url : youtubevideo.url });
-	};
-	
 	socket
 		.on('disconnect', function () {
 
@@ -14,10 +117,6 @@ app.controller('ControllerChildren', ['$scope', 'ModelYoutube', function($scope,
 			jQuery('.only-disconnected').removeClass('hidden');
 
 			socket.removeAllListeners('child.logged');
-
-			socket.removeAllListeners('child.connection');
-			socket.removeAllListeners('child.getconnected');
-			socket.removeAllListeners('child.disconnected');
 			socket.removeAllListeners('child.temperature');
 
 		})
@@ -28,56 +127,30 @@ app.controller('ControllerChildren', ['$scope', 'ModelYoutube', function($scope,
 
 			socket.on('child.logged', function (socketData) {
 
-				ModelYoutube.getAll()
-                    .then(function(p_tabData) {
-                        $scope.youtubevideos = p_tabData;
-                    })
-                    .catch(alert);
-
 				jQuery('.only-disconnected, .only-connected').addClass('hidden');
 				jQuery('.only-logged').removeClass('hidden');
 
 				socket.on('child.temperature', function (child) {
 
-					for (var i = 0; i < $scope.children.length; ++i) {
+					angular.forEach($scope.children, function(value, key) {
 
-						if (child.token == $scope.children[i].token) {
-							$scope.children[i].temperature = child.temperature;
+						if (child.token == value.token) {
+							$scope.children[key].temperature = child.temperature;
 						}
 
-					}
-
+					});
+					
 					$scope.$apply();
 
 				});
 				
-				socket
-					.on('child.getconnected', function(children) {
-						$scope.children = children;
-						$scope.$apply();
-					})
-					.on('child.connection', function(child) {
-						$scope.children.push(child);
-						$scope.$apply();
-					})
-					.on('child.disconnected', function(child) {
-						
-						for (var i = 0; i < $scope.children.length; ++i) {
-
-							if (child.token == $scope.children[i].token) {
-								$scope.children.splice(i, 1);
-							}
-
-						}
-
-						$scope.$apply();
-
-					});
-
-				socket.emit('child.getconnected');
-				
 			});
 
+		});
+
+		ModelChildren.onChange(function(p_tabData) {
+			$scope.children = p_tabData;
+			$scope.$apply();
 		});
 		
 }]);

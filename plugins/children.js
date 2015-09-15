@@ -3,7 +3,8 @@
 	
 	var
 		CST_DEP_Path = require('path'),
-		CST_DEP_Log = require('logs');
+		CST_DEP_Log = require('logs'),
+		CST_DEP_W3VoicesManager = require('W3VoicesManager');
 
 // module
 	
@@ -12,13 +13,17 @@
 		// attributes
 			
 			var
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'plugins', 'children'));
+				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'plugins', 'children')),
+				m_clW3VoicesManager = new CST_DEP_W3VoicesManager();
 				
 		// constructor
 
 			p_clHTTPSocket.onDisconnect(function(socket) {
+				
 				socket.removeAllListeners('child.getconnected');
 				socket.removeAllListeners('child.youtube.play');
+				socket.removeAllListeners('child.warcraft.getraces');
+				
 			});
 
 			p_clHTTPSocket.onConnection(function(socket) {

@@ -295,23 +295,22 @@ app.controller('ControllerYoutubeList', ['$scope', 'ModelYoutube', function($sco
 
 			jQuery('#menuYoutube').click(function(e) {
 				e.preventDefault();
-				jQuery('#modalYoutubeList').modal('show');
+				jQuery('#modalYoutube').modal('show');
 			});
+                
+            jQuery('#modalYoutube').on('shown.bs.modal', function() {
 
-            jQuery('#modalYoutubeList')
-                .on('shown.bs.modal', function() {
+                $scope.loading = true;
+                ModelYoutube.getAll()
+                    .then(function(p_tabData) {
+                        $scope.videos = p_tabData;
+                    })
+                    .catch(alert)
+                    .finally(function() {
+                        $scope.loading = false;
+                    });
 
-                    $scope.loading = true;
-                    ModelYoutube.getAll()
-                        .then(function(p_tabData) {
-                            $scope.videos = p_tabData;
-                        })
-                        .catch(alert)
-                        .finally(function() {
-                            $scope.loading = false;
-                        });
-
-                });
+            });
 
         // socket
 
@@ -322,11 +321,9 @@ app.controller('ControllerYoutubeList', ['$scope', 'ModelYoutube', function($sco
                 })
                 .on('connect', function () {
 
-                    socket.on('child.logged', function (socketData) {
+                    socket.on('child.logged', function () {
 
-                        socket.on('child.youtube.error', function (error) {
-                            alert(error);
-                        });
+                        socket.on('child.youtube.error', alert);
 
                     });
                     

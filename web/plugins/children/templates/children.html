@@ -1,0 +1,31 @@
+
+<div data-ng-controller="ControllerChildren" class="col-xs-12 only-logged hidden">
+
+	<div class="row">
+		
+		<div data-ng-repeat="child in children" class="col-xs-12 col-md-6 col-lg-3">
+
+			<div class="panel" data-ng-class="{ 'panel-default' : child.connected, 'panel-danger' : !child.connected }">
+				
+				<div class="panel-heading">{{child.name}}</div>
+
+				<table class="table table-bordered">
+					<tbody>
+						<tr>
+							<td>token</td>
+							<td>{{child.token}}</td>
+						</tr>
+						<tr>
+							<td>temperature</td>
+							<td>{{child.temperature}}°C</td>
+						</tr>
+					</tbody>
+				</table>
+
+			</div>
+		
+		</div>
+
+	</div>
+
+</div>

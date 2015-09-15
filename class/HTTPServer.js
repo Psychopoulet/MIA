@@ -3,7 +3,7 @@
 	
 	var
 		CST_DEP_Path = require('path'),
-		CST_DEP_FileStream = require('fs'),
+		CST_DEP_FileSystem = require('fs'),
 		CST_DEP_Url = require('url'),
 		CST_DEP_Q = require('q'),
 		CST_DEP_HTTP = require('http'),
@@ -56,6 +56,59 @@
 						}
 
 				// files
+
+					function _extractPluginsTemplates() {
+
+						var deferred = CST_DEP_Q.defer(), sDirWebPlugins = CST_DEP_Path.join(m_sDirWeb, 'plugins');
+
+							try {
+
+								CST_DEP_FileSystem.readdir(sDirWebPlugins, function (err, directories) {
+
+									var tabTemplates = [], sContent = '';
+
+									if (err) {
+										deferred.reject(err);
+									}
+									else {
+
+										directories.forEach(function (p_sDirectory) {
+
+											var sTemplatesDirectory = CST_DEP_Path.join(sDirWebPlugins, p_sDirectory, 'templates');
+
+											if (CST_DEP_FileSystem.existsSync(sTemplatesDirectory)) {
+
+												CST_DEP_FileSystem.readdirSync(sTemplatesDirectory).forEach(function (p_sFile) {
+													tabTemplates.push(CST_DEP_Path.join(sTemplatesDirectory, p_sFile));
+												});
+
+											}
+
+										});
+
+										tabTemplates.forEach(function (p_sFile) {
+											sContent += CST_DEP_FileSystem.readFileSync(p_sFile, 'utf8');
+										});
+
+										deferred.resolve(sContent);
+
+									}
+
+								});
+
+							}
+							catch (e) {
+								if (e.message) {
+									deferred.reject(e.message);
+								}
+								else {
+									deferred.reject(e);
+								}
+							}
+
+						return deferred.promise;
+						
+					}
 					
 					function _readFile(p_sDirectory, p_sFileName) {
 
@@ -65,12 +118,12 @@
 
 								sFileName = CST_DEP_Path.join(m_sDirWeb, p_sDirectory, p_sFileName);
 
-								if (!CST_DEP_FileStream.existsSync(sFileName)) {
+								if (!CST_DEP_FileSystem.existsSync(sFileName)) {
 									m_clLog.err('-- [HTTP server] The ' + sFileName + ' file does not exist');
 								}
 								else {
 
-									CST_DEP_FileStream.readFile(sFileName, 'utf8', function (err, data) {
+									CST_DEP_FileSystem.readFile(sFileName, 'utf8', function (err, data) {
 
 										if (err) {
 											deferred.reject(err);
@@ -103,7 +156,7 @@
 
 							try {
 
-								CST_DEP_FileStream.readdir(p_sDirectory, function (err, files) {
+								CST_DEP_FileSystem.readdir(p_sDirectory, function (err, files) {
 
 									var bResult = true, sResult = '';
 
@@ -113,7 +166,7 @@
 									else {
 
 										files.forEach(function (p_sFile) {
-											sResult += CST_DEP_FileStream.readFileSync(CST_DEP_Path.join(p_sDirectory, p_sFile), 'utf8');
+											sResult += CST_DEP_FileSystem.readFileSync(CST_DEP_Path.join(p_sDirectory, p_sFile), 'utf8');
 										});
 
 										if (bResult) {
@@ -159,9 +212,17 @@
 
 									m_clLog.log('-- [HTTP server] query');
 
-									_readFile('templates', 'index.tpl')
-										.then(function (data) {
-											_sendHTMLResponse(p_clResponse, 200, data);
+									_readFile('', 'index.html')
+										.then(function (index) {
+
+											_extractPluginsTemplates()
+												.then(function(sHTML) {
+													_sendHTMLResponse(p_clResponse, 200, index.replace('{{pages}}', sHTML));
+												})
+												.catch(function (error) {
+													_sendHTMLResponse(p_clResponse, 500, index.replace('{{pages}}', error));
+												});
+
 										})
 										.catch(function (error) {
 											_sendHTMLResponse(p_clResponse, 500, error);

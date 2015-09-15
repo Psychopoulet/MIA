@@ -15,7 +15,7 @@
 			var
 				m_clThis = this,
 				m_sConfFile = CST_DEP_Path.join(__dirname, '..', 'conf.json'),
-				m_stConf = m_stConf = JSON.parse(CST_DEP_FileSystem.readFileSync(m_sConfFile), 'utf8');
+				m_stConf = JSON.parse(CST_DEP_FileSystem.readFileSync(m_sConfFile), 'utf8');
 				
 		// methodes
 			
