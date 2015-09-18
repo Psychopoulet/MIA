@@ -18,6 +18,7 @@
 			var
 				m_clServer,
 				m_sDirWeb = CST_DEP_Path.join(__dirname, '..', 'web'),
+				m_sDirWebPlugins = CST_DEP_Path.join(m_sDirWeb, 'plugins'),
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'httpserver'));
 				
 		// methodes
@@ -39,8 +40,15 @@
 								_sendHTMLResponse(p_clResponse, 404, 'Not found');
 							}
 							
-							function _500(p_clResponse) {
-								_sendHTMLResponse(p_clResponse, 500, 'Internal error');
+							function _500(p_clResponse, p_sMessage) {
+
+								if (p_sMessage) {
+									_sendHTMLResponse(p_clResponse, 500, p_sMessage);
+								}
+								else {
+									_sendHTMLResponse(p_clResponse, 500, 'Internal error');
+								}
+								
 							}
 						
 						function _sendJSResponse(p_clResponse, p_nCode, p_sMessage) {
@@ -57,13 +65,13 @@
 
 				// files
 
-					function _extractPluginsTemplates() {
+					function _extractDataTemplates(p_sSubDirectory, p_sSubSubDirectory) {
 
-						var deferred = CST_DEP_Q.defer(), sDirWebPlugins = CST_DEP_Path.join(m_sDirWeb, 'plugins');
+						var deferred = CST_DEP_Q.defer();
 
 							try {
 
-								CST_DEP_FileSystem.readdir(sDirWebPlugins, function (err, directories) {
+								CST_DEP_FileSystem.readdir(m_sDirWebPlugins, function (err, directories) {
 
 									var tabTemplates = [], sContent = '';
 
@@ -74,7 +82,7 @@
 
 										directories.forEach(function (p_sDirectory) {
 
-											var sTemplatesDirectory = CST_DEP_Path.join(sDirWebPlugins, p_sDirectory, 'templates');
+											var sTemplatesDirectory = (p_sSubSubDirectory) ? CST_DEP_Path.join(m_sDirWebPlugins, p_sDirectory, p_sSubDirectory, p_sSubSubDirectory) : CST_DEP_Path.join(m_sDirWebPlugins, p_sDirectory, p_sSubDirectory);
 
 											if (CST_DEP_FileSystem.existsSync(sTemplatesDirectory)) {
 
@@ -109,7 +117,43 @@
 						return deferred.promise;
 						
 					}
-					
+
+					function _extractPluginsTemplates() {
+						return _extractDataTemplates('templates');
+					}
+
+					function _extractPluginsJavaScript() {
+
+						var deferred = CST_DEP_Q.defer();
+
+							try {
+
+								_extractDataTemplates('javascript', 'models')
+									.then(function(sJavascriptModels) {
+
+										_extractDataTemplates('javascript', 'controllers')
+											.then(function(sJavascriptControllers) {
+												deferred.resolve(sJavascriptModels + sJavascriptControllers);
+											})
+											.catch(deferred.reject);
+
+									})
+									.catch(deferred.reject);
+
+							}
+							catch (e) {
+								if (e.message) {
+									deferred.reject(e.message);
+								}
+								else {
+									deferred.reject(e);
+								}
+							}
+
+						return deferred.promise;
+
+					}
+
 					function _readFile(p_sDirectory, p_sFileName) {
 
 						var deferred = CST_DEP_Q.defer(), sFileName = '';
@@ -166,7 +210,13 @@
 									else {
 
 										files.forEach(function (p_sFile) {
-											sResult += CST_DEP_FileSystem.readFileSync(CST_DEP_Path.join(p_sDirectory, p_sFile), 'utf8');
+
+											p_sFile = CST_DEP_Path.join(p_sDirectory, p_sFile);
+
+											if (CST_DEP_FileSystem.lstatSync(p_sFile).isFile()) {
+												sResult += CST_DEP_FileSystem.readFileSync(p_sFile, 'utf8');
+											}
+
 										});
 
 										if (bResult) {
@@ -220,12 +270,12 @@
 													_sendHTMLResponse(p_clResponse, 200, index.replace('{{pages}}', sHTML));
 												})
 												.catch(function (error) {
-													_sendHTMLResponse(p_clResponse, 500, index.replace('{{pages}}', error));
+													_500(p_clResponse, index.replace('{{pages}}', error));
 												});
 
 										})
 										.catch(function (error) {
-											_sendHTMLResponse(p_clResponse, 500, error);
+											_500(p_clResponse, error);
 										});
 
 								break;
@@ -236,41 +286,44 @@
 
 										case 'js':
 
-											if (tabURI[1] && 'plugins.js' == tabURI[1]) {
+											if (tabURI[1]) {
 
-												_readAllFiles(CST_DEP_Path.join(m_sDirWeb, 'js', 'plugins'))
-													.then(function (data) {
-														_sendJSResponse(p_clResponse, 200, data);
-													})
-													.catch(function (error) {
-														_sendJSResponse(p_clResponse, 500, error);
-													});
+												switch (tabURI[1]) {
+
+													case 'plugins.js' :
+
+														_extractPluginsJavaScript()
+															.then(function(sJavascript) {
+																_sendJSResponse(p_clResponse, 200, sJavascript);
+															})
+															.catch(function (error) {
+																_500(p_clResponse, error);
+															});
+
+													break;
+
+													case 'children.js' :
+
+														_readAllFiles(CST_DEP_Path.join(m_sDirWeb, 'js'))
+															.then(function (data) {
+																_sendJSResponse(p_clResponse, 200, data);
+															})
+															.catch(function (error) {
+																_500(p_clResponse, error);
+															});
+
+													break;
+
+													default :
+														_404(p_clResponse);
+													break;
+
+												}
 
 											}
 											else {
-
-												_readFile('js', tabURI[1])
-													.then(function (data) {
-														_sendJSResponse(p_clResponse, 200, data);
-													})
-													.catch(function (error) {
-														_sendJSResponse(p_clResponse, 500, error);
-													});
-
+												_404(p_clResponse);
 											}
-
-											
-										break;
-
-										case 'css':
-
-											_readFile('css', tabURI[1])
-												.then(function (data) {
-													_sendCSSResponse(p_clResponse, 200, data);
-												})
-												.catch(function (error) {
-													_sendCSSResponse(p_clResponse, 500, error);
-												});
 
 										break;
 
@@ -285,7 +338,7 @@
 															_sendPNGResponse(p_clResponse, 200, data);
 														})
 														.catch(function (error) {
-															_sendPNGResponse(p_clResponse, 500, error);
+															_500(p_clResponse, error);
 														});
 
 												break;
@@ -311,7 +364,7 @@
 															_sendCSSResponse(p_clResponse, 200, data);
 														})
 														.catch(function (error) {
-															_sendCSSResponse(p_clResponse, 500, error);
+															_500(p_clResponse, error);
 														});
 
 												break;
@@ -325,7 +378,7 @@
 															_sendJSResponse(p_clResponse, 200, data);
 														})
 														.catch(function (error) {
-															_sendJSResponse(p_clResponse, 500, error);
+															_500(p_clResponse, error);
 														});
 
 												break;
@@ -336,7 +389,7 @@
 															_sendJSResponse(p_clResponse, 200, data);
 														})
 														.catch(function (error) {
-															_sendJSResponse(p_clResponse, 500, error);
+															_500(p_clResponse, error);
 														});
 
 												break;
@@ -347,7 +400,7 @@
 															_sendJSResponse(p_clResponse, 200, data);
 														})
 														.catch(function (error) {
-															_sendJSResponse(p_clResponse, 500, error);
+															_500(p_clResponse, error);
 														});
 
 												break;
@@ -358,7 +411,7 @@
 															_sendJSResponse(p_clResponse, 200, data);
 														})
 														.catch(function (error) {
-															_sendJSResponse(p_clResponse, 500, error);
+															_500(p_clResponse, error);
 														});
 
 												break;

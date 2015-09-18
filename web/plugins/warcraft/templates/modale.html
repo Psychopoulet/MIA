@@ -11,6 +11,56 @@
 
 			<div class="modal-body">
 
+				<select class="form-control"
+                		data-ng-disabled="loading || !races.length" data-ng-class="{'disabled' : loading || !races.length }"
+                		data-ng-options="race.name for race in races track by race.id"
+                		data-ng-model="selectedrace">
+                	<option value="">-- NC --</option>
+                </select>
+
+                <!--<form class="form-inline">
+
+                	<div class="form-group">
+                        <select class="form-control"
+                        		data-ng-disabled="loading || !races.length" data-ng-class="{'disabled' : loading || !races.length }"
+                        		data-ng-options="race.name for race in races track by race.id"
+                        		data-ng-model="selectedrace">
+                        	<option value="">-- NC --</option>
+                        </select>
+                    </div>
+
+                	<div class="form-group">
+                        <select class="form-control"
+                        		data-ng-disabled="loading || !races.length" data-ng-class="{'disabled' : loading || !races.length }"
+                        		data-ng-options="race.name for race in races track by race.id"
+                        		data-ng-model="selectedrace">
+                        	<option value="">-- NC --</option>
+                        </select>
+                    </div>
+
+                	<div class="form-group">
+                        <select class="form-control"
+                        		data-ng-disabled="loading || !races.length" data-ng-class="{'disabled' : loading || !races.length }"
+                        		data-ng-options="race.name for race in races track by race.id"
+                        		data-ng-model="selectedrace">
+                        	<option value="">-- NC --</option>
+                        </select>
+                    </div>
+
+                	<div class="form-group">
+            			<input 	type="button" class="btn btn-primary" value="Preview"
+                        		data-ng-disabled="loading || !videos.length || !selectedvideo" data-ng-class="{'disabled' : loading || !videos.length || !selectedvideo }"
+                        		data-ng-click="preview()" />
+                    </div>
+
+                	<div class="form-group">
+            			<input 	type="button" class="btn btn-primary" value="Play"
+                        		data-ng-disabled="loading || !videos.length || !children.length || !selectedvideo || !selectedchild" data-ng-class="{'disabled' : loading || !videos.length || !children.length || !selectedvideo || !selectedchild }"
+                        		data-ng-click="play()" />
+                    </div>
+
+                </form>-->
+
 			</div>
 
 			<div class="modal-footer">
