@@ -7,6 +7,7 @@ app.service('ModelYoutube', ['$q', function($q) {
         var
             CST_THAT = this,
             m_tabOnChange = [],
+            m_clPromiseGetAll,
             m_tabData = [];
 
     // methods
@@ -37,42 +38,22 @@ app.service('ModelYoutube', ['$q', function($q) {
 
             // read
 
-                var isLoadingGetAll = false, deferredGetAll;
-                this.getAll = function (p_bForceLoading) {
+                this.getAll = function () {
 
-                    if (!isLoadingGetAll) {
+                    var defer = $q.defer();
 
-                        deferredGetAll = $q.defer();
-
-                        isLoadingGetAll = true;
-
-                        if (0 < m_tabData.length && ('undefined' == typeof p_bForceLoading || !p_bForceLoading)) {
-                            deferredGetAll.resolve(m_tabData);
+                        if (0 < m_tabData.length) {
+                            defer.resolve(m_tabData);
                         }
                         else {
 
-                        	m_tabData = [
-	                        	{
-									id : 1,
-									name : 'witcher 9',
-									url : 'https://www.youtube.com/embed/x6go-o0TNd4'
-								},
-								{
-									id : 2,
-									name : 'witcher 10',
-									url : 'https://www.youtube.com/embed/gTgVcK8E7tM'
-								}
-							];
-
-                            _execOnChange();
-
-                        	deferredGetAll.resolve(m_tabData);
+                            m_clPromiseGetAll
+                                .then(defer.resolve)
+                                .catch(defer.resolve);
 
                         }
 
-                    }
-
-                    return deferredGetAll.promise;
+                    return defer.promise;
 
                 };
 
@@ -147,5 +128,36 @@ app.service('ModelYoutube', ['$q', function($q) {
                     return deferred.promise;
 
                 };
+
+    // constructor
+
+        // data
+
+            socket
+                .on('disconnect', function () {
+
+                    socket.removeAllListeners('child.youtube.getall');
+                    socket.removeAllListeners('child.youtube.error');
+
+                    m_tabData = [];
+
+                })
+                .on('connect', function () {
+
+                    var deferred = $q.defer();
+                    m_clPromiseGetAll = deferred.promise;
+
+                    socket
+                        .on('child.logged', function () {
+                            socket.emit('child.youtube.getall');
+                        })
+                        .on('child.youtube.getall', function (p_tabData) {
+                            m_tabData = p_tabData;
+                            _execOnChange();
+                            deferred.resolve(m_tabData);
+                        })
+                        .on('child.youtube.error', deferred.reject);
+
+                });
 
 }]);

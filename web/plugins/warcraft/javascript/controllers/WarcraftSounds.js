@@ -1,17 +1,23 @@
-app.controller('ControllerWarcraftSounds', ['$scope', 'ModelWarcraftSounds', function($scope, ModelSounds) {
+app.controller('ControllerWarcraftSounds', ['$scope', 'ModelWarcraftSounds', function($scope, ModelWarcraftSounds) {
 
 	"use strict";
 
 	// attributes
 
-		$scope.loading = false;
+		$scope.loading = true;
 
-        $scope.races = [];
+        $scope.data = [];
 		$scope.selectedrace = null;
 
     // constructor
 
         // events
+
+            ModelWarcraftSounds
+                .onChange(function (p_tabData) {
+                    console.log(p_tabData);
+                    $scope.data = p_tabData;
+                });
 
 			jQuery('#menuWarcraft').click(function(e) {
 				e.preventDefault();
@@ -20,11 +26,7 @@ app.controller('ControllerWarcraftSounds', ['$scope', 'ModelWarcraftSounds', fun
                 
             jQuery('#modalWarcraft').on('shown.bs.modal', function() {
 
-                $scope.loading = true;
-                ModelSounds.getAllRaces()
-                	.then(function(p_tabData) {
-                		$scope.races = p_tabData;
-                	})
+                ModelWarcraftSounds.getAll()
                     .catch(alert)
                     .finally(function() {
                         $scope.loading = false;

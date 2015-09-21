@@ -4,7 +4,7 @@ app.controller('ControllerYoutubeList', ['$scope', 'ModelYoutube', 'ModelChildre
 
 	// attributes
 
-		$scope.loading = false;
+		$scope.loading = true;
 
         $scope.videos = [];
 		$scope.selectedvideo = null;
@@ -100,6 +100,7 @@ app.controller('ControllerYoutubeList', ['$scope', 'ModelYoutube', 'ModelChildre
 
             ModelYoutube
                 .onChange(function (p_tabData) {
+                    console.log(p_tabData);
                     $scope.videos = p_tabData;
                 });
 
@@ -117,7 +118,6 @@ app.controller('ControllerYoutubeList', ['$scope', 'ModelYoutube', 'ModelChildre
                 
             jQuery('#modalYoutube').on('shown.bs.modal', function() {
 
-                $scope.loading = true;
                 ModelYoutube.getAll()
                     .catch(alert)
                     .finally(function() {

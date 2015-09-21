@@ -6,49 +6,86 @@ app.service('ModelWarcraftSounds', ['$q', function($q) {
 
         var
             CST_THAT = this,
-            m_tabRaces = [];
+            m_tabOnChange = [],
+            m_clPromiseGetAll,
+            m_tabData = [];
 
     // methods
 
+        // protected
+
+            function _execOnChange() {
+
+                angular.forEach(m_tabOnChange, function (p_fCallback) {
+                    p_fCallback(m_tabData);
+                });
+
+                return CST_THAT;
+
+            }
+
         // public
+
+            this.onChange = function (p_fCallback) {
+
+                if ('function' === typeof p_fCallback) {
+                    m_tabOnChange.push(p_fCallback);
+                }
+
+                return CST_THAT;
+
+            };
 
             // read
 
-                var isLoadingGetAllRaces = false, deferredGetAllRaces;
-                this.getAllRaces = function (p_bForceLoading) {
+                this.getAll = function () {
 
-                    if (!isLoadingGetAllRaces) {
+                    var defer = $q.defer();
 
-                        deferredGetAllRaces = $q.defer();
-
-                        isLoadingGetAllRaces = true;
-
-                        if (0 < m_tabRaces.length && ('undefined' == typeof p_bForceLoading || !p_bForceLoading)) {
-                            deferredGetAllRaces.resolve(m_tabRaces);
+                        if (0 < m_tabData.length) {
+                            defer.resolve(m_tabData);
                         }
                         else {
 
-                        	m_tabRaces = [
-	                        	{
-									id : 1,
-									name : 'witcher 9',
-									url : 'https://www.youtube.com/embed/x6go-o0TNd4'
-								},
-								{
-									id : 2,
-									name : 'witcher 10',
-									url : 'https://www.youtube.com/embed/gTgVcK8E7tM'
-								}
-							];
-
-                        	deferredGetAllRaces.resolve(m_tabRaces);
+                            m_clPromiseGetAll
+                                .then(defer.resolve)
+                                .catch(defer.resolve);
 
                         }
 
-                    }
-
-                    return deferredGetAllRaces.promise;
+                    return defer.promise;
 
                 };
+
+    // constructor
+
+        // data
+
+            socket
+                .on('disconnect', function () {
+
+                    socket.removeAllListeners('child.warcraftsounds.getall');
+                    socket.removeAllListeners('child.warcraftsounds.error');
+
+                    m_tabData = [];
+
+                })
+                .on('connect', function () {
+
+                    var deferred = $q.defer();
+                    m_clPromiseGetAll = deferred.promise;
+
+                    socket
+                        .on('child.logged', function () {
+                            socket.emit('child.warcraftsounds.getall');
+                        })
+                        .on('child.warcraftsounds.getall', function (p_tabData) {
+                            m_tabData = p_tabData;
+                            _execOnChange();
+                            deferred.resolve(m_tabData);
+                        })
+                        .on('child.warcraftsounds.error', deferred.reject);
+
+                });
 
 }]);
