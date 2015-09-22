@@ -23,7 +23,7 @@ app.controller('ControllerWarcraftSounds', ['$scope', 'ModelWarcraftSounds', fun
 				e.preventDefault();
 				jQuery('#modalWarcraft').modal('show');
 			});
-                
+            
             jQuery('#modalWarcraft').on('shown.bs.modal', function() {
 
                 ModelWarcraftSounds.getAll()
