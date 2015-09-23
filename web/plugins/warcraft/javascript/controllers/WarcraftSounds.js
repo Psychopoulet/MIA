@@ -1,4 +1,4 @@
-app.controller('ControllerWarcraftSounds', ['$scope', 'ModelWarcraftSounds', function($scope, ModelWarcraftSounds) {
+app.controller('ControllerWarcraftSounds', ['$scope'/*, '$popup'*/, function($scope/*, $popup*/) {
 
 	"use strict";
 
@@ -13,25 +13,36 @@ app.controller('ControllerWarcraftSounds', ['$scope', 'ModelWarcraftSounds', fun
 
         // events
 
-            ModelWarcraftSounds
-                .onChange(function (p_tabData) {
-                    console.log(p_tabData);
-                    $scope.data = p_tabData;
-                });
+            // sockets
 
-			jQuery('#menuWarcraft').click(function(e) {
-				e.preventDefault();
-				jQuery('#modalWarcraft').modal('show');
-			});
-            
-            jQuery('#modalWarcraft').on('shown.bs.modal', function() {
+                socket
+                    .on('disconnect', function () {
+                        socket.removeAllListeners('child.warcraftsounds.getall');
+                        socket.removeAllListeners('child.warcraftsounds.error');
+                    })
+                    .on('connect', function () {
 
-                ModelWarcraftSounds.getAll()
-                    .catch(alert)
-                    .finally(function() {
-                        $scope.loading = false;
+                        socket
+                            .on('child.logged', function () {
+                                socket.emit('child.warcraftsounds.getall');
+                            })
+                            .on('child.warcraftsounds.getall', function (p_tabData) {
+                                console.log(p_tabData);
+                                $scope.data = p_tabData;
+                                $scope.$apply();
+                            })
+                            .on('child.warcraftsounds.error', function(p_sMessage) {
+                                // $popup.error(p_sMessage);
+                                alert(p_sMessage);
+                            });
+
                     });
 
-            });
+            // interface
 
+    			jQuery('#menuWarcraft').click(function(e) {
+    				e.preventDefault();
+    				jQuery('#modalWarcraft').modal('show');
+    			});
+                
 }]);
