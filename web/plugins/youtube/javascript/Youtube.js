@@ -1,4 +1,4 @@
-app.controller('ControllerYoutubeList', ['$scope', 'ModelChildren', function($scope, ModelChildren) {
+app.controller('ControllerYoutubeList', ['$scope', '$popup', 'ModelChildren', function($scope, ModelChildren, $popup) {
 
 	"use strict";
 
@@ -158,8 +158,7 @@ app.controller('ControllerYoutubeList', ['$scope', 'ModelChildren', function($sc
                                 $scope.$apply();
                             })
                             .on('child.youtube.error', function(p_sMessage) {
-                                // $popup.error(p_sMessage);
-                                alert(p_sMessage);
+                                $popup.alert(p_sMessage);
                             });
 
                     });

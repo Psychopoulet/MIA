@@ -1,4 +1,4 @@
-app.controller('ControllerWarcraftSounds', ['$scope'/*, '$popup'*/, function($scope/*, $popup*/) {
+app.controller('ControllerWarcraftSounds', ['$scope', '$popup', function($scope, $popup) {
 
 	"use strict";
 
@@ -32,8 +32,7 @@ app.controller('ControllerWarcraftSounds', ['$scope'/*, '$popup'*/, function($sc
                                 $scope.$apply();
                             })
                             .on('child.warcraftsounds.error', function(p_sMessage) {
-                                // $popup.error(p_sMessage);
-                                alert(p_sMessage);
+                                $popup.alert(p_sMessage);
                             });
 
                     });

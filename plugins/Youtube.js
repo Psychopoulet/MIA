@@ -3,8 +3,7 @@
 	
 	var
 		CST_DEP_Path = require('path'),
-		CST_DEP_Log = require('logs'),
-		CST_DEP_W3VoicesManager = require('W3VoicesManager');
+		CST_DEP_Log = require('logs');
 
 // module
 	

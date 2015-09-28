@@ -65,7 +65,7 @@
 
 				// files
 
-					function _extractDataTemplates(p_sSubDirectory, p_sSubSubDirectory) {
+					function _extractDataTemplates(p_sSubDirectory) {
 
 						var deferred = CST_DEP_Q.defer();
 
@@ -82,7 +82,7 @@
 
 										directories.forEach(function (p_sDirectory) {
 
-											var sTemplatesDirectory = (p_sSubSubDirectory) ? CST_DEP_Path.join(m_sDirWebPlugins, p_sDirectory, p_sSubDirectory, p_sSubSubDirectory) : CST_DEP_Path.join(m_sDirWebPlugins, p_sDirectory, p_sSubDirectory);
+											var sTemplatesDirectory = CST_DEP_Path.join(m_sDirWebPlugins, p_sDirectory, p_sSubDirectory);
 
 											if (CST_DEP_FileSystem.existsSync(sTemplatesDirectory)) {
 
@@ -116,42 +116,6 @@
 
 						return deferred.promise;
 						
-					}
-
-					function _extractPluginsTemplates() {
-						return _extractDataTemplates('templates');
-					}
-
-					function _extractPluginsJavaScript() {
-
-						var deferred = CST_DEP_Q.defer();
-
-							try {
-
-								_extractDataTemplates('javascript', 'models')
-									.then(function(sJavascriptModels) {
-
-										_extractDataTemplates('javascript', 'controllers')
-											.then(function(sJavascriptControllers) {
-												deferred.resolve(sJavascriptModels + sJavascriptControllers);
-											})
-											.catch(deferred.reject);
-
-									})
-									.catch(deferred.reject);
-
-							}
-							catch (e) {
-								if (e.message) {
-									deferred.reject(e.message);
-								}
-								else {
-									deferred.reject(e);
-								}
-							}
-
-						return deferred.promise;
-
 					}
 
 					function _readFile(p_sDirectory, p_sFileName) {
@@ -265,7 +229,7 @@
 									_readFile('', 'index.html')
 										.then(function (index) {
 
-											_extractPluginsTemplates()
+											_extractDataTemplates('templates')
 												.then(function(sHTML) {
 													_sendHTMLResponse(p_clResponse, 200, index.replace('{{pages}}', sHTML));
 												})
@@ -292,7 +256,7 @@
 
 													case 'plugins.js' :
 
-														_extractPluginsJavaScript()
+														_extractDataTemplates('javascript')
 															.then(function(sJavascript) {
 																_sendJSResponse(p_clResponse, 200, sJavascript);
 															})
