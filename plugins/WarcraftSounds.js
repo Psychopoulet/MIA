@@ -5,17 +5,19 @@
 		CST_DEP_Path = require('path'),
 		CST_DEP_FileStream = require('fs'),
 		CST_DEP_Log = require('logs'),
-		CST_DEP_W3VoicesManager = require('W3VoicesManager');
+		CST_DEP_W3VoicesManager = require('W3VoicesManager'),
+		CST_DEP_SikyAPI = require('SIKY-API');
 
 // module
 	
-	module.exports = function (p_clHTTPSocket, p_clChildSocket, p_clSIKYAPI) {
+	module.exports = function (p_clHTTPSocket, p_clChildSocket) {
 
 		// attributes
 			
 			var
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'plugins', 'warcraftsounds')),
 				m_clW3VoicesManager = new CST_DEP_W3VoicesManager(),
+				m_clSikyAPI = new CST_DEP_SikyAPI(),
 				m_tabData = [];
 				
 		// constructor
@@ -62,8 +64,7 @@
 				socket.emit('w3.error', err);
 			}
 
-
-			p_clSIKYAPI.query('warcraftsounds', 'races', 'GET')
+			m_clSikyAPI.query('warcraftsounds', 'races', 'GET')
 				.then(function (p_tabRaces) {
 
 					m_tabData = p_tabRaces;
@@ -72,7 +73,7 @@
 
 						console.log('races/' + value.code + '/warnings');
 
-						p_clSIKYAPI.query('warcraftsounds', 'races/' + value.code + '/warnings', 'GET')
+						m_clSikyAPI.query('warcraftsounds', 'races/' + value.code + '/warnings', 'GET')
 							.then(function (p_tabWarnings) {
 								m_tabData[key].warnings = p_tabWarnings;
 							})

@@ -3,16 +3,18 @@
 	
 	var
 		CST_DEP_Path = require('path'),
-		CST_DEP_Log = require('logs');
+		CST_DEP_Log = require('logs'),
+		CST_DEP_SikyAPI = require('SIKY-API');
 
 // module
 	
-	module.exports = function (p_clHTTPSocket, p_clChildSocket, p_clSIKYAPI) {
+	module.exports = function (p_clHTTPSocket, p_clChildSocket) {
 
 		// attributes
 			
 			var
 				m_stSIKYUser,
+				m_clSikyAPI = new CST_DEP_SikyAPI(),
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'plugins', 'children'));
 				
 		// constructor
@@ -35,11 +37,11 @@
 							}
 							else {
 
-								p_clSIKYAPI.login(p_stData.email, p_stData.password)
+								m_clSikyAPI.login(p_stData.email, p_stData.password)
 									.then(function () {
 
 										m_stSIKYUser = {
-											token : p_clSIKYAPI.getToken(),
+											token : m_clSikyAPI.getToken(),
 											email : p_stData.email,
 											password : p_stData.password
 										};

@@ -5,7 +5,6 @@
 		CST_DEP_Path = require('path'),
 		CST_DEP_FileSystem = require('fs'),
 		CST_DEP_Q = require('q'),
-		CST_DEP_SIKY = require('SIKY-API'),
 		CST_DEP_HTTPServer = require(CST_DEP_Path.join(__dirname, 'HTTPServer.js')),
 		CST_DEP_HTTPSocket = require(CST_DEP_Path.join(__dirname, 'HTTPSocket.js')),
 		CST_DEP_ChildSocket = require(CST_DEP_Path.join(__dirname, 'ChildSocket.js')),
@@ -37,13 +36,13 @@
 
 							m_clHTTPServer.start(m_clConf.getConf().portweb)
 								.then(function() {
-									
+
 									// plugins
 										
 										var sPluginsPath = CST_DEP_Path.join(__dirname, '..', 'plugins');
 
 										CST_DEP_FileSystem.readdirSync(sPluginsPath).forEach(function (file) {
-											require(CST_DEP_Path.join(sPluginsPath, file))(m_clHTTPSocket, m_clChildSocket, CST_DEP_SIKY);
+											require(CST_DEP_Path.join(sPluginsPath, file))(m_clHTTPSocket, m_clChildSocket);
 										});
 
 									// start
