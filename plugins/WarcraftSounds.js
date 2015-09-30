@@ -24,14 +24,31 @@
 			p_clHTTPSocket
 				.onDisconnect(function(socket) {
 					socket.removeAllListeners('child.warcraftsounds.getall');
+					socket.removeAllListeners('child.warcraftsounds.play');
 				})
 				.onConnection(function(socket) {
 
 					socket
 						.on('child.warcraftsounds.getall', function () {
-
-							m_clLog.log('child.warcraftsounds.getall');
 							socket.emit('child.warcraftsounds.getall', m_tabData);
+						})
+						.on('child.warcraftsounds.play', function (p_stData) {
+
+							if (!p_stData) {
+								m_clLog.err('Missing data');
+								socket.emit('child.warcraftsounds.error', 'Missing data');
+							}
+							else if (!p_stData.token) {
+								m_clLog.err('Missing \'token\' data');
+								socket.emit('child.warcraftsounds.error', 'Missing \'token\' data');
+							}
+							else if (!p_stData.url) {
+								m_clLog.err('Missing \'url\' data');
+								socket.emit('child.warcraftsounds.error', 'Missing \'url\' data');
+							}
+							else {
+								p_clChildSocket.emitTo(p_stData.token, 'child.youtube.play', p_stData.url);
+							}
 
 						});
 
@@ -45,7 +62,21 @@
 				.onConnection(function(socket) {
 
 					socket
-						.on('w3.error', m_clLog.err)
+
+						.on('w3.error', function (error) {
+							m_clLog.err(error);
+							p_clChildSocket.emit('child.warcraftsounds.error', error);
+						})
+
+						.on('child.youtube.error', function (error) {
+							m_clLog.err(error);
+							p_clChildSocket.emit('child.warcraftsounds.error', data.url);
+						})
+						.on('child.youtube.played', function () {
+							m_clLog.success('child.warcraftsounds.played');
+							p_clChildSocket.emit('child.warcraftsounds.played');
+						})
+
 						.emit('w3', { order : 'play_actioncode', race : 'random', character : 'random', action : 'ready', actioncode : 'random' });
 						
 				});
@@ -62,21 +93,9 @@
 				socket.emit('w3.error', err);
 			}
 
-			p_clSikyAPI.query('warcraftsounds', '/races', 'GET')
+			p_clSikyAPI.query('warcraftsounds', '/races/complete', 'GET')
 				.then(function (p_tabRaces) {
-
 					m_tabData = p_tabRaces;
-
-					m_tabData.forEach(function (value, key) {
-
-						p_clSikyAPI.query('warcraftsounds', '/races/' + value.code + '/warnings', 'GET')
-							.then(function (p_tabWarnings) {
-								m_tabData[key].warnings = p_tabWarnings;
-							})
-							.catch(_err);
-						
-					});
-
 				})
 				.catch(_err);
 				

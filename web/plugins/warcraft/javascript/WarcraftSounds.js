@@ -1,4 +1,4 @@
-app.controller('ControllerWarcraftSounds', ['$scope', '$popup', function($scope, $popup) {
+app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren', function($scope, $popup, ModelChildren) {
 
 	"use strict";
 
@@ -6,12 +6,47 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', function($scope,
 
 		$scope.loading = true;
 
-        $scope.data = [];
+        $scope.races = [];
 		$scope.selectedrace = null;
+
+        $scope.children = [];
+        $scope.selectedchild = null;
+
+    // methods
+
+        // public
+
+            $scope.previewMusic = function() {
+                $popup.preview($scope.selectedmusic.url);
+            };
+
+            $scope.previewWarning = function() {
+                $popup.preview($scope.selectedwarning.url);
+            };
+
+            $scope.previewAction = function() {
+                $popup.preview($scope.selectedaction.url);
+            };
+
+            $scope.playAction = function() {
+
+                socket.emit('child.warcraftsounds.play', {
+                    token : $scope.selectedchild.token,
+                    url : $scope.selectedaction.url
+                });
+
+            };
 
     // constructor
 
         // events
+
+            ModelChildren
+                .onChange(function(p_tabData) {
+                    $scope.children = p_tabData;
+                    $scope.selectedchild = null;
+                    $scope.$apply();
+                });
 
             // sockets
 
@@ -27,13 +62,11 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', function($scope,
                                 socket.emit('child.warcraftsounds.getall');
                             })
                             .on('child.warcraftsounds.getall', function (p_tabData) {
-                                console.log(p_tabData);
-                                $scope.data = p_tabData;
+                                $scope.races = p_tabData;
+                                $scope.loading = false;
                                 $scope.$apply();
                             })
-                            .on('child.warcraftsounds.error', function(p_sMessage) {
-                                $popup.alert(p_sMessage);
-                            });
+                            .on('child.warcraftsounds.error', $popup.alert);
 
                     });
 

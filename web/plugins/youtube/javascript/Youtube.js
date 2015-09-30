@@ -1,4 +1,4 @@
-app.controller('ControllerYoutubeList', ['$scope', '$popup', 'ModelChildren', function($scope, ModelChildren, $popup) {
+app.controller('ControllerYoutubeList', ['$scope', '$popup', 'ModelChildren', function($scope, $popup, ModelChildren) {
 
 	"use strict";
 
@@ -107,8 +107,7 @@ app.controller('ControllerYoutubeList', ['$scope', '$popup', 'ModelChildren', fu
             // preview
 
                 $scope.preview = function () {
-                    jQuery('#modalYoutubePreviewIframe').empty().append('<iframe class="embed-responsive-item" src="' + $scope.selectedvideo.url + '" frameborder="0" allowfullscreen></iframe>');
-                    jQuery('#modalYoutubePreview').modal('show');
+                    $popup.preview($scope.selectedvideo.url, $scope.selectedvideo.name);
                 };
 
                 $scope.closePreview = function () {
@@ -152,14 +151,11 @@ app.controller('ControllerYoutubeList', ['$scope', '$popup', 'ModelChildren', fu
                                 socket.emit('child.youtube.getall');
                             })
                             .on('child.youtube.getall', function (p_tabData) {
-                                console.log(p_tabData);
                                 $scope.videos = p_tabData;
                                 $scope.loading = false;
                                 $scope.$apply();
                             })
-                            .on('child.youtube.error', function(p_sMessage) {
-                                $popup.alert(p_sMessage);
-                            });
+                            .on('child.youtube.error', $popup.alert);
 
                     });
 
