@@ -8,7 +8,8 @@
 		CST_DEP_HTTPServer = require(CST_DEP_Path.join(__dirname, 'HTTPServer.js')),
 		CST_DEP_HTTPSocket = require(CST_DEP_Path.join(__dirname, 'HTTPSocket.js')),
 		CST_DEP_ChildSocket = require(CST_DEP_Path.join(__dirname, 'ChildSocket.js')),
-		CST_DEP_Conf = require(CST_DEP_Path.join(__dirname, 'Conf.js'));
+		CST_DEP_Conf = require(CST_DEP_Path.join(__dirname, 'Conf.js')),
+		CST_DEP_SikyAPI = require('SIKY-API');
 		
 // module
 	
@@ -18,10 +19,11 @@
 			
 			var
 				m_clThis = this,
-				m_clConf = new CST_DEP_Conf(),
 				m_clHTTPServer = new CST_DEP_HTTPServer(),
 				m_clHTTPSocket = new CST_DEP_HTTPSocket(),
-				m_clChildSocket = new CST_DEP_ChildSocket();
+				m_clChildSocket = new CST_DEP_ChildSocket(),
+				m_clConf = new CST_DEP_Conf(),
+				m_clSikyAPI = new CST_DEP_SikyAPI();
 				
 		// methodes
 
@@ -42,7 +44,7 @@
 										var sPluginsPath = CST_DEP_Path.join(__dirname, '..', 'plugins');
 
 										CST_DEP_FileSystem.readdirSync(sPluginsPath).forEach(function (file) {
-											require(CST_DEP_Path.join(sPluginsPath, file))(m_clHTTPSocket, m_clChildSocket);
+											require(CST_DEP_Path.join(sPluginsPath, file))(m_clHTTPSocket, m_clChildSocket, m_clSikyAPI);
 										});
 
 									// start
