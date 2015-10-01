@@ -43,10 +43,9 @@
 									
 									m_clLog.info('-- [child socket client] ' + socket.id + ' disconnected');
 									
-									socket.removeAllListeners('w3');
-									socket.removeAllListeners('token_get');
-									socket.removeAllListeners('token_empty');
-									socket.removeAllListeners('token_error');
+									socket.removeAllListeners('child.token.get');
+									socket.removeAllListeners('child.token.empty');
+									socket.removeAllListeners('child.token.error');
 
 									m_tabOnDisconnect.forEach(function (fOnDisconnect) {
 										fOnDisconnect(socket);
@@ -57,7 +56,7 @@
 								});
 
 								socket
-									.on('token_get', function (sToken) {
+									.on('child.token.get', function (sToken) {
 										
 										socket.MIA.token = sToken;
 										socket.MIA.name = sToken;
@@ -70,10 +69,8 @@
 											fOnConnection(socket);
 										});
 										
-										socket.emit('w3', { order : 'play_actioncode', race : 'random', character : 'random', action : 'ready', actioncode : 'random' });
-										
 									})
-									.on('token_empty', function () {
+									.on('child.token.empty', function () {
 										
 										var sAlpha = 'abcdefghijklmnopqrstuvwxyz0123456789', sToken = '';
 										
@@ -83,21 +80,14 @@
 											sToken += sAlpha.substring(al, al+1);
 										}
 										
-										socket.emit('token_set', sToken);
+										socket.emit('child.token.set', sToken);
 										
 									})
-									.on('token_error', function (err) {
+									.on('child.token.error', function (err) {
 										m_clLog.err(err);
-									})
-									.on('w3', function (data) {
-
-										if (data && data.error) {
-											m_clLog.err(data.error);
-										}
-
 									});
 									
-								socket.emit('token_get');
+								socket.emit('child.token.get');
 								
 							});
 

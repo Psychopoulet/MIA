@@ -1,0 +1,188 @@
+
+<div id="modalWarcraft" class="modal fade only-logged hidden" data-ng-controller="ControllerWarcraftSounds">
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title">Warcraft</h4>
+            </div>
+
+            <form class="modal-body">
+
+                <div class="form-group">
+
+                    <label for="WarcraftRaces">Races</label>
+
+                    <select id="WarcraftRaces" class="form-control"
+                            data-ng-disabled="loading || !races.length" data-ng-class="{'disabled' : loading || !races.length }"
+                            data-ng-options="race.name for race in races"
+                            data-ng-model="selectedrace">
+                        <option value="">-- NC --</option>
+                    </select>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="form-group col-xs-6">
+
+                        <label for="WarcraftMusics">Musics</label>
+
+                        <select id="WarcraftMusics" class="form-control"
+                                data-ng-disabled="loading || !selectedrace || !selectedrace.musics || !selectedrace.musics.length" data-ng-class="{'disabled' : loading || !selectedrace || !selectedrace.musics || !selectedrace.musics.length }"
+                                data-ng-options="music.name for music in selectedrace.musics"
+                                data-ng-model="selectedmusic">
+                            <option value="">-- NC --</option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group col-xs-6">
+
+                        <label for="WarcraftWarnings">Warning</label>
+
+                        <select id="WarcraftWarnings" class="form-control"
+                                data-ng-disabled="loading || !selectedrace || !selectedrace.warnings || !selectedrace.warnings.length" data-ng-class="{'disabled' : loading || !selectedrace || !selectedrace.warnings || !selectedrace.warnings.length }"
+                                data-ng-options="warning.name for warning in selectedrace.warnings"
+                                data-ng-model="selectedwarning">
+                            <option value="">-- NC --</option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group col-xs-6">
+
+                        <div class="form-inline">
+
+                            <div class="form-group">
+
+                                <input  type="button" class="btn btn-primary" value="Preview"
+                                        data-ng-disabled="loading || !selectedmusic" data-ng-class="{'disabled' : loading || !selectedmusic }"
+                                        data-ng-click="previewMusic()" />
+
+                            </div>
+
+                            <div class="form-group">
+                                <select class="form-control"
+                                        data-ng-disabled="loading || !selectedmusic" data-ng-class="{'disabled' : loading || !selectedmusic }"
+                                        data-ng-options="child.name for child in children"
+                                        data-ng-model="selectedchild">
+                                    <option value="">-- NC --</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <input  type="button" class="btn btn-primary" value="Play"
+                                        data-ng-disabled="loading || !selectedmusic || !selectedchild" data-ng-class="{'disabled' : loading || !selectedmusic || !selectedchild }"
+                                        data-ng-click="playMusic()" />
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-group col-xs-6">
+
+                        <div class="form-inline">
+
+                            <div class="form-group">
+                                <input  type="button" class="btn btn-primary" value="Preview"
+                                        data-ng-disabled="loading || !selectedwarning" data-ng-class="{'disabled' : loading || !selectedwarning }"
+                                        data-ng-click="previewWarning()" />
+                            </div>
+
+                            <div class="form-group">
+                                <select class="form-control"
+                                        data-ng-disabled="loading || !selectedwarning" data-ng-class="{'disabled' : loading || !selectedwarning }"
+                                        data-ng-options="child.name for child in children"
+                                        data-ng-model="selectedchild">
+                                    <option value="">-- NC --</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <input  type="button" class="btn btn-primary" value="Play"
+                                        data-ng-disabled="loading || !selectedwarning || !selectedchild" data-ng-class="{'disabled' : loading || !selectedwarning || !selectedchild }"
+                                        data-ng-click="playWarning()" />
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="form-group col-xs-6">
+
+                        <label for="WarcraftCharacters">Characters</label>
+
+                        <select id="WarcraftCharacters" class="form-control"
+                                data-ng-disabled="loading || !selectedrace || !selectedrace.characters || !selectedrace.characters.length" data-ng-class="{'disabled' : loading || !selectedrace || !selectedrace.characters || !selectedrace.characters.length }"
+                                data-ng-options="character.name for character in selectedrace.characters"
+                                data-ng-model="selectedcharacter">
+                            <option value="">-- NC --</option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group col-xs-6">
+
+                        <label for="WarcraftActions">Actions</label>
+
+                        <select id="WarcraftActions" class="form-control"
+                                data-ng-disabled="loading || !selectedcharacter || !selectedcharacter.actions || !selectedcharacter.actions.length" data-ng-class="{'disabled' : loading || !selectedcharacter || !selectedcharacter.actions || !selectedcharacter.actions.length }"
+                                data-ng-options="action.name for action in selectedcharacter.actions"
+                                data-ng-model="selectedaction">
+                            <option value="">-- NC --</option>
+                        </select>
+
+                    </div>
+
+                    <div class="col-xs-12">
+
+                        <div class="form-inline">
+
+                            <div class="form-group">
+
+                                <input  type="button" class="btn btn-primary" value="Preview"
+                                        data-ng-disabled="loading || !selectedaction" data-ng-class="{'disabled' : loading || !selectedaction }"
+                                        data-ng-click="previewAction()" />
+
+                            </div>
+
+                            <div class="form-group">
+                                <select class="form-control"
+                                        data-ng-disabled="loading || !selectedaction" data-ng-class="{'disabled' : loading || !selectedaction }"
+                                        data-ng-options="child.name for child in children"
+                                        data-ng-model="selectedchild">
+                                    <option value="">-- NC --</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <input  type="button" class="btn btn-primary" value="Play"
+                                        data-ng-disabled="loading || !selectedaction || !selectedchild" data-ng-class="{'disabled' : loading || !selectedaction || !selectedchild }"
+                                        data-ng-click="playAction()" />
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

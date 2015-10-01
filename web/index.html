@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+		<!-- INFOS -->
+
+			<meta charset="utf-8" />
+			<title>MIA</title>
+
+			<link rel="shortcut icon" href="/pictures/favicon.png" />
+
+			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+			<meta name="HandheldFriendly" content="True" />
+			<meta name="MobileOptimized" content="320" />
+			<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+
+			<meta name="google" content="notranslate" />
+			
+		<!-- CSS -->
+
+			<link rel="stylesheet" type="text/css" href="/libs/bootstrap.css">
+			
+	</head>
+
+	<body data-ng-app="MIAApp" class="container-fluid">
+
+		<!-- menu -->
+
+			<div class="row">
+
+				<nav class="navbar navbar-default">
+
+					<div class="navbar-header">
+						<div class="navbar-brand">MIA</div>
+					</div>
+
+					<div class="collapse navbar-collapse bs-example-js-navbar-collapse">
+
+						<ul class="nav navbar-nav only-logged hidden">
+							<li><a id="menuYoutube" href="#">Youtube</a></li>
+							<li><a id="menuWarcraft" href="#">Warcraft</a></li>
+						</ul>
+
+						<div class="navbar-form navbar-right">
+							<span class="label label-danger only-disconnected">diconnected</span>
+							<span class="label label-warning only-connected hidden">connected</span>
+							<span class="label label-success only-logged hidden">logged</span>
+						</div>
+
+					</div>
+
+				</nav>
+
+			</div>
+
+		<!-- content -->
+
+			<div class="row">
+
+				<div class="col-xs-12 only-disconnected">
+
+					<div class="panel panel-danger">
+						<div class="panel-heading">MIA déconnectée. Veuillez attendre la reconnexion.</div>
+					</div>
+
+				</div>
+
+				<div class="col-xs-12 only-connected hidden">
+
+					<form id="login_form" action="#" method="POST" class="panel panel-default">
+
+						<div class="panel-heading">Login</div>
+
+						<div class="panel-body">
+
+							<div class="form-group">
+								<label for="login_email">Email</label>
+								<input id="login_email" type="email" placeholder="Login" class="form-control">
+							</div>
+
+							<div class="form-group">
+								<label for="login_password">Password</label>
+								<input id="login_password" type="password" placeholder="Password" class="form-control">
+							</div>
+
+							<button type="submit" class="btn btn-default">Submit</button>
+
+						</div>
+
+					</form>
+
+				</div>
+
+				<div data-ng-controller="ControllerChildren" class="col-xs-12 only-logged hidden">
+
+					<div class="row">
+						
+						<div data-ng-repeat="child in children" class="col-xs-12 col-md-6 col-lg-3">
+
+							<div class="panel" data-ng-class="{ 'panel-default' : child.connected, 'panel-danger' : !child.connected }">
+								
+								<div class="panel-heading">{{child.name}}</div>
+
+								<table class="table table-bordered">
+									<tbody>
+										<tr>
+											<td>token</td>
+											<td>{{child.token}}</td>
+										</tr>
+										<tr>
+											<td>temperature</td>
+											<td>{{child.temperature}}°C</td>
+										</tr>
+									</tbody>
+								</table>
+
+							</div>
+						
+						</div>
+
+					</div>
+
+				</div>
+
+				{{pages}}
+
+			</div>
+			
+		<!-- JS -->
+
+			<script type="text/javascript" src="/libs/jquery.js"></script>
+			<script type="text/javascript" src="/libs/bootstrap.js"></script>
+			<script type="text/javascript" src="/libs/socketio.js"></script>
+			<script type="text/javascript" src="/libs/angular.js"></script>
+
+			<script type="text/javascript">
+				var socket = io.connect();
+				var app = angular.module('MIAApp', []);
+			</script>
+			
+			<script src="/js/children.js"></script>
+			<script src="/js/plugins.js"></script>
+			
+	</body>
+	
+</html>
