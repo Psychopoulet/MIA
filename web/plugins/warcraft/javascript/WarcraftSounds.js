@@ -34,27 +34,27 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 
                 $scope.playAction = function() {
 
-                    socket.emit('child.warcraftsounds.play', {
-                        token : $scope.selectedchild.token,
-                        url : $scope.selectedaction.url
+                    socket.emit('child.warcraftsounds.action.play', {
+                        child : $scope.selectedchild,
+                        action : $scope.selectedaction
                     });
 
                 };
 
                 $scope.playMusic = function() {
 
-                    socket.emit('child.warcraftsounds.play', {
-                        token : $scope.selectedchild.token,
-                        url : $scope.selectedmusic.url
+                    socket.emit('child.warcraftsounds.music.play', {
+                        child : $scope.selectedchild,
+                        music : $scope.selectedmusic
                     });
 
                 };
 
                 $scope.playWarning = function() {
 
-                    socket.emit('child.warcraftsounds.play', {
-                        token : $scope.selectedchild.token,
-                        url : $scope.selectedwarning.url
+                    socket.emit('child.warcraftsounds.warning.play', {
+                        child : $scope.selectedchild,
+                        warning : $scope.selectedwarning
                     });
 
                 };
