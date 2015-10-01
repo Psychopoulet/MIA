@@ -110,11 +110,6 @@ app.controller('ControllerYoutubeList', ['$scope', '$popup', 'ModelChildren', fu
                     $popup.preview($scope.selectedvideo.url, $scope.selectedvideo.name);
                 };
 
-                $scope.closePreview = function () {
-                    jQuery('#modalYoutubePreviewIframe').empty();
-                    jQuery('#modalYoutubePreview').modal('hide');
-                };
-
             // play
 
                 $scope.play = function () {

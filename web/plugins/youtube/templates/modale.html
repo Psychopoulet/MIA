@@ -11,7 +11,7 @@
 
 			<div class="modal-body">
 
-                <form class="form-inline">
+                <form class="form-inline form-group">
 
                     <div class="form-group">
                     	<input type="text" data-ng-model="selectedvideo.name" class="form-control" />
@@ -21,11 +21,11 @@
                     	<input type="text" data-ng-model="selectedvideo.url" class="form-control" />
                     </div>
 
-                    <button type="button" class="btn btn-primary" data-ng-click="add()">
+                    <button type="button" class="btn btn-primary" data-ng-disabled="loading" data-ng-class="{'disabled' : loading }" data-ng-click="add()">
                         Add
                     </button>
 
-                    <button type="button" class="btn btn-primary" data-ng-disabled="loading || !videos.length || !selectedvideo" data-ng-class="{'disabled' : loading || !videos.length || !selectedvideo }" data-ng-click="edit()">
+                    <button type="button" class="btn btn-primary" data-ng-disabled="loading || !selectedvideo" data-ng-class="{'disabled' : loading || !selectedvideo }" data-ng-click="edit()">
                         Edit
                     </button>
 
@@ -63,14 +63,14 @@
 
 		                	<div class="form-group">
                     			<input 	type="button" class="btn btn-primary" value="Preview"
-		                        		data-ng-disabled="loading || !videos.length || !selectedvideo" data-ng-class="{'disabled' : loading || !videos.length || !selectedvideo }"
+		                        		data-ng-disabled="loading || !selectedvideo" data-ng-class="{'disabled' : loading || !selectedvideo }"
 		                        		data-ng-click="preview()" />
 		                    </div>
 
 		                	<div class="form-group">
 		                        <select class="form-control"
-		                        		data-ng-disabled="loading || !videos.length || !children.length || !selectedvideo" data-ng-class="{'disabled' : loading || !videos.length || !children.length || !selectedvideo }"
-		                        		data-ng-options="child.name for child in children track by child.id"
+		                        		data-ng-disabled="loading || !selectedvideo" data-ng-class="{'disabled' : loading || !selectedvideo }"
+		                        		data-ng-options="child.name for child in children"
 		                        		data-ng-model="selectedchild">
 		                        	<option value="">-- NC --</option>
 		                        </select>
@@ -78,7 +78,7 @@
 
 		                	<div class="form-group">
                     			<input 	type="button" class="btn btn-primary" value="Play"
-		                        		data-ng-disabled="loading || !videos.length || !children.length || !selectedvideo || !selectedchild" data-ng-class="{'disabled' : loading || !videos.length || !children.length || !selectedvideo || !selectedchild }"
+		                        		data-ng-disabled="loading || !selectedvideo || !selectedchild" data-ng-class="{'disabled' : loading || !selectedvideo || !selectedchild }"
 		                        		data-ng-click="play()" />
 		                    </div>
 
@@ -88,7 +88,7 @@
 
                     <div class="col-xs-6">
 	        			<input 	type="button" class="btn btn-primary pull-right" value="Delete"
-	                    		data-ng-disabled="loading || !videos.length || !children.length || !selectedvideo" data-ng-class="{'disabled' : loading || !videos.length || !children.length || !selectedvideo }"
+	                    		data-ng-disabled="loading || !selectedvideo" data-ng-class="{'disabled' : loading || !selectedvideo }"
 	                    		data-ng-click="delete()" />
                     </div>
 
@@ -99,32 +99,6 @@
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 	  		</div>
-
-		</div>
-
-	</div>
-
-	<div id="modalYoutubePreview" class="modal fade only-logged hidden">
-
-		<div class="modal-dialog modal-lg">
-
-			<div class="modal-content">
-
-				<div class="modal-header">
-					<h4 class="modal-title">Youtube (preview {{video.name}})</h4>
-				</div>
-
-				<div class="modal-body">
-
-					<div id="modalYoutubePreviewIframe" class="embed-responsive embed-responsive-16by9"></div>
-					
-		  		</div>
-
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-ng-click="closePreview()">Close</button>
-		  		</div>
-
-			</div>
 
 		</div>
 

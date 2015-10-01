@@ -16,26 +16,48 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 
         // public
 
-            $scope.previewMusic = function() {
-                $popup.preview($scope.selectedmusic.url);
-            };
+            // previews
 
-            $scope.previewWarning = function() {
-                $popup.preview($scope.selectedwarning.url);
-            };
+                $scope.previewAction = function() {
+                    $popup.preview($scope.selectedaction.url);
+                };
 
-            $scope.previewAction = function() {
-                $popup.preview($scope.selectedaction.url);
-            };
+                $scope.previewMusic = function() {
+                    $popup.preview($scope.selectedmusic.url);
+                };
 
-            $scope.playAction = function() {
+                $scope.previewWarning = function() {
+                    $popup.preview($scope.selectedwarning.url);
+                };
 
-                socket.emit('child.warcraftsounds.play', {
-                    token : $scope.selectedchild.token,
-                    url : $scope.selectedaction.url
-                });
+            // plays
 
-            };
+                $scope.playAction = function() {
+
+                    socket.emit('child.warcraftsounds.play', {
+                        token : $scope.selectedchild.token,
+                        url : $scope.selectedaction.url
+                    });
+
+                };
+
+                $scope.playMusic = function() {
+
+                    socket.emit('child.warcraftsounds.play', {
+                        token : $scope.selectedchild.token,
+                        url : $scope.selectedmusic.url
+                    });
+
+                };
+
+                $scope.playWarning = function() {
+
+                    socket.emit('child.warcraftsounds.play', {
+                        token : $scope.selectedchild.token,
+                        url : $scope.selectedwarning.url
+                    });
+
+                };
 
     // constructor
 
