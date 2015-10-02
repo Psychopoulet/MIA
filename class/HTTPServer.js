@@ -379,6 +379,17 @@
 														});
 
 												break;
+												case 'angular-modules.js':
+
+													_readAllFiles(CST_DEP_Path.join(m_sDirWeb, 'libs', 'angularjs', 'modules'))
+														.then(function (data) {
+															_sendJSResponse(p_clResponse, 200, data);
+														})
+														.catch(function (error) {
+															_500(p_clResponse, error);
+														});
+
+												break;
 
 												default:
 													_404(p_clResponse);
