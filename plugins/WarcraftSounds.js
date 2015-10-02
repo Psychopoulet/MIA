@@ -79,8 +79,7 @@
 										socket.emit('child.warcraftsounds.error', 'Missing \'action.url\' data');
 									}
 									else {
-										m_clLog.log('child.warcraftsounds.action.play');
-										m_clLog.log(p_stData.action.name);
+										m_clLog.log('child.warcraftsounds.action.play : ' + p_stData.action.name);
 										p_clChildSocket.emitTo(p_stData.child.token, 'child.warcraftsounds.action.play', p_stData.action);
 									}
 
@@ -100,8 +99,7 @@
 										socket.emit('child.warcraftsounds.error', 'Missing \'music.url\' data');
 									}
 									else {
-										m_clLog.log('child.warcraftsounds.music.play');
-										m_clLog.log(p_stData.music.name);
+										m_clLog.log('child.warcraftsounds.music.play : ' + p_stData.music.name);
 										p_clChildSocket.emitTo(p_stData.child.token, 'child.warcraftsounds.music.play', p_stData.music);
 									}
 
@@ -121,8 +119,7 @@
 										socket.emit('child.warcraftsounds.error', 'Missing \'warning.url\' data');
 									}
 									else {
-										m_clLog.log('child.warcraftsounds.warning.play');
-										m_clLog.log(p_stData.warning.name);
+										m_clLog.log('child.warcraftsounds.warning.play : ' + p_stData.warning.name);
 										p_clChildSocket.emitTo(p_stData.child.token, 'child.warcraftsounds.warning.play', p_stData.warning);
 									}
 
@@ -152,18 +149,15 @@
 								p_clHTTPSocket.emit('child.warcraftsounds.error', error);
 							})
 							.on('child.warcraftsounds.action.played', function (p_stData) {
-								m_clLog.success('child.warcraftsounds.action.played');
-								m_clLog.log(p_stData);
+								m_clLog.success('child.warcraftsounds.action.played : ' + p_stData.name);
 								p_clHTTPSocket.emit('child.warcraftsounds.action.played', p_stData);
 							})
 							.on('child.warcraftsounds.music.played', function (p_stData) {
-								m_clLog.success('child.warcraftsounds.music.played');
-								m_clLog.log(p_stData);
+								m_clLog.success('child.warcraftsounds.music.played : ' + p_stData.name);
 								p_clHTTPSocket.emit('child.warcraftsounds.music.played', p_stData);
 							})
 							.on('child.warcraftsounds.warning.played', function (p_stData) {
-								m_clLog.success('child.warcraftsounds.warning.played');
-								m_clLog.log(p_stData);
+								m_clLog.success('child.warcraftsounds.warning.played : ' + p_stData.name);
 								p_clHTTPSocket.emit('child.warcraftsounds.warning.played', p_stData);
 							})
 
