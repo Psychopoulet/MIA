@@ -106,12 +106,14 @@ app.service('ModelChildren', function() {
 
 });
 
-app.controller('ControllerChildren', ['$scope', 'ModelChildren', function($scope, ModelChildren) {
+app.controller('ControllerChildren', ['$scope', '$popup', 'ModelChildren', function($scope, $popup, ModelChildren) {
 
 	$scope.children = [];
 
 	socket
 		.on('disconnect', function () {
+
+			$popup.closeAll();
 
 			jQuery('.only-logged, .only-connected').addClass('hidden');
 			jQuery('.only-disconnected').removeClass('hidden');

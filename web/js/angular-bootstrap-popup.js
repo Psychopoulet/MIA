@@ -116,4 +116,8 @@ app.service('$popup', function() {
 
             };
 
+            this.closeAll = function () {
+                jQuery('.modal').modal('hide');
+            };
+
 });
