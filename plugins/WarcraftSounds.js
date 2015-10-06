@@ -3,9 +3,8 @@
 	
 	var
 		CST_DEP_Path = require('path'),
-		CST_DEP_FileStream = require('fs'),
-		CST_DEP_Log = require('logs'),
-		CST_DEP_W3VoicesManager = require('W3VoicesManager');
+		CST_DEP_FileSystem = require('fs'),
+		CST_DEP_Log = require('logs');
 
 // module
 	
@@ -14,14 +13,26 @@
 		// attributes
 			
 			var
+				m_sLocalFile = CST_DEP_Path.join(__dirname, '..', 'data', 'WarcraftSounds.json'),
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'plugins', 'warcraftsounds')),
-				m_clW3VoicesManager = new CST_DEP_W3VoicesManager(),f
 				m_tabData = [];
 
 		// methods
 
 			// private
 				
+				function _readCache() {
+					
+					if (CST_DEP_FileSystem.existsSync(m_sLocalFile)) {
+						m_tabData = JSON.parse(CST_DEP_FileSystem.readFileSync(m_sLocalFile, 'utf8'));
+					}
+
+				}
+
+				function _writeCache() {
+					CST_DEP_FileSystem.writeFileSync(m_sLocalFile, JSON.stringify(m_tabData), 'utf8');
+				}
+
 				function _check(p_clSocket, p_stData) {
 
 					var bResult = true;
@@ -167,9 +178,12 @@
 
 			// data
 
+				_readCache();
+
 				p_clSikyAPI.query('warcraftsounds', '/races/complete', 'GET')
 					.then(function (p_tabRaces) {
 						m_tabData = p_tabRaces;
+						_writeCache();
 					})
 					.catch(function (err){
 

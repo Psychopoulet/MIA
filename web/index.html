@@ -132,10 +132,11 @@
 			<script type="text/javascript" src="/libs/bootstrap.js"></script>
 			<script type="text/javascript" src="/libs/socketio.js"></script>
 			<script type="text/javascript" src="/libs/angular.js"></script>
+			<script type="text/javascript" src="/libs/angular-modules.js"></script>
 
 			<script type="text/javascript">
 				var socket = io.connect();
-				var app = angular.module('MIAApp', []);
+				var app = angular.module('MIAApp', ['ngBootstrapPopup']);
 			</script>
 			
 			<script src="/js/children.js"></script>

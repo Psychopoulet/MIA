@@ -1,0 +1,17 @@
+{
+
+  "name": "Youtube Playlists",
+  "version": "0.0.1",
+
+  "author": [
+    "VIDAL Sébastien"
+  ],
+
+  "javascripts": [
+    "controller.js"
+  ],
+  "templates": [
+    "template.html"
+  ]
+
+}
