@@ -18,7 +18,7 @@
 			var
 				m_clServer,
 				m_sDirWeb = CST_DEP_Path.join(__dirname, '..', 'web'),
-				m_sDirWebPlugins = CST_DEP_Path.join(m_sDirWeb, 'plugins'),
+				m_tabWebPlugins = [],
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'httpserver'));
 				
 		// methodes
@@ -65,15 +65,92 @@
 
 				// files
 
-					function _extractDataTemplates(p_sSubDirectory) {
+					function _extractPluginsTemplates() {
+
+						var deferred = CST_DEP_Q.defer(), sContent = '';
+
+							try {
+
+								m_tabWebPlugins.forEach(function (p_stPlugin) {
+
+									if (p_stPlugin.templates) {
+
+										p_stPlugin.templates.forEach(function (p_sFile) {
+
+											if (CST_DEP_FileSystem.existsSync(p_sFile)) {
+												sContent += CST_DEP_FileSystem.readFileSync(p_sFile, 'utf8');
+											}
+
+										});
+
+									}
+
+								});
+
+								deferred.resolve(sContent);
+
+							}
+							catch (e) {
+								if (e.message) {
+									deferred.reject(e.message);
+								}
+								else {
+									deferred.reject(e);
+								}
+							}
+
+						return deferred.promise;
+						
+					}
+
+
+					function _extractPluginsJavascripts() {
+
+						var deferred = CST_DEP_Q.defer(), sContent = '';
+
+							try {
+
+								m_tabWebPlugins.forEach(function (p_stPlugin) {
+
+									if (p_stPlugin.javascripts) {
+
+										p_stPlugin.javascripts.forEach(function (p_sFile) {
+
+											if (CST_DEP_FileSystem.existsSync(p_sFile)) {
+												sContent += CST_DEP_FileSystem.readFileSync(p_sFile, 'utf8');
+											}
+
+										});
+
+									}
+
+								});
+
+								deferred.resolve(sContent);
+
+							}
+							catch (e) {
+								if (e.message) {
+									deferred.reject(e.message);
+								}
+								else {
+									deferred.reject(e);
+								}
+							}
+
+						return deferred.promise;
+						
+					}
+
+					function _extractDataPlugins() {
+
+						var sDirWebPlugins = CST_DEP_Path.join(m_sDirWeb, 'plugins');
 
 						var deferred = CST_DEP_Q.defer();
 
 							try {
 
-								CST_DEP_FileSystem.readdir(m_sDirWebPlugins, function (err, directories) {
-
-									var tabTemplates = [], sContent = '';
+								CST_DEP_FileSystem.readdir(sDirWebPlugins, function (err, directories) {
 
 									if (err) {
 										deferred.reject(err);
@@ -82,23 +159,41 @@
 
 										directories.forEach(function (p_sDirectory) {
 
-											var sTemplatesDirectory = CST_DEP_Path.join(m_sDirWebPlugins, p_sDirectory, p_sSubDirectory);
+											var
+												sDirectory = CST_DEP_Path.join(sDirWebPlugins, p_sDirectory),
+												sConf = CST_DEP_Path.join(sDirectory, 'plugin.json'),
+												stPlugin;
 
-											if (CST_DEP_FileSystem.existsSync(sTemplatesDirectory)) {
+											if (!CST_DEP_FileSystem.existsSync(sConf)) {
+												deferred.reject("Missing 'plugin.json' for '" + sDirectory + "' plugin.");
+											}
+											else {
 
-												CST_DEP_FileSystem.readdirSync(sTemplatesDirectory).forEach(function (p_sFile) {
-													tabTemplates.push(CST_DEP_Path.join(sTemplatesDirectory, p_sFile));
-												});
+												stPlugin = JSON.parse(CST_DEP_FileSystem.readFileSync(sConf, 'utf8'));
+
+												if (stPlugin.javascripts) {
+
+													stPlugin.javascripts.forEach(function (value, key) {
+														stPlugin.javascripts[key] = CST_DEP_Path.join(sDirectory, value);
+													});
+
+												}
+
+												if (stPlugin.templates) {
+
+													stPlugin.templates.forEach(function (value, key) {
+														stPlugin.templates[key] = CST_DEP_Path.join(sDirectory, value);
+													});
+
+												}
+
+												m_tabWebPlugins.push(stPlugin);
 
 											}
 
 										});
 
-										tabTemplates.forEach(function (p_sFile) {
-											sContent += CST_DEP_FileSystem.readFileSync(p_sFile, 'utf8');
-										});
-
-										deferred.resolve(sContent);
+										deferred.resolve();
 
 									}
 
@@ -229,7 +324,7 @@
 									_readFile('', 'index.html')
 										.then(function (index) {
 
-											_extractDataTemplates('templates')
+											_extractPluginsTemplates()
 												.then(function(sHTML) {
 													_sendHTMLResponse(p_clResponse, 200, index.replace('{{pages}}', sHTML));
 												})
@@ -256,7 +351,7 @@
 
 													case 'plugins.js' :
 
-														_extractDataTemplates('javascript')
+														_extractPluginsJavascripts()
 															.then(function(sJavascript) {
 																_sendJSResponse(p_clResponse, 200, sJavascript);
 															})
@@ -432,20 +527,26 @@
 
 							// lancement
 
-								m_clServer = CST_DEP_HTTP.createServer();
+								_extractDataPlugins()
+									.then(function () {
+
+										m_clServer = CST_DEP_HTTP.createServer();
+										
+										m_clServer.listen(p_nPort, function () {
+											m_clLog.success('-- [HTTP server] started');
+										});
+									
+									// requete
+
+										m_clServer.on('request', function (p_clRequest, p_clResponse) {
+											_router(p_clResponse, CST_DEP_Url.parse(p_clRequest.url).pathname);
+										});
 								
-								m_clServer.listen(p_nPort, function () {
-									m_clLog.success('-- [HTTP server] started');
-								});
-							
-							// requete
+									deferred.resolve();
 
-								m_clServer.on('request', function (p_clRequest, p_clResponse) {
-									_router(p_clResponse, CST_DEP_Url.parse(p_clRequest.url).pathname);
-								});
-						
-							deferred.resolve();
-
+									})
+									.catch(deferred.reject);
+									
 						}
 						catch (e) {
 							if (e.message) {
@@ -481,6 +582,6 @@
 					return deferred.promise;
 
 				};
-				
+
 	};
 	
