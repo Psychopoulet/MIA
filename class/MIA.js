@@ -48,19 +48,19 @@
 
 								m_clHTTPSocket
 									.onDisconnect(function(socket) {
-										socket.removeAllListeners('child.getconnected');
-										socket.removeAllListeners('child.login');
+										socket.removeAllListeners('web.getconnected');
+										socket.removeAllListeners('web.login');
 									})
 									.onConnection(function(socket) {
 
 										socket
-											.on('child.getconnected', function () {
-												m_clHTTPSocket.emit('child.getconnected', m_clChildSocket.getConnectedChilds());
+											.on('web.getconnected', function () {
+												m_clHTTPSocket.emit('web.getconnected', m_clChildSocket.getConnectedChilds());
 											})
-											.on('child.login', function (p_stData) {
+											.on('web.login', function (p_stData) {
 
 												if (m_stSIKYUser && m_stSIKYUser.email == p_stData.email && m_stSIKYUser.password == p_stData.password) {
-													socket.emit('child.logged');
+													socket.emit('web.logged');
 												}
 												else {
 
@@ -74,7 +74,7 @@
 															};
 
 															m_clLog.success('-- [socket server] logged to SIKY');
-															socket.emit('child.logged');
+															socket.emit('web.logged');
 															
 														})
 														.catch(function (e) {
@@ -84,7 +84,7 @@
 															}
 
 															m_clLog.err(e);
-															socket.emit('child.login.error', e);
+															socket.emit('web.login.error', e);
 
 														});
 														
@@ -96,10 +96,10 @@
 
 								m_clChildSocket
 									.onDisconnect(function(socket) {
-										m_clHTTPSocket.emit('child.disconnected', socket.MIA);
+										m_clHTTPSocket.emit('web.disconnected', socket.MIA);
 									})
 									.onConnection(function(socket) {
-										m_clHTTPSocket.emit('child.connection', socket.MIA);
+										m_clHTTPSocket.emit('web.connection', socket.MIA);
 									});
 
 							// run

@@ -7,8 +7,8 @@ jQuery(document).ready(function() {
 	socket
 		.on('disconnect', function () {
 
-			socket.removeAllListeners('child.logged');
-			socket.removeAllListeners('child.login.error');
+			socket.removeAllListeners('web.logged');
+			socket.removeAllListeners('web.login.error');
 
 			socket.logged = false;
 
@@ -17,13 +17,13 @@ jQuery(document).ready(function() {
 		.on('connect', function() {
 
 			socket
-				.on('child.logged', function () {
+				.on('web.logged', function () {
 
 					socket.logged = true;
 					login_form.find('input, button, select, checkbox').removeAttr('disabled', 'disabled').removeClass('disabled');
 
 				})
-				.on('child.login.error', function (m_sError) {
+				.on('web.login.error', function (m_sError) {
 					login_form.find('input, button, select, checkbox').removeAttr('disabled', 'disabled').removeClass('disabled');
 					socket.logged = false;
 					alert(m_sError);
@@ -33,7 +33,7 @@ jQuery(document).ready(function() {
 
 	login_form.submit(function (e) {
 		login_form.find('input, button, select, checkbox').attr('disabled', 'disabled').addClass('disabled');
-		socket.emit('child.login', { email : jQuery('#login_email').val(), password : jQuery('#login_password').val() });
+		socket.emit('web.login', { email : jQuery('#login_email').val(), password : jQuery('#login_password').val() });
 		return false;
 
 	});

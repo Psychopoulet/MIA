@@ -39,15 +39,15 @@
 
 						if (!p_stData) {
 							m_clLog.err('Missing data');
-							p_clSocket.emit('child.warcraftsounds.error', 'Missing data');
+							p_clSocket.emit('web.warcraftsounds.error', 'Missing data');
 						}
 						else if (!p_stData.child) {
 							m_clLog.err('Missing \'child\' data');
-							p_clSocket.emit('child.warcraftsounds.error', 'Missing \'child\' data');
+							p_clSocket.emit('web.warcraftsounds.error', 'Missing \'child\' data');
 						}
 						else if (!p_stData.child.token) {
 							m_clLog.err('Missing \'child.token\' data');
-							p_clSocket.emit('child.warcraftsounds.error', 'Missing \'child.token\' data');
+							p_clSocket.emit('web.warcraftsounds.error', 'Missing \'child.token\' data');
 						}
 
 					return bResult;
@@ -61,76 +61,76 @@
 				p_clHTTPSocket
 					.onDisconnect(function(socket) {
 
-						socket.removeAllListeners('child.warcraftsounds.getall');
+						socket.removeAllListeners('web.warcraftsounds.getall');
 
-						socket.removeAllListeners('child.warcraftsounds.action.play');
-						socket.removeAllListeners('child.warcraftsounds.music.play');
-						socket.removeAllListeners('child.warcraftsounds.warning.play');
+						socket.removeAllListeners('web.warcraftsounds.action.play');
+						socket.removeAllListeners('web.warcraftsounds.music.play');
+						socket.removeAllListeners('web.warcraftsounds.warning.play');
 
 					})
 					.onConnection(function(socket) {
 
 						socket
 
-							.on('child.warcraftsounds.getall', function () {
-								m_clLog.log('child.warcraftsounds.getall');
-								socket.emit('child.warcraftsounds.getall', m_tabData);
+							.on('web.warcraftsounds.getall', function () {
+								m_clLog.log('web.warcraftsounds.getall');
+								socket.emit('web.warcraftsounds.getall', m_tabData);
 							})
 
-							.on('child.warcraftsounds.action.play', function (p_stData) {
+							.on('web.warcraftsounds.action.play', function (p_stData) {
 
 								if (_check(socket, p_stData)) {
 
 									if (!p_stData.action) {
 										m_clLog.err('Missing \'action\' data');
-										socket.emit('child.warcraftsounds.error', 'Missing \'action\' data');
+										socket.emit('web.warcraftsounds.error', 'Missing \'action\' data');
 									}
 									else if (!p_stData.action.url) {
 										m_clLog.err('Missing \'action.url\' data');
-										socket.emit('child.warcraftsounds.error', 'Missing \'action.url\' data');
+										socket.emit('web.warcraftsounds.error', 'Missing \'action.url\' data');
 									}
 									else {
-										m_clLog.log('child.warcraftsounds.action.play : ' + p_stData.action.name);
+										m_clLog.log('web.warcraftsounds.action.play : ' + p_stData.action.name);
 										p_clChildSocket.emitTo(p_stData.child.token, 'child.warcraftsounds.action.play', p_stData.action);
 									}
 
 								}
 
 							})
-							.on('child.warcraftsounds.music.play', function (p_stData) {
+							.on('web.warcraftsounds.music.play', function (p_stData) {
 
 								if (_check(socket, p_stData)) {
 
 									if (!p_stData.music) {
 										m_clLog.err('Missing \'music\' data');
-										socket.emit('child.warcraftsounds.error', 'Missing \'music\' data');
+										socket.emit('web.warcraftsounds.error', 'Missing \'music\' data');
 									}
 									else if (!p_stData.music.url) {
 										m_clLog.err('Missing \'music.url\' data');
-										socket.emit('child.warcraftsounds.error', 'Missing \'music.url\' data');
+										socket.emit('web.warcraftsounds.error', 'Missing \'music.url\' data');
 									}
 									else {
-										m_clLog.log('child.warcraftsounds.music.play : ' + p_stData.music.name);
+										m_clLog.log('web.warcraftsounds.music.play : ' + p_stData.music.name);
 										p_clChildSocket.emitTo(p_stData.child.token, 'child.warcraftsounds.music.play', p_stData.music);
 									}
 
 								}
 
 							})
-							.on('child.warcraftsounds.warning.play', function (p_stData) {
+							.on('web.warcraftsounds.warning.play', function (p_stData) {
 
 								if (_check(socket, p_stData)) {
 
 									if (!p_stData.warning) {
 										m_clLog.err('Missing \'warning\' data');
-										socket.emit('child.warcraftsounds.error', 'Missing \'warning\' data');
+										socket.emit('web.warcraftsounds.error', 'Missing \'warning\' data');
 									}
 									else if (!p_stData.warning.url) {
 										m_clLog.err('Missing \'warning.url\' data');
-										socket.emit('child.warcraftsounds.error', 'Missing \'warning.url\' data');
+										socket.emit('web.warcraftsounds.error', 'Missing \'warning.url\' data');
 									}
 									else {
-										m_clLog.log('child.warcraftsounds.warning.play : ' + p_stData.warning.name);
+										m_clLog.log('web.warcraftsounds.warning.play : ' + p_stData.warning.name);
 										p_clChildSocket.emitTo(p_stData.child.token, 'child.warcraftsounds.warning.play', p_stData.warning);
 									}
 
@@ -183,6 +183,7 @@
 				p_clSikyAPI.query('warcraftsounds', '/races/complete', 'GET')
 					.then(function (p_tabRaces) {
 						m_tabData = p_tabRaces;
+						p_clHTTPSocket.emit('child.warcraftsounds.getall', m_tabData);
 						_writeCache();
 					})
 					.catch(function (err){

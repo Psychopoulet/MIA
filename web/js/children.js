@@ -40,19 +40,19 @@ app.service('ModelChildren', function() {
 		socket
 			.on('disconnect', function () {
 
-				socket.removeAllListeners('child.logged');
+				socket.removeAllListeners('web.logged');
 
-				socket.removeAllListeners('child.connection');
-				socket.removeAllListeners('child.getconnected');
-				socket.removeAllListeners('child.disconnected');
+				socket.removeAllListeners('web.connection');
+				socket.removeAllListeners('web.getconnected');
+				socket.removeAllListeners('web.disconnected');
 
 			})
 			.on('connect', function () {
 
-				socket.on('child.logged', function (socketData) {
+				socket.on('web.logged', function (socketData) {
 
 					socket
-						.on('child.getconnected', function(children) {
+						.on('web.getconnected', function(children) {
 
 							m_tabData = children;
 
@@ -63,7 +63,7 @@ app.service('ModelChildren', function() {
 							_execOnChange();
 
 						})
-						.on('child.connection', function(child) {
+						.on('web.connection', function(web) {
 
 							var bExists = false;
 
@@ -84,7 +84,7 @@ app.service('ModelChildren', function() {
 							_execOnChange();
 
 						})
-						.on('child.disconnected', function(child) {
+						.on('web.disconnected', function(child) {
 
 							angular.forEach(m_tabData, function(value) {
 
@@ -98,7 +98,7 @@ app.service('ModelChildren', function() {
 
 						});
 
-					socket.emit('child.getconnected');
+					socket.emit('web.getconnected');
 					
 				});
 
@@ -118,8 +118,8 @@ app.controller('ControllerChildren', ['$scope', '$popup', 'ModelChildren', funct
 			jQuery('.only-logged, .only-connected').addClass('hidden');
 			jQuery('.only-disconnected').removeClass('hidden');
 
-			socket.removeAllListeners('child.logged');
-			socket.removeAllListeners('child.temperature');
+			socket.removeAllListeners('web.logged');
+			socket.removeAllListeners('web.temperature');
 
 		})
 		.on('connect', function () {
@@ -127,12 +127,12 @@ app.controller('ControllerChildren', ['$scope', '$popup', 'ModelChildren', funct
 			jQuery('.only-disconnected, .only-logged').addClass('hidden');
 			jQuery('.only-connected').removeClass('hidden');
 
-			socket.on('child.logged', function (socketData) {
+			socket.on('web.logged', function (socketData) {
 
 				jQuery('.only-disconnected, .only-connected').addClass('hidden');
 				jQuery('.only-logged').removeClass('hidden');
 
-				socket.on('child.temperature', function (child) {
+				socket.on('web.temperature', function (child) {
 
 					angular.forEach($scope.children, function(value, key) {
 

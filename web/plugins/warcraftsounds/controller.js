@@ -34,7 +34,7 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 
                 $scope.playAction = function() {
 
-                    socket.emit('child.warcraftsounds.action.play', {
+                    socket.emit('web.warcraftsounds.action.play', {
                         child : $scope.selectedchild,
                         action : $scope.selectedaction
                     });
@@ -43,7 +43,7 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 
                 $scope.playMusic = function() {
 
-                    socket.emit('child.warcraftsounds.music.play', {
+                    socket.emit('web.warcraftsounds.music.play', {
                         child : $scope.selectedchild,
                         music : $scope.selectedmusic
                     });
@@ -52,7 +52,7 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 
                 $scope.playWarning = function() {
 
-                    socket.emit('child.warcraftsounds.warning.play', {
+                    socket.emit('web.warcraftsounds.warning.play', {
                         child : $scope.selectedchild,
                         warning : $scope.selectedwarning
                     });
@@ -74,21 +74,22 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 
                 socket
                     .on('disconnect', function () {
-                        socket.removeAllListeners('child.warcraftsounds.getall');
-                        socket.removeAllListeners('child.warcraftsounds.error');
+                        socket.removeAllListeners('web.warcraftsounds.getall');
+                        socket.removeAllListeners('web.warcraftsounds.error');
                     })
                     .on('connect', function () {
 
                         socket
-                            .on('child.logged', function () {
-                                socket.emit('child.warcraftsounds.getall');
+                            .on('web.logged', function () {
+                                socket.emit('web.warcraftsounds.getall');
                             })
-                            .on('child.warcraftsounds.getall', function (p_tabData) {
+                            .on('web.warcraftsounds.getall', function (p_tabData) {
+                                console.log(p_tabData);
                                 $scope.races = p_tabData;
                                 $scope.loading = false;
                                 $scope.$apply();
                             })
-                            .on('child.warcraftsounds.error', $popup.alert);
+                            .on('web.warcraftsounds.error', $popup.alert);
 
                     });
 

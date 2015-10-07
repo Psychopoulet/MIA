@@ -18,33 +18,33 @@
 
 			p_clHTTPSocket
 				.onDisconnect(function(socket) {
-					socket.removeAllListeners('child.youtube.play');
-					socket.removeAllListeners('child.youtube.getall');
+					socket.removeAllListeners('web.youtube.play');
+					socket.removeAllListeners('web.youtube.getall');
 				})
 				.onConnection(function(socket) {
 
 					socket
-						.on('child.youtube.play', function (data) {
+						.on('web.youtube.play', function (data) {
 
 							if (!data) {
 								m_clLog.err('Missing data');
-								socket.emit('child.youtube.error', 'Missing data');
+								socket.emit('web.youtube.error', 'Missing data');
 							}
 							else if (!data.token) {
 								m_clLog.err('Missing \'token\' data');
-								socket.emit('child.youtube.error', 'Missing \'token\' data');
+								socket.emit('web.youtube.error', 'Missing \'token\' data');
 							}
 							else if (!data.url) {
 								m_clLog.err('Missing \'url\' data');
-								socket.emit('child.youtube.error', 'Missing \'url\' data');
+								socket.emit('web.youtube.error', 'Missing \'url\' data');
 							}
 							else {
 								p_clChildSocket.emitTo(data.token, 'child.youtube.play', data.url);
 							}
 
 						})
-						.on('child.youtube.getall', function () {
-							socket.emit('child.youtube.getall', [{ id: 1, name: 'test', url: 'https://www.youtube.com/embed/ms_ZcfSvcJA' }]);
+						.on('web.youtube.getall', function () {
+							socket.emit('web.youtube.getall', [{ id: 1, name: 'test', url: 'https://www.youtube.com/embed/ms_ZcfSvcJA' }]);
 						});
 
 				});
@@ -70,7 +70,7 @@
 							p_clChildSocket.emit('child.youtube.played');
 						});
 						
-					p_clHTTPSocket.emit('child.connection', socket.MIA);
+					p_clHTTPSocket.emit('web.connection', socket.MIA);
 
 				});
 
