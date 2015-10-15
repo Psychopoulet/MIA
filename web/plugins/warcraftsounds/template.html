@@ -135,7 +135,7 @@
 
                         <select id="WarcraftActions" class="form-control"
                                 data-ng-disabled="loading || !selectedcharacter || !selectedcharacter.actions || !selectedcharacter.actions.length" data-ng-class="{'disabled' : loading || !selectedcharacter || !selectedcharacter.actions || !selectedcharacter.actions.length }"
-                                data-ng-options="action.name for action in selectedcharacter.actions"
+                                data-ng-options="action.name group by action.codetype for action in selectedcharacter.actions"
                                 data-ng-model="selectedaction">
                             <option value="">-- NC --</option>
                         </select>
