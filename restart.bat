@@ -1,1 +1,1 @@
-node %~dp0exe.js --restart
+cls && cd %~dp0 && node main.js --restart

@@ -4,7 +4,7 @@
 	var
 		CST_DEP_Path = require('path'),
 		CST_DEP_FileSystem = require('fs'),
-		CST_DEP_Log = require('logs');
+		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, '..', 'class', 'Logs.js'));
 
 // module
 	

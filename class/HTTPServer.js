@@ -7,7 +7,7 @@
 		CST_DEP_Url = require('url'),
 		CST_DEP_Q = require('q'),
 		CST_DEP_HTTP = require('http'),
-		CST_DEP_Log = require('logs');
+		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, 'Logs.js'));
 		
 // module
 	

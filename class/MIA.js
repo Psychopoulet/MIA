@@ -11,10 +11,10 @@
 		CST_DEP_HTTPSocket = require(CST_DEP_Path.join(__dirname, 'HTTPSocket.js')),
 		CST_DEP_ChildSocket = require(CST_DEP_Path.join(__dirname, 'ChildSocket.js')),
 
-		CST_DEP_Log = require('logs'),
+		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, 'Logs.js')),
 		CST_DEP_Conf = require(CST_DEP_Path.join(__dirname, 'Conf.js')),
 
-		CST_DEP_SikyAPI = require('SIKY-API');
+		CST_DEP_SikyAPI = require(CST_DEP_Path.join(__dirname, 'SIKY-API.js'));
 		
 // module
 	

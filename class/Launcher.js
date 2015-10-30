@@ -5,7 +5,7 @@
 		CST_DEP_Path = require('path'),
 		CST_DEP_FileSystem = require('fs'),
 		CST_DEP_Q = require('q'),
-		CST_DEP_Log = require('logs'),
+		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, 'Logs.js')),
 		CST_DEP_MIA = require(CST_DEP_Path.join(__dirname, 'MIA.js')),
 		CST_DEP_Conf = require(CST_DEP_Path.join(__dirname, 'Conf.js'));
 		
