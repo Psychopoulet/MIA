@@ -2,24 +2,25 @@
 // dépendances
 	
 	var
-		CST_DEP_Path = require('path'),
-		CST_DEP_FileSystem = require('fs'),
-		CST_DEP_Url = require('url'),
-		CST_DEP_Q = require('q'),
-		CST_DEP_HTTP = require('http'),
-		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, 'Logs.js'));
+		path = require('path'),
+		fs = require('fs'),
+		url = require('url'),
+		q = require('q'),
+		Logs = require(path.join(__dirname, 'Logs.js'));
 		
 // module
 	
 	module.exports = function () {
 	
+		"use strict";
+		
 		// attributes
 			
 			var
 				m_clServer,
-				m_sDirWeb = CST_DEP_Path.join(__dirname, '..', 'web'),
+				m_sDirWeb = path.join(__dirname, '..', 'web'),
 				m_tabWebPlugins = [],
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'httpserver'));
+				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'httpserver'));
 				
 		// methodes
 
@@ -67,7 +68,7 @@
 
 					function _extractPluginsTemplates() {
 
-						var deferred = CST_DEP_Q.defer(), sContent = '';
+						var deferred = q.defer(), sContent = '';
 
 							try {
 
@@ -77,8 +78,8 @@
 
 										p_stPlugin.templates.forEach(function (p_sFile) {
 
-											if (CST_DEP_FileSystem.existsSync(p_sFile)) {
-												sContent += CST_DEP_FileSystem.readFileSync(p_sFile, 'utf8');
+											if (fs.existsSync(p_sFile)) {
+												sContent += fs.readFileSync(p_sFile, 'utf8');
 											}
 
 										});
@@ -106,7 +107,7 @@
 
 					function _extractPluginsJavascripts() {
 
-						var deferred = CST_DEP_Q.defer(), sContent = '';
+						var deferred = q.defer(), sContent = '';
 
 							try {
 
@@ -116,8 +117,8 @@
 
 										p_stPlugin.javascripts.forEach(function (p_sFile) {
 
-											if (CST_DEP_FileSystem.existsSync(p_sFile)) {
-												sContent += CST_DEP_FileSystem.readFileSync(p_sFile, 'utf8');
+											if (fs.existsSync(p_sFile)) {
+												sContent += fs.readFileSync(p_sFile, 'utf8');
 											}
 
 										});
@@ -144,13 +145,13 @@
 
 					function _extractDataPlugins() {
 
-						var sDirWebPlugins = CST_DEP_Path.join(m_sDirWeb, 'plugins');
+						var sDirWebPlugins = path.join(m_sDirWeb, 'plugins');
 
-						var deferred = CST_DEP_Q.defer();
+						var deferred = q.defer();
 
 							try {
 
-								CST_DEP_FileSystem.readdir(sDirWebPlugins, function (err, directories) {
+								fs.readdir(sDirWebPlugins, function (err, directories) {
 
 									if (err) {
 										deferred.reject(err);
@@ -160,21 +161,21 @@
 										directories.forEach(function (p_sDirectory) {
 
 											var
-												sDirectory = CST_DEP_Path.join(sDirWebPlugins, p_sDirectory),
-												sConf = CST_DEP_Path.join(sDirectory, 'plugin.json'),
+												sDirectory = path.join(sDirWebPlugins, p_sDirectory),
+												sConf = path.join(sDirectory, 'plugin.json'),
 												stPlugin;
 
-											if (!CST_DEP_FileSystem.existsSync(sConf)) {
+											if (!fs.existsSync(sConf)) {
 												deferred.reject("Missing 'plugin.json' for '" + sDirectory + "' plugin.");
 											}
 											else {
 
-												stPlugin = JSON.parse(CST_DEP_FileSystem.readFileSync(sConf, 'utf8'));
+												stPlugin = JSON.parse(fs.readFileSync(sConf, 'utf8'));
 
 												if (stPlugin.javascripts) {
 
 													stPlugin.javascripts.forEach(function (value, key) {
-														stPlugin.javascripts[key] = CST_DEP_Path.join(sDirectory, value);
+														stPlugin.javascripts[key] = path.join(sDirectory, value);
 													});
 
 												}
@@ -182,7 +183,7 @@
 												if (stPlugin.templates) {
 
 													stPlugin.templates.forEach(function (value, key) {
-														stPlugin.templates[key] = CST_DEP_Path.join(sDirectory, value);
+														stPlugin.templates[key] = path.join(sDirectory, value);
 													});
 
 												}
@@ -215,18 +216,18 @@
 
 					function _readFile(p_sDirectory, p_sFileName) {
 
-						var deferred = CST_DEP_Q.defer(), sFileName = '';
+						var deferred = q.defer(), sFileName = '';
 
 							try {
 
-								sFileName = CST_DEP_Path.join(m_sDirWeb, p_sDirectory, p_sFileName);
+								sFileName = path.join(m_sDirWeb, p_sDirectory, p_sFileName);
 
-								if (!CST_DEP_FileSystem.existsSync(sFileName)) {
+								if (!fs.existsSync(sFileName)) {
 									m_clLog.err('-- [HTTP server] The ' + sFileName + ' file does not exist');
 								}
 								else {
 
-									CST_DEP_FileSystem.readFile(sFileName, 'utf8', function (err, data) {
+									fs.readFile(sFileName, 'utf8', function (err, data) {
 
 										if (err) {
 											deferred.reject(err);
@@ -254,12 +255,12 @@
 					}
 					
 					function _readAllFiles(p_sDirectory) {
-
-						var deferred = CST_DEP_Q.defer();
+q
+						var deferred = q.defer();
 
 							try {
 
-								CST_DEP_FileSystem.readdir(p_sDirectory, function (err, files) {
+								fs.readdir(p_sDirectory, function (err, files) {
 
 									var bResult = true, sResult = '';
 
@@ -270,10 +271,10 @@
 
 										files.forEach(function (p_sFile) {
 
-											p_sFile = CST_DEP_Path.join(p_sDirectory, p_sFile);
+											p_sFile = path.join(p_sDirectory, p_sFile);
 
-											if (CST_DEP_FileSystem.lstatSync(p_sFile).isFile()) {
-												sResult += CST_DEP_FileSystem.readFileSync(p_sFile, 'utf8');
+											if (fs.lstatSync(p_sFile).isFile()) {
+												sResult += fs.readFileSync(p_sFile, 'utf8');
 											}
 
 										});
@@ -363,7 +364,7 @@
 
 													case 'children.js' :
 
-														_readAllFiles(CST_DEP_Path.join(m_sDirWeb, 'js'))
+														_readAllFiles(path.join(m_sDirWeb, 'js'))
 															.then(function (data) {
 																_sendJSResponse(p_clResponse, 200, data);
 															})
@@ -418,7 +419,7 @@
 
 												case 'bootstrap.css':
 
-													_readAllFiles(CST_DEP_Path.join(m_sDirWeb, 'libs', 'bootstrap', 'css'))
+													_readAllFiles(path.join(m_sDirWeb, 'libs', 'bootstrap', 'css'))
 														.then(function (data) {
 															_sendCSSResponse(p_clResponse, 200, data);
 														})
@@ -432,7 +433,7 @@
 												
 												case 'jquery.js':
 
-													_readAllFiles(CST_DEP_Path.join(m_sDirWeb, 'libs', 'jquery'))
+													_readAllFiles(path.join(m_sDirWeb, 'libs', 'jquery'))
 														.then(function (data) {
 															_sendJSResponse(p_clResponse, 200, data);
 														})
@@ -443,7 +444,7 @@
 												break;
 												case 'bootstrap.js':
 
-													_readAllFiles(CST_DEP_Path.join(m_sDirWeb, 'libs', 'bootstrap', 'js'))
+													_readAllFiles(path.join(m_sDirWeb, 'libs', 'bootstrap', 'js'))
 														.then(function (data) {
 															_sendJSResponse(p_clResponse, 200, data);
 														})
@@ -476,7 +477,7 @@
 												break;
 												case 'angular-modules.js':
 
-													_readAllFiles(CST_DEP_Path.join(m_sDirWeb, 'libs', 'angularjs', 'modules'))
+													_readAllFiles(path.join(m_sDirWeb, 'libs', 'angularjs', 'modules'))
 														.then(function (data) {
 															_sendJSResponse(p_clResponse, 200, data);
 														})
@@ -521,7 +522,7 @@
 				
 				this.start = function (p_nPort) {
 
-					var deferred = CST_DEP_Q.defer();
+					var deferred = q.defer();
 
 						try {
 
@@ -530,7 +531,7 @@
 								_extractDataPlugins()
 									.then(function () {
 
-										m_clServer = CST_DEP_HTTP.createServer();
+										m_clServer = require('http').createServer();
 										
 										m_clServer.listen(p_nPort, function () {
 											m_clLog.success('-- [HTTP server] started');
@@ -539,7 +540,7 @@
 									// requete
 
 										m_clServer.on('request', function (p_clRequest, p_clResponse) {
-											_router(p_clResponse, CST_DEP_Url.parse(p_clRequest.url).pathname);
+											_router(p_clResponse, url.parse(p_clRequest.url).pathname);
 										});
 								
 									deferred.resolve();
@@ -563,7 +564,7 @@
 				
 				this.stop = function (p_fCallback) {
 
-					var deferred = CST_DEP_Q.defer();
+					var deferred = q.defer();
 
 						try {
 

@@ -2,26 +2,28 @@
 // dépendances
 	
 	var
-		CST_DEP_Path = require('path'),
-		CST_DEP_FileSystem = require('fs'),
-		CST_DEP_Q = require('q'),
-		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, 'Logs.js')),
-		CST_DEP_MIA = require(CST_DEP_Path.join(__dirname, 'MIA.js')),
-		CST_DEP_Conf = require(CST_DEP_Path.join(__dirname, 'Conf.js'));
+		path = require('path'),
+		fs = require('fs'),
+		q = require('q'),
+		Logs = require(path.join(__dirname, 'Logs.js')),
+		MIA = require(path.join(__dirname, 'MIA.js')),
+		Conf = require(path.join(__dirname, 'Conf.js'));
 		
 // module
 	
 	module.exports = function () {
 		
+		"use strict";
+		
 		// attributes
 			
 			var
 				m_clThis = this,
-				m_sCommandFile = CST_DEP_Path.join(__dirname, '../', 'command.tmp'),
+				m_sCommandFile = path.join(__dirname, '../', 'command.tmp'),
 				m_tabArgs = process.argv.slice(2),
 				m_sLaunchType = m_tabArgs[0],
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs')),
-				m_clMIA = new CST_DEP_MIA();
+				m_clLog = new Logs(path.join(__dirname, '..', 'logs')),
+				m_clMIA = new MIA();
 				
 		// methodes
 
@@ -29,16 +31,16 @@
 
 				this.start = function () {
 
-					var deferred = CST_DEP_Q.defer();
+					var deferred = q.defer();
 
 						try {
 
-							if (CST_DEP_FileSystem.existsSync(m_sCommandFile)) {
+							if (fs.existsSync(m_sCommandFile)) {
 								m_clLog.err('An another server is already running.');
 							}
 							else {
 
-								CST_DEP_FileSystem.writeFile(m_sCommandFile, process.pid, function (err) {
+								fs.writeFile(m_sCommandFile, process.pid, function (err) {
 									
 									if (err) {
 										if (err.message) {
@@ -78,17 +80,17 @@
 				
 				this.stop = function (p_fCallback) {
 
-					var deferred = CST_DEP_Q.defer();
+					var deferred = q.defer();
 
 						try {
 
-							if (!CST_DEP_FileSystem.existsSync(m_sCommandFile)) {
+							if (!fs.existsSync(m_sCommandFile)) {
 								m_clLog.log('[END]');
 								deferred.resolve();
 							}
 							else {
 								
-								CST_DEP_FileSystem.readFile(m_sCommandFile, function (err, p_sData) {
+								fs.readFile(m_sCommandFile, function (err, p_sData) {
 
 									if (err) {
 										if (err.message) {
@@ -100,7 +102,7 @@
 									}
 									else {
 
-										CST_DEP_FileSystem.unlink(m_sCommandFile, function (err) {
+										fs.unlink(m_sCommandFile, function (err) {
 
 											if (err) {
 												if (err.message) {
@@ -155,7 +157,7 @@
 				
 				this.help = function () {
 
-					var deferred = CST_DEP_Q.defer();
+					var deferred = q.defer();
 
 						try {
 
@@ -183,13 +185,13 @@
 				
 				this.setWebPort = function () {
 
-					var deferred = CST_DEP_Q.defer();
+					var deferred = q.defer();
 
 						try {
 
 							if (m_tabArgs[1]) {
 
-								new CST_DEP_Conf().setConfOption('portweb', parseInt(m_tabArgs[1])).save()
+								new Conf().setConfOption('portweb', parseInt(m_tabArgs[1])).save()
 									.then(deferred.resolve)
 									.catch(deferred.reject);
 
@@ -214,13 +216,13 @@
 				
 				this.setChildrenPort = function () {
 
-					var deferred = CST_DEP_Q.defer();
+					var deferred = q.defer();
 
 						try {
 
 							if (m_tabArgs[1]) {
 
-								new CST_DEP_Conf().setConfOption('portchildren', parseInt(m_tabArgs[1])).save()
+								new Conf().setConfOption('portchildren', parseInt(m_tabArgs[1])).save()
 									.then(deferred.resolve)
 									.catch(deferred.reject);
 

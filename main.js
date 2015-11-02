@@ -1,14 +1,15 @@
+"use strict";
+
 // dépendances
 
 	var
-		CST_DEP_Path = require('path'),
-		CST_DEP_Launcher = require(CST_DEP_Path.join(__dirname, 'class', 'Launcher.js'));
+		Launcher = require(require('path').join(__dirname, 'class', 'Launcher.js'));
 
 // run
 
 	try {
 		
-		new CST_DEP_Launcher();
+		new Launcher();
 		
 	}
 	catch (e) {

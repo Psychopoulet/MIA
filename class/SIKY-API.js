@@ -2,13 +2,15 @@
 // dépendances
 	
 	var
-		CST_DEP_HTTP = require('http'),
-		CST_DEP_Q = require('Q');
+		http = require('http'),
+		q = require('q');
 		
 // modules
 	
 	module.exports = function () {
 
+		"use strict";
+		
 		// attributes
 
 			var
@@ -22,7 +24,7 @@
 
 				function _HTTPRequest(p_sUrl, p_sMethod, p_tabData) {
 
-					var deferred = CST_DEP_Q.defer(), sPOSTData = '', stOptions = {};
+					var deferred = q.defer(), sPOSTData = '', stOptions = {};
 						
 						p_tabData = (!p_tabData) ? {} : p_tabData;
 						p_sMethod = (!p_sMethod) ? 'GET' : p_sMethod;
@@ -69,7 +71,7 @@
 									stOptions.headers.Cookie = m_sCookieSession;
 								}
 								
-								CST_DEP_HTTP.request(stOptions, function(response) {
+								http.request(stOptions, function(response) {
 
 									var sStatusCode = '', sResponse = '';
 
@@ -143,7 +145,7 @@
 
 				this.query = function (p_sApplicationUrl, p_sUrl, p_sMethod, p_stData) {
 				
-					var deferred = CST_DEP_Q.defer(), sUrl = '/fr/' + p_sApplicationUrl + '/api/' + p_sUrl;
+					var deferred = q.defer(), sUrl = '/fr/' + p_sApplicationUrl + '/api/' + p_sUrl;
 						
 						_HTTPRequest(sUrl, p_sMethod, p_stData)
 							.then(function (sResult) {
@@ -207,7 +209,7 @@
 
 				this.login = function (p_sEmail, p_sPassword) {
 					
-					var deferred = CST_DEP_Q.defer();
+					var deferred = q.defer();
 						
 						m_clTHAT.query('/', '/users/login', 'PUT', { login : p_sEmail, password : p_sPassword })
 							.then(function (sResult) {

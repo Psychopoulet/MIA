@@ -2,20 +2,21 @@
 // dépendances
 	
 	var
-		CST_DEP_Path = require('path'),
-		CST_DEP_Q = require('q'),
-		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, 'Logs.js')),
-		CST_DEP_SocketIO = require('socket.io');
+		path = require('path'),
+		q = require('q'),
+		Logs = require(path.join(__dirname, 'Logs.js'));
 		
 // module
 	
 	module.exports = function () {
-	
+
+		"use strict";
+		
 		// attributes
 			
 			var
 				m_clThis = this,
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'childsocket')),
+				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'childsocket')),
 				m_clSocketServer,
 				m_stSocketsConnected = {},
 				m_tabOnConnection = [],
@@ -27,11 +28,11 @@
 				
 				this.start = function (p_nPort, p_fCallback) {
 					
-					var deferred = CST_DEP_Q.defer();
+					var deferred = q.defer();
 
 						try {
 
-							m_clSocketServer = CST_DEP_SocketIO.listen(p_nPort);
+							m_clSocketServer = require('socket.io').listen(p_nPort);
 
 							m_clSocketServer.sockets.on('connection', function (socket) {
 
@@ -111,7 +112,7 @@
 				
 				this.stop = function (p_fCallback) {
 
-					var deferred = CST_DEP_Q.defer();
+					var deferred = q.defer();
 
 						try {
 

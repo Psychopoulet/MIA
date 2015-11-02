@@ -7,6 +7,8 @@
 
 	module.exports = function (p_sPathLogDirectory) {
 		
+		"use strict";
+		
 		// attributes
 			
 			var m_sLogsDirectory = p_sPathLogDirectory;
