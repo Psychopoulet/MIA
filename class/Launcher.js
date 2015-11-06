@@ -21,7 +21,7 @@
 				m_clThis = this,
 				m_sCommandFile = path.join(__dirname, '../', 'command.tmp'),
 				m_tabArgs = process.argv.slice(2),
-				m_sLaunchType = m_tabArgs[0],
+				m_sLaunchType = (0 < m_tabArgs.length) ? m_tabArgs[0] : '',
 				m_clLog = new Logs(path.join(__dirname, '..', 'logs')),
 				m_clMIA = new MIA();
 				
@@ -40,15 +40,10 @@
 							}
 							else {
 
-								fs.writeFile(m_sCommandFile, process.pid, function (err) {
+								fs.writeFile(m_sCommandFile, process.pid, function (e) {
 									
-									if (err) {
-										if (err.message) {
-											deferred.reject(err.message);
-										}
-										else {
-											deferred.reject(err);
-										}
+									if (e) {
+										deferred.reject((e.message) ? e.message : e);
 									}
 									else {
 
@@ -66,12 +61,7 @@
 							
 						}
 						catch (e) {
-							if (e.message) {
-								deferred.reject(e.message);
-							}
-							else {
-								deferred.reject(e);
-							}
+							deferred.reject((e.message) ? e.message : e);
 						}
 						
 					return deferred.promise;
@@ -143,12 +133,7 @@
 							
 						}
 						catch (e) {
-							if (e.message) {
-								deferred.reject(e.message);
-							}
-							else {
-								deferred.reject(e);
-							}
+							deferred.reject((e.message) ? e.message : e);
 						}
 						
 					return deferred.promise;
@@ -171,12 +156,7 @@
 
 						}
 						catch (e) {
-							if (e.message) {
-								deferred.reject(e.message);
-							}
-							else {
-								deferred.reject(e);
-							}
+							deferred.reject((e.message) ? e.message : e);
 						}
 						
 					return deferred.promise;
@@ -202,12 +182,7 @@
 
 						}
 						catch (e) {
-							if (e.message) {
-								deferred.reject(e.message);
-							}
-							else {
-								deferred.reject(e);
-							}
+							deferred.reject((e.message) ? e.message : e);
 						}
 						
 					return deferred.promise;
@@ -233,12 +208,7 @@
 
 						}
 						catch (e) {
-							if (e.message) {
-								deferred.reject(e.message);
-							}
-							else {
-								deferred.reject(e);
-							}
+							deferred.reject((e.message) ? e.message : e);
 						}
 						
 					return deferred.promise;
