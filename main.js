@@ -8,9 +8,7 @@
 // run
 
 	try {
-		
 		new Launcher();
-		
 	}
 	catch (e) {
 		console.log('Global script failed : ');

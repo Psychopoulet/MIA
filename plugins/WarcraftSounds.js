@@ -187,14 +187,8 @@
 						_writeCache();
 					})
 					.catch(function (err){
-
-						if(err.message) {
-							err = err.message;
-						}
-
 						m_clLog.err(err);
 						p_clHTTPSocket.emit('child.warcraftsounds.error', err);
-						
 					});
 					
 	};

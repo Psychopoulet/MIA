@@ -115,8 +115,7 @@
 								
 							}
 							catch(e) {
-								if (e.message) { deferred.reject(e.message); }
-								else { deferred.reject(e); }
+								deferred.reject((e.message) ? e.message : e);
 							}
 							
 						}
@@ -191,16 +190,8 @@
 								
 							})
 							.catch(function (e) {
-
-								if (e.message) {
-									deferred.reject(e.message);
-									_errlog(e.message);
-								}
-								else {
-									deferred.reject(e);
-									_errlog(e);
-								}
-								
+								deferred.reject((e.message) ? e.message : e);
+								_errlog((e.message) ? e.message : e);
 							});
 							
 					return deferred.promise;
@@ -216,7 +207,7 @@
 								deferred.resolve(sResult);
 							})
 							.catch(function (e) {
-								deferred.reject(e);
+								deferred.reject((e.message) ? e.message : e);
 							});
 							
 					return deferred.promise;

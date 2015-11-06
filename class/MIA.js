@@ -79,14 +79,8 @@
 															
 														})
 														.catch(function (e) {
-															
-															if(e.message) {
-																e = e.message;
-															}
-
-															m_clLog.err(e);
-															socket.emit('web.login.error', e);
-
+															m_clLog.err((e.message) ? e.message : e);
+															socket.emit('web.login.error', (e.message) ? e.message : e);
 														});
 														
 												}
@@ -113,7 +107,14 @@
 											var sPluginsPath = path.join(__dirname, '..', 'plugins');
 
 											require('fs').readdirSync(sPluginsPath).forEach(function (file) {
-												require(path.join(sPluginsPath, file))(m_clHTTPSocket, m_clChildSocket, m_clSikyAPI);
+
+												try {
+													require(path.join(sPluginsPath, file))(m_clHTTPSocket, m_clChildSocket, m_clSikyAPI);
+												}
+												catch (e) {
+													m_clLog.err((e.message) ? e.message : e);
+												}
+
 											});
 
 										// start
@@ -133,12 +134,7 @@
 							
 						}
 						catch (e) {
-							if (e.message) {
-								deferred.reject(e.message);
-							}
-							else {
-								deferred.reject(e);
-							}
+							deferred.reject((e.message) ? e.message : e);
 						}
 						
 					return deferred.promise;
@@ -169,12 +165,7 @@
 								
 						}
 						catch (e) {
-							if (e.message) {
-								deferred.reject(e.message);
-							}
-							else {
-								deferred.reject(e);
-							}
+							deferred.reject((e.message) ? e.message : e);
 						}
 						
 					return deferred.promise;
