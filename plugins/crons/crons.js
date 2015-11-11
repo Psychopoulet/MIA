@@ -4,7 +4,7 @@
 	var
 		path = require('path'),
 		cronjob = require('cron').CronJob, // https://github.com/ncb000gt/node-cron/blob/master/README.md
-		Logs = require(path.join(__dirname, '..', 'class', 'Logs.js'));
+		Logs = require(path.join(__dirname, '..', '..', 'class', 'Logs.js'));
 
 // module
 	

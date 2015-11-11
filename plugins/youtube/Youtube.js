@@ -3,7 +3,7 @@
 	
 	var
 		CST_DEP_Path = require('path'),
-		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, '..', 'class', 'Logs.js'));
+		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, '..', '..', 'class', 'Logs.js'));
 
 // module
 	

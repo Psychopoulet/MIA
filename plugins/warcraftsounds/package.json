@@ -1,0 +1,8 @@
+{
+  "name": "WarcraftSounds",
+  "description": "",
+  "version": "0.0.1",
+  "main": "WarcraftSounds.js",
+  "author": "Sébastien VIDAL",
+  "license": "ISC"
+}

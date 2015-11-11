@@ -1,0 +1,8 @@
+{
+  "name": "Youtube",
+  "description": "",
+  "version": "0.0.1",
+  "main": "Youtube.js",
+  "author": "Sébastien VIDAL",
+  "license": "ISC"
+}

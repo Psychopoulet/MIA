@@ -4,7 +4,7 @@
 	var
 		CST_DEP_Path = require('path'),
 		CST_DEP_FileSystem = require('fs'),
-		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, '..', 'class', 'Logs.js'));
+		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, '..', '..', 'class', 'Logs.js'));
 
 // module
 	
@@ -13,7 +13,7 @@
 		// attributes
 			
 			var
-				m_sLocalFile = CST_DEP_Path.join(__dirname, '..', 'data', 'WarcraftSounds.json'),
+				m_sLocalFile = CST_DEP_Path.join(__dirname, 'backup.json'),
 				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'plugins', 'warcraftsounds')),
 				m_tabData = [];
 

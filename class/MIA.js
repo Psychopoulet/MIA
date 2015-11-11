@@ -9,6 +9,7 @@
 		HTTPServer = require(path.join(__dirname, 'HTTPServer.js')),
 		HTTPSocket = require(path.join(__dirname, 'HTTPSocket.js')),
 		ChildSocket = require(path.join(__dirname, 'ChildSocket.js')),
+		Plugins = require(path.join(__dirname, 'Plugins.js')),
 
 		Logs = require(path.join(__dirname, 'Logs.js')),
 		Conf = require(path.join(__dirname, 'Conf.js')),
@@ -29,6 +30,7 @@
 				m_clHTTPServer = new HTTPServer(),
 				m_clHTTPSocket = new HTTPSocket(),
 				m_clChildSocket = new ChildSocket(),
+				m_clPlugins = new Plugins(),
 				
 				m_clLog = new Logs(path.join(__dirname, '..', 'logs')),
 				m_clConf = new Conf(),
@@ -40,8 +42,7 @@
 
 				this.start = function () {
 
-					var
-						deferred = q.defer();
+					var deferred = q.defer();
 
 						try {
 
@@ -103,20 +104,25 @@
 									.then(function() {
 
 										// plugins
+
+											m_clPlugins.getData()
+												.then(function(p_tabData) {
+
+													p_tabData.forEach(function(p_stPlugin) {
+
+														try {
+															require(p_stPlugin.main)(m_clHTTPSocket, m_clChildSocket, m_clSikyAPI);
+															m_clLog.success('-- [plugin] ' + p_stPlugin.name + ' loaded');
+														}
+														catch (e) {
+															m_clLog.err((e.message) ? e.message : e);
+														}
+
+													})
+
+												})
+												.catch(deferred.reject);
 											
-											var sPluginsPath = path.join(__dirname, '..', 'plugins');
-
-											require('fs').readdirSync(sPluginsPath).forEach(function (file) {
-
-												try {
-													require(path.join(sPluginsPath, file))(m_clHTTPSocket, m_clChildSocket, m_clSikyAPI);
-												}
-												catch (e) {
-													m_clLog.err((e.message) ? e.message : e);
-												}
-
-											});
-
 										// start
 											
 											m_clHTTPSocket.start(m_clHTTPServer.getServer())
