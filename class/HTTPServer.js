@@ -8,6 +8,8 @@
 		q = require('q'),
 		app = require('express')(),
 		http = require('http').Server(app),
+
+		Plugins = require(path.join(__dirname, 'Plugins.js')),
 		Logs = require(path.join(__dirname, 'Logs.js'));
 		
 // module
@@ -20,8 +22,11 @@
 			
 			var
 				m_sDirWeb = path.join(__dirname, '..', 'web'),
-				m_tabWebPlugins = [],
-				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'httpserver'));
+				m_clPlugins = new Plugins(),
+				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'httpserver')),
+
+				m_tabTemplates = [],
+				m_tabJavascripts = [];
 				
 		// methodes
 
@@ -66,139 +71,6 @@
 						}
 
 				// files
-
-					function _extractPluginsTemplates() {
-
-						var deferred = q.defer(), sContent = '';
-
-							try {
-
-								m_tabWebPlugins.forEach(function (p_stPlugin) {
-
-									if (p_stPlugin.templates) {
-
-										p_stPlugin.templates.forEach(function (p_sFile) {
-
-											if (fs.existsSync(p_sFile)) {
-												sContent += fs.readFileSync(p_sFile, 'utf8');
-											}
-
-										});
-
-									}
-
-								});
-
-								deferred.resolve(sContent);
-
-							}
-							catch (e) {
-								deferred.reject((e.message) ? e.message : e);
-							}
-
-						return deferred.promise;
-						
-					}
-
-
-					function _extractPluginsJavascripts() {
-
-						var deferred = q.defer(), sContent = '';
-
-							try {
-
-								m_tabWebPlugins.forEach(function (p_stPlugin) {
-
-									if (p_stPlugin.javascripts) {
-
-										p_stPlugin.javascripts.forEach(function (p_sFile) {
-
-											if (fs.existsSync(p_sFile)) {
-												sContent += fs.readFileSync(p_sFile, 'utf8');
-											}
-
-										});
-
-									}
-
-								});
-
-								deferred.resolve(sContent);
-
-							}
-							catch (e) {
-								deferred.reject((e.message) ? e.message : e);
-							}
-
-						return deferred.promise;
-						
-					}
-
-					function _extractDataPlugins() {
-
-						var sDirWebPlugins = path.join(m_sDirWeb, 'plugins');
-
-						var deferred = q.defer();
-
-							try {
-
-								fs.readdir(sDirWebPlugins, function (err, directories) {
-
-									if (err) {
-										deferred.reject(err);
-									}
-									else {
-
-										directories.forEach(function (p_sDirectory) {
-
-											var
-												sDirectory = path.join(sDirWebPlugins, p_sDirectory),
-												sConf = path.join(sDirectory, 'plugin.json'),
-												stPlugin;
-
-											if (!fs.existsSync(sConf)) {
-												deferred.reject("Missing 'plugin.json' for '" + sDirectory + "' plugin.");
-											}
-											else {
-
-												stPlugin = JSON.parse(fs.readFileSync(sConf, 'utf8'));
-
-												if (stPlugin.javascripts) {
-
-													stPlugin.javascripts.forEach(function (value, key) {
-														stPlugin.javascripts[key] = path.join(sDirectory, value);
-													});
-
-												}
-
-												if (stPlugin.templates) {
-
-													stPlugin.templates.forEach(function (value, key) {
-														stPlugin.templates[key] = path.join(sDirectory, value);
-													});
-
-												}
-
-												m_tabWebPlugins.push(stPlugin);
-
-											}
-
-										});
-
-										deferred.resolve();
-
-									}
-
-								});
-
-							}
-							catch (e) {
-								deferred.reject((e.message) ? e.message : e);
-							}
-
-						return deferred.promise;
-						
-					}
 
 					function _readFile(p_sDirectory, p_sFileName) {
 
@@ -294,8 +166,35 @@ q
 
 							// lancement
 
-								_extractDataPlugins()
-									.then(function () {
+								m_clPlugins.getData()
+									.then(function (p_tabData) {
+
+										p_tabData.forEach(function(plugin) {
+
+											if (plugin.web) {
+												
+												if (plugin.web.templates && 0 < plugin.web.templates.length) {
+
+													plugin.web.templates.forEach(function(template) {
+														m_tabTemplates.push(template);
+													});
+
+												}
+
+												if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
+
+													plugin.web.javascripts.forEach(function(javascript) {
+														m_tabJavascripts.push(javascript);
+													});
+
+												}
+
+											}
+
+										});
+
+										console.log(m_tabTemplates);
+										console.log(m_tabJavascripts);
 
 										app
 

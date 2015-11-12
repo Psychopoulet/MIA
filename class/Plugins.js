@@ -38,15 +38,36 @@
 
 									try {
 
-										var stData = JSON.parse(fs.readFileSync(sFile, 'utf8'));
+										var plugin = JSON.parse(fs.readFileSync(sFile, 'utf8'));
 
-										if (stData.main && '' != stData.main) {
-											stData.main = path.join(m_sPluginsPath, directory, stData.main);
-											m_tabData.push(stData);
+										if (plugin.main && '' != plugin.main) {
+											plugin.main = path.join(m_sPluginsPath, directory, plugin.main);
 										}
 
+										if (plugin.web) {
+
+											if (plugin.web.templates && 0 < plugin.web.templates.length) {
+
+												for (var i = 0, l = plugin.web.templates.length; i < l; ++i) {
+													plugin.web.templates[i] = path.join(m_sPluginsPath, directory, plugin.web.templates[i]);
+												}
+
+											}
+
+											if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
+
+												for (var i = 0, l = plugin.web.javascripts.length; i < l; ++i) {
+													plugin.web.javascripts[i] = path.join(m_sPluginsPath, directory, plugin.web.javascripts[i]);
+												}
+
+											}
+
+										}
+
+										m_tabData.push(plugin);
+
 									}
-									catch (e) { }
+									catch (e) { console.log(e); }
 
 								}
 

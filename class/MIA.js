@@ -9,12 +9,12 @@
 		HTTPServer = require(path.join(__dirname, 'HTTPServer.js')),
 		HTTPSocket = require(path.join(__dirname, 'HTTPSocket.js')),
 		ChildSocket = require(path.join(__dirname, 'ChildSocket.js')),
+		SikyAPI = require(path.join(__dirname, 'SIKY-API.js')),
+		
 		Plugins = require(path.join(__dirname, 'Plugins.js')),
-
-		Logs = require(path.join(__dirname, 'Logs.js')),
 		Conf = require(path.join(__dirname, 'Conf.js')),
 
-		SikyAPI = require(path.join(__dirname, 'SIKY-API.js'));
+		Logs = require(path.join(__dirname, 'Logs.js'));
 		
 // module
 	
@@ -118,7 +118,7 @@
 															m_clLog.err((e.message) ? e.message : e);
 														}
 
-													})
+													});
 
 												})
 												.catch(deferred.reject);
