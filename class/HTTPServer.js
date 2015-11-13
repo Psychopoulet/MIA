@@ -9,7 +9,6 @@
 		app = require('express')(),
 		http = require('http').Server(app),
 
-		Plugins = require(path.join(__dirname, 'Plugins.js')),
 		Logs = require(path.join(__dirname, 'Logs.js'));
 		
 // module
@@ -22,11 +21,11 @@
 			
 			var
 				m_sDirWeb = path.join(__dirname, '..', 'web'),
-				m_clPlugins = new Plugins(),
+				m_clPlugins = require(path.join(__dirname, 'Factory.js')).getPluginsInstance(),
 				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'httpserver')),
 
-				m_tabTemplates = [],
-				m_tabJavascripts = [];
+				m_sTemplatesBufferFile = "",
+				m_sJavascriptsBufferFile = "";
 				
 		// methodes
 
@@ -169,6 +168,24 @@ q
 								m_clPlugins.getData()
 									.then(function (p_tabData) {
 
+										m_sTemplatesBufferFile = path.join(__dirname, '..', 'web', 'templates', 'plugins.html');
+
+										try {
+											if (fs.lstatSync(m_sTemplatesBufferFile).isFile()) {
+												fs.unlinkSync(m_sTemplatesBufferFile);
+											}
+										}
+										catch(e) {}
+
+										m_sJavascriptsBufferFile = path.join(__dirname, '..', 'web', 'js', 'plugins.js');
+
+										try {
+											if (fs.lstatSync(m_sJavascriptsBufferFile).isFile()) {
+												fs.unlinkSync(m_sJavascriptsBufferFile);
+											}
+										}
+										catch(e) {}
+
 										p_tabData.forEach(function(plugin) {
 
 											if (plugin.web) {
@@ -176,7 +193,7 @@ q
 												if (plugin.web.templates && 0 < plugin.web.templates.length) {
 
 													plugin.web.templates.forEach(function(template) {
-														m_tabTemplates.push(template);
+														fs.appendFileSync(m_sTemplatesBufferFile, fs.readFileSync(template, 'utf8'), 'utf8');
 													});
 
 												}
@@ -184,7 +201,7 @@ q
 												if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
 
 													plugin.web.javascripts.forEach(function(javascript) {
-														m_tabJavascripts.push(javascript);
+														fs.appendFileSync(m_sJavascriptsBufferFile, fs.readFileSync(javascript, 'utf8'), 'utf8');
 													});
 
 												}
@@ -193,17 +210,14 @@ q
 
 										});
 
-										console.log(m_tabTemplates);
-										console.log(m_tabJavascripts);
-
 										app
 
 											.get('/', function (req, res) {
 
-												_readFile('', 'index.html')
+												_readFile('templates', 'index.html')
 													.then(function (index) {
 
-														_extractPluginsTemplates()
+														_readFile('templates', 'plugins.html')
 															.then(function(sHTML) {
 																_sendHTMLResponse(res, 200, index.replace('{{pages}}', sHTML));
 															})
@@ -221,15 +235,7 @@ q
 											// js
 
 												.get('/js/plugins.js', function (req, res) {
-
-													_extractPluginsJavascripts()
-														.then(function(sJavascript) {
-															_sendJSResponse(res, 200, sJavascript);
-														})
-														.catch(function (error) {
-															_500(res, error);
-														});
-
+													res.sendFile(m_sJavascriptsBufferFile);
 												})
 												.get('/js/children.js', function (req, res) {
 

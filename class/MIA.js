@@ -6,14 +6,7 @@
 		path = require('path'),
 		q = require('q'),
 
-		HTTPServer = require(path.join(__dirname, 'HTTPServer.js')),
-		HTTPSocket = require(path.join(__dirname, 'HTTPSocket.js')),
-		ChildSocket = require(path.join(__dirname, 'ChildSocket.js')),
-		SikyAPI = require(path.join(__dirname, 'SIKY-API.js')),
-		
-		Plugins = require(path.join(__dirname, 'Plugins.js')),
-		Conf = require(path.join(__dirname, 'Conf.js')),
-
+		Factory = require(path.join(__dirname, 'Factory.js')),
 		Logs = require(path.join(__dirname, 'Logs.js'));
 		
 // module
@@ -25,16 +18,8 @@
 		// attributes
 			
 			var
-				m_stSIKYUser,
-
-				m_clHTTPServer = new HTTPServer(),
-				m_clHTTPSocket = new HTTPSocket(),
-				m_clChildSocket = new ChildSocket(),
-				m_clPlugins = new Plugins(),
-				
 				m_clLog = new Logs(path.join(__dirname, '..', 'logs')),
-				m_clConf = new Conf(),
-				m_clSikyAPI = new SikyAPI();
+				m_stSIKYUser;
 				
 		// methodes
 
@@ -48,7 +33,7 @@
 
 							// events
 
-								m_clHTTPSocket
+								Factory.getHTTPSocketInstance()
 									.onDisconnect(function(socket) {
 										socket.removeAllListeners('web.getconnected');
 										socket.removeAllListeners('web.login');
@@ -57,7 +42,7 @@
 
 										socket
 											.on('web.getconnected', function () {
-												m_clHTTPSocket.emit('web.getconnected', m_clChildSocket.getConnectedChilds());
+												Factory.getHTTPSocketInstance().emit('web.getconnected', Factory.getChildSocketInstance().getConnectedChilds());
 											})
 											.on('web.login', function (p_stData) {
 
@@ -66,11 +51,11 @@
 												}
 												else {
 
-													m_clSikyAPI.login(p_stData.email, p_stData.password)
+													Factory.getSikyAPIInstance().login(p_stData.email, p_stData.password)
 														.then(function () {
 
 															m_stSIKYUser = {
-																token : m_clSikyAPI.getToken(),
+																token : Factory.getSikyAPIInstance().getToken(),
 																email : p_stData.email,
 																password : p_stData.password
 															};
@@ -90,28 +75,28 @@
 
 									});
 
-								m_clChildSocket
+								Factory.getChildSocketInstance()
 									.onDisconnect(function(socket) {
-										m_clHTTPSocket.emit('web.disconnected', socket.MIA);
+										Factory.getHTTPSocketInstance().emit('web.disconnected', socket.MIA);
 									})
 									.onConnection(function(socket) {
-										m_clHTTPSocket.emit('web.connection', socket.MIA);
+										Factory.getHTTPSocketInstance().emit('web.connection', socket.MIA);
 									});
 
 							// run
 
-								m_clHTTPServer.start(m_clConf.getConf().portweb)
+								Factory.getHTTPServerInstance().start(Factory.getConfInstance().getConf().portweb)
 									.then(function() {
 
 										// plugins
 
-											m_clPlugins.getData()
+											Factory.getPluginsInstance().getData()
 												.then(function(p_tabData) {
 
 													p_tabData.forEach(function(p_stPlugin) {
 
 														try {
-															require(p_stPlugin.main)(m_clHTTPSocket, m_clChildSocket, m_clSikyAPI);
+															require(p_stPlugin.main)(Factory);
 															m_clLog.success('-- [plugin] ' + p_stPlugin.name + ' loaded');
 														}
 														catch (e) {
@@ -125,10 +110,10 @@
 											
 										// start
 											
-											m_clHTTPSocket.start(m_clHTTPServer.getServer())
+											Factory.getHTTPSocketInstance().start(Factory.getHTTPServerInstance().getServer())
 												.then(function () {
 													
-													m_clChildSocket.start(m_clConf.getConf().portchildren)
+													Factory.getChildSocketInstance().start(Factory.getConfInstance().getConf().portchildren)
 														.then(deferred.resolve)
 														.catch(deferred.reject);
 														
@@ -153,13 +138,13 @@
 
 						try {
 
-							m_clChildSocket.stop()
+							Factory.getChildSocketInstance().stop()
 								.then(function () {
 									
-									m_clHTTPSocket.stop()
+									Factory.getHTTPSocketInstance().stop()
 										.then(function () {
 											
-											m_clHTTPServer.stop()
+											Factory.getHTTPServerInstance().stop()
 												.then(deferred.resolve)
 												.catch(deferred.reject);
 											

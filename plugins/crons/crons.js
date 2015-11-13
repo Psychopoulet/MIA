@@ -8,7 +8,7 @@
 
 // module
 	
-	module.exports = function (p_clHTTPSocket, p_clChildSocket, p_clSikyAPI) {
+	module.exports = function (Factory) {
 
 		// attributes
 			

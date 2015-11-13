@@ -2,21 +2,21 @@
 // dépendances
 	
 	var
-		CST_DEP_Path = require('path'),
-		CST_DEP_Log = require(CST_DEP_Path.join(__dirname, '..', '..', 'class', 'Logs.js'));
+		path = require('path'),
+		Logs = require(path.join(__dirname, '..', '..', 'class', 'Logs.js'));
 
 // module
 	
-	module.exports = function (p_clHTTPSocket, p_clChildSocket) {
+	module.exports = function (Factory) {
 
 		// attributes
 			
 			var
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'plugins', 'youtube'));
+				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'plugins', 'youtube'));
 				
 		// constructor
 
-			p_clHTTPSocket
+			Factory.getHTTPSocketInstance()
 				.onDisconnect(function(socket) {
 					socket.removeAllListeners('web.youtube.play');
 					socket.removeAllListeners('web.youtube.getall');
@@ -39,7 +39,7 @@
 								socket.emit('web.youtube.error', 'Missing \'url\' data');
 							}
 							else {
-								p_clChildSocket.emitTo(data.token, 'child.youtube.play', data.url);
+								Factory.getChildSocketInstance().emitTo(data.token, 'child.youtube.play', data.url);
 							}
 
 						})
@@ -49,13 +49,13 @@
 
 				});
 
-			p_clChildSocket
+			Factory.getChildSocketInstance()
 				.onDisconnect(function(socket) {
 
 					socket.removeAllListeners('child.youtube.error');
 					socket.removeAllListeners('child.youtube.played');
 
-					p_clHTTPSocket.emit('child.disconnected', socket.MIA);
+					Factory.getHTTPSocketInstance().emit('child.disconnected', socket.MIA);
 
 				})
 				.onConnection(function(socket) {
@@ -63,14 +63,14 @@
 					socket
 						.on('child.youtube.error', function (error) {
 							m_clLog.err(error);
-							p_clChildSocket.emit('child.youtube.error', error);
+							Factory.getChildSocketInstance().emit('child.youtube.error', error);
 						})
 						.on('child.youtube.played', function () {
 							m_clLog.success('child.youtube.played');
-							p_clChildSocket.emit('child.youtube.played');
+							Factory.getChildSocketInstance().emit('child.youtube.played');
 						});
 						
-					p_clHTTPSocket.emit('web.connection', socket.MIA);
+					Factory.getHTTPSocketInstance().emit('web.connection', socket.MIA);
 
 				});
 

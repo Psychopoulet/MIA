@@ -2,8 +2,7 @@
 
 // dépendances
 
-	var
-		Launcher = require(require('path').join(__dirname, 'class', 'Launcher.js'));
+	var Launcher = require(require('path').join(__dirname, 'class', 'Launcher.js'));
 
 // run
 

@@ -3,11 +3,11 @@
 	
 // module
 	
-	module.exports = function (p_clHTTPSocket, p_clChildSocket) {
+	module.exports = function (Factory) {
 
 		// constructor
 
-			p_clChildSocket
+			Factory.getChildSocketInstance()
 				.onDisconnect(function(socket) {
 					socket.removeAllListeners('child.temperature');
 				})
@@ -16,7 +16,7 @@
 					socket
 						.on('child.temperature', function (data) {
 							socket.MIA.temperature = data;
-							p_clHTTPSocket.emit('web.temperature', socket.MIA);
+							Factory.getHTTPSocketInstance().emit('web.temperature', socket.MIA);
 						});
 
 				});

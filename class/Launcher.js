@@ -6,8 +6,7 @@
 		fs = require('fs'),
 		q = require('q'),
 		Logs = require(path.join(__dirname, 'Logs.js')),
-		MIA = require(path.join(__dirname, 'MIA.js')),
-		Conf = require(path.join(__dirname, 'Conf.js'));
+		MIA = require(path.join(__dirname, 'MIA.js'));
 		
 // module
 	
@@ -171,7 +170,7 @@
 
 							if (m_tabArgs[1]) {
 
-								new Conf().setConfOption('portweb', parseInt(m_tabArgs[1])).save()
+								require(path.join(__dirname, 'Factory.js')).getConfInstance().setConfOption('portweb', parseInt(m_tabArgs[1])).save()
 									.then(deferred.resolve)
 									.catch(deferred.reject);
 
@@ -197,7 +196,7 @@
 
 							if (m_tabArgs[1]) {
 
-								new Conf().setConfOption('portchildren', parseInt(m_tabArgs[1])).save()
+								require(path.join(__dirname, 'Factory.js')).getConfInstance().setConfOption('portchildren', parseInt(m_tabArgs[1])).save()
 									.then(deferred.resolve)
 									.catch(deferred.reject);
 
