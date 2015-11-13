@@ -1,0 +1,16 @@
+{
+  "name": "WarcraftSounds",
+  "description": "",
+  "version": "0.0.1",
+  "main": "WarcraftSounds.js",
+  "author": "Sébastien VIDAL",
+  "license": "ISC",
+  "web" : {
+  	"templates" : [
+  		"web/template.html"
+  	],
+  	"javascripts" : [
+  		"web/controller.js"
+  	]
+  }
+}

@@ -1,1 +1,1 @@
-node %~dp0exe.js --start
+cls && cd %~dp0 && node main.js --start

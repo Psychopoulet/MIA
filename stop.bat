@@ -1,1 +1,1 @@
-node %~dp0exe.js --end
+cls && cd %~dp0 && node main.js --end

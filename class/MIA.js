@@ -2,28 +2,24 @@
 // dépendances
 	
 	var
-		CST_DEP_Path = require('path'),
-		CST_DEP_FileSystem = require('fs'),
-		CST_DEP_Q = require('q'),
-		CST_DEP_HTTPServer = require(CST_DEP_Path.join(__dirname, 'HTTPServer.js')),
-		CST_DEP_HTTPSocket = require(CST_DEP_Path.join(__dirname, 'HTTPSocket.js')),
-		CST_DEP_ChildSocket = require(CST_DEP_Path.join(__dirname, 'ChildSocket.js')),
-		CST_DEP_Conf = require(CST_DEP_Path.join(__dirname, 'Conf.js')),
-		CST_DEP_SikyAPI = require('SIKY-API');
+
+		path = require('path'),
+		q = require('q'),
+
+		Factory = require(path.join(__dirname, 'Factory.js')),
+		Logs = require(path.join(__dirname, 'Logs.js'));
 		
 // module
 	
 	module.exports = function () {
 		
+		"use strict";
+		
 		// attributes
 			
 			var
-				m_clThis = this,
-				m_clHTTPServer = new CST_DEP_HTTPServer(),
-				m_clHTTPSocket = new CST_DEP_HTTPSocket(),
-				m_clChildSocket = new CST_DEP_ChildSocket(),
-				m_clConf = new CST_DEP_Conf(),
-				m_clSikyAPI = new CST_DEP_SikyAPI();
+				m_clLog = new Logs(path.join(__dirname, '..', 'logs')),
+				m_stSIKYUser;
 				
 		// methodes
 
@@ -31,45 +27,105 @@
 
 				this.start = function () {
 
-					var
-						deferred = CST_DEP_Q.defer();
+					var deferred = q.defer();
 
 						try {
 
-							m_clHTTPServer.start(m_clConf.getConf().portweb)
-								.then(function() {
+							// events
 
-									// plugins
-										
-										var sPluginsPath = CST_DEP_Path.join(__dirname, '..', 'plugins');
+								Factory.getHTTPSocketInstance()
+									.onDisconnect(function(socket) {
+										socket.removeAllListeners('web.getconnected');
+										socket.removeAllListeners('web.login');
+									})
+									.onConnection(function(socket) {
 
-										CST_DEP_FileSystem.readdirSync(sPluginsPath).forEach(function (file) {
-											require(CST_DEP_Path.join(sPluginsPath, file))(m_clHTTPSocket, m_clChildSocket, m_clSikyAPI);
-										});
-
-									// start
-										
-										m_clHTTPSocket.start(m_clHTTPServer.getServer())
-											.then(function () {
-												
-												m_clChildSocket.start(m_clConf.getConf().portchildren)
-													.then(deferred.resolve)
-													.catch(deferred.reject);
-													
+										socket
+											.on('web.getconnected', function () {
+												Factory.getHTTPSocketInstance().emit('web.getconnected', Factory.getChildSocketInstance().getConnectedChilds());
 											})
-											.catch(deferred.reject);
+											.on('web.login', function (p_stData) {
 
-								})
-								.catch(deferred.reject);
-						
+												if (m_stSIKYUser && m_stSIKYUser.email == p_stData.email && m_stSIKYUser.password == p_stData.password) {
+													socket.emit('web.logged');
+												}
+												else {
+
+													Factory.getSikyAPIInstance().login(p_stData.email, p_stData.password)
+														.then(function () {
+
+															m_stSIKYUser = {
+																token : Factory.getSikyAPIInstance().getToken(),
+																email : p_stData.email,
+																password : p_stData.password
+															};
+
+															m_clLog.success('-- [socket server] logged to SIKY');
+															socket.emit('web.logged');
+															
+														})
+														.catch(function (e) {
+															m_clLog.err((e.message) ? e.message : e);
+															socket.emit('web.login.error', (e.message) ? e.message : e);
+														});
+														
+												}
+
+											});
+
+									});
+
+								Factory.getChildSocketInstance()
+									.onDisconnect(function(socket) {
+										Factory.getHTTPSocketInstance().emit('web.disconnected', socket.MIA);
+									})
+									.onConnection(function(socket) {
+										Factory.getHTTPSocketInstance().emit('web.connection', socket.MIA);
+									});
+
+							// run
+
+								Factory.getHTTPServerInstance().start(Factory.getConfInstance().getConf().portweb)
+									.then(function() {
+
+										// plugins
+
+											Factory.getPluginsInstance().getData()
+												.then(function(p_tabData) {
+
+													p_tabData.forEach(function(p_stPlugin) {
+
+														try {
+															require(p_stPlugin.main)(Factory);
+															m_clLog.success('-- [plugin] ' + p_stPlugin.name + ' loaded');
+														}
+														catch (e) {
+															m_clLog.err((e.message) ? e.message : e);
+														}
+
+													});
+
+												})
+												.catch(deferred.reject);
+											
+										// start
+											
+											Factory.getHTTPSocketInstance().start(Factory.getHTTPServerInstance().getServer())
+												.then(function () {
+													
+													Factory.getChildSocketInstance().start(Factory.getConfInstance().getConf().portchildren)
+														.then(deferred.resolve)
+														.catch(deferred.reject);
+														
+												})
+												.catch(deferred.reject);
+
+									})
+									.catch(deferred.reject);
+							
 						}
 						catch (e) {
-							if (e.message) {
-								deferred.reject(e.message);
-							}
-							else {
-								deferred.reject(e);
-							}
+							deferred.reject((e.message) ? e.message : e);
 						}
 						
 					return deferred.promise;
@@ -78,17 +134,17 @@
 				
 				this.stop = function () {
 
-					var deferred = CST_DEP_Q.defer();
+					var deferred = q.defer();
 
 						try {
 
-							m_clChildSocket.stop()
+							Factory.getChildSocketInstance().stop()
 								.then(function () {
 									
-									m_clHTTPSocket.stop()
+									Factory.getHTTPSocketInstance().stop()
 										.then(function () {
 											
-											m_clHTTPServer.stop()
+											Factory.getHTTPServerInstance().stop()
 												.then(deferred.resolve)
 												.catch(deferred.reject);
 											
@@ -100,12 +156,7 @@
 								
 						}
 						catch (e) {
-							if (e.message) {
-								deferred.reject(e.message);
-							}
-							else {
-								deferred.reject(e);
-							}
+							deferred.reject((e.message) ? e.message : e);
 						}
 						
 					return deferred.promise;

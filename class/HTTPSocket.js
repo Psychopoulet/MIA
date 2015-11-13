@@ -2,20 +2,21 @@
 // dépendances
 	
 	var
-		CST_DEP_Path = require('path'),
-		CST_DEP_Q = require('q'),
-		CST_DEP_Log = require('logs'),
-		CST_DEP_SocketIO = require('socket.io');
+		path = require('path'),
+		q = require('q'),
+		Logs = require(path.join(__dirname, 'Logs.js'));
 
 // module
 	
 	module.exports = function () {
 	
+		"use strict";
+		
 		// attributes
 			
 			var
 				m_clThis = this,
-				m_clLog = new CST_DEP_Log(CST_DEP_Path.join(__dirname, '..', 'logs', 'httpsocket')),
+				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'httpsocket')),
 				m_clSocketServer,
 				m_tabOnConnection = [],
 				m_tabOnDisconnect = [];
@@ -26,11 +27,11 @@
 				
 				this.start = function (p_clHTTPServer, p_fCallback) {
 
-					var deferred = CST_DEP_Q.defer();
+					var deferred = q.defer();
 
 						try {
 
-							m_clSocketServer = CST_DEP_SocketIO.listen(p_clHTTPServer);
+							m_clSocketServer = require('socket.io').listen(p_clHTTPServer);
 
 							m_clSocketServer.sockets.on('connection', function (socket) {
 
@@ -58,12 +59,7 @@
 
 						}
 						catch (e) {
-							if (e.message) {
-								deferred.reject(e.message);
-							}
-							else {
-								deferred.reject(e);
-							}
+							deferred.reject((e.message) ? e.message : e);
 						}
 						
 					return deferred.promise;
@@ -72,7 +68,7 @@
 
 				this.stop = function (p_fCallback) {
 
-					var deferred = CST_DEP_Q.defer();
+					var deferred = q.defer();
 
 						try {
 
@@ -80,12 +76,7 @@
 					
 						}
 						catch (e) {
-							if (e.message) {
-								deferred.reject(e.message);
-							}
-							else {
-								deferred.reject(e);
-							}
+							deferred.reject((e.message) ? e.message : e);
 						}
 						
 					return deferred.promise;
