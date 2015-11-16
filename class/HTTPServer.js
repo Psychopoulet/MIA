@@ -21,7 +21,7 @@
 			
 			var
 				m_sDirWeb = path.join(__dirname, '..', 'web'),
-				m_clPlugins = require(path.join(__dirname, 'Factory.js')).getPluginsInstance(),
+				m_clPlugins = require(path.join(__dirname, 'Container.js')).getPluginsInstance(),
 				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'httpserver')),
 
 				m_sTemplatesBufferFile = "",

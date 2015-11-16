@@ -8,7 +8,7 @@
 
 // module
 	
-	module.exports = function (Factory) {
+	module.exports = function (Container) {
 
 		// attributes
 			

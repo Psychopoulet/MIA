@@ -7,7 +7,7 @@
 
 // module
 	
-	module.exports = function (Factory) {
+	module.exports = function (Container) {
 
 		// attributes
 			
@@ -16,7 +16,7 @@
 				
 		// constructor
 
-			Factory.getHTTPSocketInstance()
+			Container.getHTTPSocketInstance()
 				.onDisconnect(function(socket) {
 					socket.removeAllListeners('web.youtube.play');
 					socket.removeAllListeners('web.youtube.getall');
@@ -39,7 +39,7 @@
 								socket.emit('web.youtube.error', 'Missing \'url\' data');
 							}
 							else {
-								Factory.getChildSocketInstance().emitTo(data.token, 'child.youtube.play', data.url);
+								Container.getChildSocketInstance().emitTo(data.token, 'child.youtube.play', data.url);
 							}
 
 						})
@@ -49,13 +49,13 @@
 
 				});
 
-			Factory.getChildSocketInstance()
+			Container.getChildSocketInstance()
 				.onDisconnect(function(socket) {
 
 					socket.removeAllListeners('child.youtube.error');
 					socket.removeAllListeners('child.youtube.played');
 
-					Factory.getHTTPSocketInstance().emit('child.disconnected', socket.MIA);
+					Container.getHTTPSocketInstance().emit('child.disconnected', socket.MIA);
 
 				})
 				.onConnection(function(socket) {
@@ -63,14 +63,14 @@
 					socket
 						.on('child.youtube.error', function (error) {
 							m_clLog.err(error);
-							Factory.getChildSocketInstance().emit('child.youtube.error', error);
+							Container.getChildSocketInstance().emit('child.youtube.error', error);
 						})
 						.on('child.youtube.played', function () {
 							m_clLog.success('child.youtube.played');
-							Factory.getChildSocketInstance().emit('child.youtube.played');
+							Container.getChildSocketInstance().emit('child.youtube.played');
 						});
 						
-					Factory.getHTTPSocketInstance().emit('web.connection', socket.MIA);
+					Container.getHTTPSocketInstance().emit('web.connection', socket.MIA);
 
 				});
 

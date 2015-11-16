@@ -6,7 +6,7 @@
 		path = require('path'),
 		q = require('q'),
 
-		Factory = require(path.join(__dirname, 'Factory.js')),
+		Container = require(path.join(__dirname, 'Container.js')),
 		Logs = require(path.join(__dirname, 'Logs.js'));
 		
 // module
@@ -33,7 +33,7 @@
 
 							// events
 
-								Factory.getHTTPSocketInstance()
+								Container.getHTTPSocketInstance()
 									.onDisconnect(function(socket) {
 										socket.removeAllListeners('web.getconnected');
 										socket.removeAllListeners('web.login');
@@ -42,7 +42,7 @@
 
 										socket
 											.on('web.getconnected', function () {
-												Factory.getHTTPSocketInstance().emit('web.getconnected', Factory.getChildSocketInstance().getConnectedChilds());
+												Container.getHTTPSocketInstance().emit('web.getconnected', Container.getChildSocketInstance().getConnectedChilds());
 											})
 											.on('web.login', function (p_stData) {
 
@@ -51,11 +51,11 @@
 												}
 												else {
 
-													Factory.getSikyAPIInstance().login(p_stData.email, p_stData.password)
+													Container.getSikyAPIInstance().login(p_stData.email, p_stData.password)
 														.then(function () {
 
 															m_stSIKYUser = {
-																token : Factory.getSikyAPIInstance().getToken(),
+																token : Container.getSikyAPIInstance().getToken(),
 																email : p_stData.email,
 																password : p_stData.password
 															};
@@ -75,28 +75,28 @@
 
 									});
 
-								Factory.getChildSocketInstance()
+								Container.getChildSocketInstance()
 									.onDisconnect(function(socket) {
-										Factory.getHTTPSocketInstance().emit('web.disconnected', socket.MIA);
+										Container.getHTTPSocketInstance().emit('web.disconnected', socket.MIA);
 									})
 									.onConnection(function(socket) {
-										Factory.getHTTPSocketInstance().emit('web.connection', socket.MIA);
+										Container.getHTTPSocketInstance().emit('web.connection', socket.MIA);
 									});
 
 							// run
 
-								Factory.getHTTPServerInstance().start(Factory.getConfInstance().getConf().portweb)
+								Container.getHTTPServerInstance().start(Container.getConfInstance().getConf().portweb)
 									.then(function() {
 
 										// plugins
 
-											Factory.getPluginsInstance().getData()
+											Container.getPluginsInstance().getData()
 												.then(function(p_tabData) {
 
 													p_tabData.forEach(function(p_stPlugin) {
 
 														try {
-															require(p_stPlugin.main)(Factory);
+															require(p_stPlugin.main)(Container);
 															m_clLog.success('-- [plugin] ' + p_stPlugin.name + ' loaded');
 														}
 														catch (e) {
@@ -110,10 +110,10 @@
 											
 										// start
 											
-											Factory.getHTTPSocketInstance().start(Factory.getHTTPServerInstance().getServer())
+											Container.getHTTPSocketInstance().start(Container.getHTTPServerInstance().getServer())
 												.then(function () {
 													
-													Factory.getChildSocketInstance().start(Factory.getConfInstance().getConf().portchildren)
+													Container.getChildSocketInstance().start(Container.getConfInstance().getConf().portchildren)
 														.then(deferred.resolve)
 														.catch(deferred.reject);
 														
@@ -138,13 +138,13 @@
 
 						try {
 
-							Factory.getChildSocketInstance().stop()
+							Container.getChildSocketInstance().stop()
 								.then(function () {
 									
-									Factory.getHTTPSocketInstance().stop()
+									Container.getHTTPSocketInstance().stop()
 										.then(function () {
 											
-											Factory.getHTTPServerInstance().stop()
+											Container.getHTTPServerInstance().stop()
 												.then(deferred.resolve)
 												.catch(deferred.reject);
 											
