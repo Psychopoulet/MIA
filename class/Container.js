@@ -17,71 +17,88 @@
 	
 	module.exports = {
 
-		getConfInstance : function () {
+		get : function(p_sInstanceName) {
 
-			if (!m_clConfInstance) {
-				var Conf = require(path.join(__dirname, 'Conf.js'));
-				m_clConfInstance = new Conf();
+			switch(p_sInstanceName) {
+
+				case 'conf':
+
+					if (!m_clConfInstance) {
+						var Conf = require(path.join(__dirname, 'Conf.js'));
+						m_clConfInstance = new Conf();
+					}
+
+					return m_clConfInstance;
+
+				break;
+
+				case 'plugins':
+
+					if (!m_clPluginsInstance) {
+						var Plugins = require(path.join(__dirname, 'Plugins.js'));
+						m_clPluginsInstance = new Plugins();
+					}
+
+					return m_clPluginsInstance;
+
+				break;
+
+				case 'server.http':
+
+					if (!m_clHTTPServerInstance) {
+						var HTTPServer = require(path.join(__dirname, 'HTTPServer.js'));
+						m_clHTTPServerInstance = new HTTPServer();
+					}
+
+					return m_clHTTPServerInstance;
+
+				break;
+
+				case 'server.socket.web':
+
+					if (!m_clHTTPSocketInstance) {
+						var HTTPSocket = require(path.join(__dirname, 'HTTPSocket.js'));
+						m_clHTTPSocketInstance = new HTTPSocket();
+					}
+
+					return m_clHTTPSocketInstance;
+
+				break;
+
+				case 'server.socket.child':
+
+					if (!m_clChildSocketInstance) {
+						var ChildSocket = require(path.join(__dirname, 'ChildSocket.js'));
+						m_clChildSocketInstance = new ChildSocket();
+					}
+
+					return m_clChildSocketInstance;
+
+				break;
+
+				case 'sikyapi':
+
+					if (!m_clSikyAPIInstance) {
+						var SikyAPI = require(path.join(__dirname, 'SikyAPI.js'));
+						m_clSikyAPIInstance = new SikyAPI();
+					}
+
+					return m_clSikyAPIInstance;
+
+				break;
+
+				// errors
+
+				case '':
+					throw "Container : empty module";
+				break;
+				default:
+					throw "Container : unknown module '" + p_sInstanceName + "'";
+				break;
+				
 			}
-
-			return m_clConfInstance;
-
-		},
-
-		getPluginsInstance : function () {
-
-			if (!m_clPluginsInstance) {
-				var Plugins = require(path.join(__dirname, 'Plugins.js'));
-				m_clPluginsInstance = new Plugins();
-			}
-
-			return m_clPluginsInstance;
-
-		},
-
-		getHTTPServerInstance : function () {
-
-			if (!m_clHTTPServerInstance) {
-				var HTTPServer = require(path.join(__dirname, 'HTTPServer.js'));
-				m_clHTTPServerInstance = new HTTPServer();
-			}
-
-			return m_clHTTPServerInstance;
-
-		},
-
-		getHTTPSocketInstance : function () {
-
-			if (!m_clHTTPSocketInstance) {
-				var HTTPSocket = require(path.join(__dirname, 'HTTPSocket.js'));
-				m_clHTTPSocketInstance = new HTTPSocket();
-			}
-
-			return m_clHTTPSocketInstance;
-
-		},
-
-		getChildSocketInstance : function () {
-
-			if (!m_clChildSocketInstance) {
-				var ChildSocket = require(path.join(__dirname, 'ChildSocket.js'));
-				m_clChildSocketInstance = new ChildSocket();
-			}
-
-			return m_clChildSocketInstance;
-
-		},
-
-		getSikyAPIInstance : function () {
-
-			if (!m_clSikyAPIInstance) {
-				var SikyAPI = require(path.join(__dirname, 'SikyAPI.js'));
-				m_clSikyAPIInstance = new SikyAPI();
-			}
-
-			return m_clSikyAPIInstance;
 
 		}
-	
+		
 	};
 	

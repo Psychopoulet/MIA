@@ -1,4 +1,4 @@
-app.controller('ControllerYoutubeList', ['$scope', '$popup', 'ModelChildren', function($scope, $popup, ModelChildren) {
+app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', function($scope, $popup, ModelChildren) {
 
 	"use strict";
 
@@ -59,7 +59,7 @@ app.controller('ControllerYoutubeList', ['$scope', '$popup', 'ModelChildren', fu
 
                         $scope.videos.push(video);
 
-                        // socket.emit('web.youtube.add', video)
+                        // socket.emit('web.videos.add', video)
 
     			};
 
@@ -79,7 +79,7 @@ app.controller('ControllerYoutubeList', ['$scope', '$popup', 'ModelChildren', fu
 
                         }
 
-                        // socket.emit('web.youtube.edit', video)
+                        // socket.emit('web.videos.edit', video)
 
     			};
 
@@ -98,7 +98,7 @@ app.controller('ControllerYoutubeList', ['$scope', '$popup', 'ModelChildren', fu
 
                         }
 
-                        // socket.emit('web.youtube.delete', video)
+                        // socket.emit('web.videos.delete', video)
 
                     }
 
@@ -114,7 +114,7 @@ app.controller('ControllerYoutubeList', ['$scope', '$popup', 'ModelChildren', fu
 
                 $scope.play = function () {
 
-                    socket.emit('web.youtube.play', {
+                    socket.emit('web.videos.play', {
                         token : $scope.selectedchild.token,
                         url : $scope.selectedvideo.url
                     });
@@ -136,29 +136,29 @@ app.controller('ControllerYoutubeList', ['$scope', '$popup', 'ModelChildren', fu
 
                 socket
                     .on('disconnect', function () {
-                        socket.removeAllListeners('web.youtube.getall');
-                        socket.removeAllListeners('web.youtube.error');
+                        socket.removeAllListeners('web.videos.getall');
+                        socket.removeAllListeners('web.videos.error');
                     })
                     .on('connect', function () {
 
                         socket
                             .on('web.logged', function () {
-                                socket.emit('web.youtube.getall');
+                                socket.emit('web.videos.getall');
                             })
-                            .on('web.youtube.getall', function (p_tabData) {
+                            .on('web.videos.getall', function (p_tabData) {
                                 $scope.videos = p_tabData;
                                 $scope.loading = false;
                                 $scope.$apply();
                             })
-                            .on('web.youtube.error', $popup.alert);
+                            .on('web.videos.error', $popup.alert);
 
                     });
 
             // interface
 
-    			jQuery('#menuYoutube').click(function(e) {
+    			jQuery('#menuVideos').click(function(e) {
     				e.preventDefault();
-    				jQuery('#modalYoutube').modal('show');
+    				jQuery('#modalVideos').modal('show');
     			});
                 
 }]);

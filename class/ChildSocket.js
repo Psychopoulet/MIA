@@ -4,6 +4,8 @@
 	var
 		path = require('path'),
 		q = require('q'),
+		
+		Container = require(path.join(__dirname, 'Container.js')),
 		Logs = require(path.join(__dirname, 'Logs.js'));
 		
 // module
@@ -26,13 +28,13 @@
 			
 			// public
 				
-				this.start = function (p_nPort, p_fCallback) {
+				this.start = function () {
 					
 					var deferred = q.defer();
 
 						try {
 
-							m_clSocketServer = require('socket.io').listen(p_nPort);
+							m_clSocketServer = require('socket.io').listen(Container.get('conf').get('childrenport'));
 
 							m_clSocketServer.sockets.on('connection', function (socket) {
 
@@ -92,7 +94,7 @@
 								
 							});
 
-							m_clLog.success('-- [child socket server] started');
+							m_clLog.success('-- [child socket server] started on port ' + Container.get('conf').get('childrenport'));
 							
 							deferred.resolve();
 
@@ -105,7 +107,7 @@
 
 				};
 				
-				this.stop = function (p_fCallback) {
+				this.stop = function () {
 
 					var deferred = q.defer();
 

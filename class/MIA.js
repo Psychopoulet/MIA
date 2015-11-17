@@ -33,7 +33,7 @@
 
 							// events
 
-								Container.getHTTPSocketInstance()
+								Container.get('server.socket.web')
 									.onDisconnect(function(socket) {
 										socket.removeAllListeners('web.getconnected');
 										socket.removeAllListeners('web.login');
@@ -42,7 +42,7 @@
 
 										socket
 											.on('web.getconnected', function () {
-												Container.getHTTPSocketInstance().emit('web.getconnected', Container.getChildSocketInstance().getConnectedChilds());
+												Container.get('server.socket.web').emit('web.getconnected', Container.get('server.socket.child').getConnectedChilds());
 											})
 											.on('web.login', function (p_stData) {
 
@@ -51,11 +51,11 @@
 												}
 												else {
 
-													Container.getSikyAPIInstance().login(p_stData.email, p_stData.password)
+													Container.get('sikyapi').login(p_stData.email, p_stData.password)
 														.then(function () {
 
 															m_stSIKYUser = {
-																token : Container.getSikyAPIInstance().getToken(),
+																token : Container.get('sikyapi').getToken(),
 																email : p_stData.email,
 																password : p_stData.password
 															};
@@ -75,22 +75,22 @@
 
 									});
 
-								Container.getChildSocketInstance()
+								Container.get('server.socket.child')
 									.onDisconnect(function(socket) {
-										Container.getHTTPSocketInstance().emit('web.disconnected', socket.MIA);
+										Container.get('server.socket.web').emit('web.disconnected', socket.MIA);
 									})
 									.onConnection(function(socket) {
-										Container.getHTTPSocketInstance().emit('web.connection', socket.MIA);
+										Container.get('server.socket.web').emit('web.connection', socket.MIA);
 									});
 
 							// run
 
-								Container.getHTTPServerInstance().start(Container.getConfInstance().getConf().portweb)
+								Container.get('server.http').start()
 									.then(function() {
 
 										// plugins
 
-											Container.getPluginsInstance().getData()
+											Container.get('plugins').getData()
 												.then(function(p_tabData) {
 
 													p_tabData.forEach(function(p_stPlugin) {
@@ -110,10 +110,10 @@
 											
 										// start
 											
-											Container.getHTTPSocketInstance().start(Container.getHTTPServerInstance().getServer())
+											Container.get('server.socket.web').start(Container.get('server.http').getServer())
 												.then(function () {
 													
-													Container.getChildSocketInstance().start(Container.getConfInstance().getConf().portchildren)
+													Container.get('server.socket.child').start()
 														.then(deferred.resolve)
 														.catch(deferred.reject);
 														
@@ -138,13 +138,13 @@
 
 						try {
 
-							Container.getChildSocketInstance().stop()
+							Container.get('server.socket.child').stop()
 								.then(function () {
 									
-									Container.getHTTPSocketInstance().stop()
+									Container.get('server.socket.web').stop()
 										.then(function () {
 											
-											Container.getHTTPServerInstance().stop()
+											Container.get('server.http').stop()
 												.then(deferred.resolve)
 												.catch(deferred.reject);
 											
@@ -161,10 +161,6 @@
 						
 					return deferred.promise;
 
-				};
-				
-				this.getVersion = function () {
-					return '0.0.1'
 				};
 				
 	};

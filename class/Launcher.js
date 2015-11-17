@@ -5,6 +5,8 @@
 		path = require('path'),
 		fs = require('fs'),
 		q = require('q'),
+		
+		Container = require(path.join(__dirname, 'Container.js')),
 		Logs = require(path.join(__dirname, 'Logs.js')),
 		MIA = require(path.join(__dirname, 'MIA.js'));
 		
@@ -17,12 +19,9 @@
 		// attributes
 			
 			var
-				m_clThis = this,
+				that = this,
 				m_sCommandFile = path.join(__dirname, '../', 'command.tmp'),
-				m_tabArgs = process.argv.slice(2),
-				m_sLaunchType = (0 < m_tabArgs.length) ? m_tabArgs[0] : '',
-				m_clLog = new Logs(path.join(__dirname, '..', 'logs')),
-				m_clMIA = new MIA();
+				m_clLog = new Logs(path.join(__dirname, '..', 'logs'));
 				
 		// methodes
 
@@ -35,20 +34,20 @@
 						try {
 
 							if (fs.existsSync(m_sCommandFile)) {
-								m_clLog.err('An another server is already running.');
+								deferred.reject('An another server is already running.');
 							}
 							else {
 
-								fs.writeFile(m_sCommandFile, process.pid, function (e) {
+								fs.writeFile(m_sCommandFile, process.pid, function (err) {
 									
-									if (e) {
-										deferred.reject((e.message) ? e.message : e);
+									if (err) {
+										deferred.reject((err.message) ? err.message : err);
 									}
 									else {
 
 										m_clLog.log('[START ' + process.pid + ']');
 										
-										m_clMIA.start()
+										new MIA().start()
 											.then(deferred.resolve)
 											.catch(deferred.reject);
 
@@ -67,7 +66,7 @@
 
 				};
 				
-				this.stop = function (p_fCallback) {
+				this.stop = function () {
 
 					var deferred = q.defer();
 
@@ -103,7 +102,7 @@
 											}
 											else {
 
-												m_clMIA.stop()
+												new MIA().stop()
 													.then(function () {
 
 														var sPID = p_sData.toString();
@@ -139,134 +138,82 @@
 
 				};
 				
-				this.help = function () {
-
-					var deferred = q.defer();
-
-						try {
-
-							console.log('--help | -H : get the commands');
-							console.log('--version | -V : get the soft version');
-							console.log('--start | -S : start MIA');
-							console.log('--end | -E : stop MIA');
-							console.log('--restart | -R : restart MIA');
-							console.log('--webport | -WP : configure the watched port for the web interface');
-							console.log('--childrenport | -CP : configure the watched port for the children communication');
-
-						}
-						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
-						}
-						
-					return deferred.promise;
-
-				};
-				
-				this.setWebPort = function () {
-
-					var deferred = q.defer();
-
-						try {
-
-							if (m_tabArgs[1]) {
-
-								require(path.join(__dirname, 'Container.js')).getConfInstance().setConfOption('portweb', parseInt(m_tabArgs[1])).save()
-									.then(deferred.resolve)
-									.catch(deferred.reject);
-
-							}
-							else {
-								deferred.reject('\'port\' missing');
-							}
-
-						}
-						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
-						}
-						
-					return deferred.promise;
-
-				};
-				
-				this.setChildrenPort = function () {
-
-					var deferred = q.defer();
-
-						try {
-
-							if (m_tabArgs[1]) {
-
-								require(path.join(__dirname, 'Container.js')).getConfInstance().setConfOption('portchildren', parseInt(m_tabArgs[1])).save()
-									.then(deferred.resolve)
-									.catch(deferred.reject);
-
-							}
-							else {
-								deferred.reject('\'port\' missing');
-							}
-
-						}
-						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
-						}
-						
-					return deferred.promise;
-
-				};
-				
 		// construct
-			
-			switch (m_sLaunchType) {
-				
-				case '--version' :
-				case '-V' :
-					console.log(m_clMIA.getVersion());
-				break;
-				
-				case '--help' :
-				case '-H' :
-					this.help().catch(function (err) { m_clLog.err(err); });
-				break;
-				
-				case '--start' :
-				case '-S' :
-					this.start().catch(function (err) { m_clLog.err(err); });
-				break;
-				
-				case '--end' :
-				case '-E' :
-					this.stop().catch(function (err) { m_clLog.err(err); });
-				break;
-				
-				case '--restart' :
-				case '-R' :
 
-					this.stop()
+			var sLaunchType = 'restart';
+
+			for (var i = 2, l = process.argv.length; i < l; ++i) {
+
+				var value = process.argv[i];
+
+				switch (value) {
+					
+					case '--version' : case '-V' :
+						console.log('0.0.2');
+					break;
+					
+					case '--help' : case '-H' :
+						
+						console.log('--help | -H : get the commands');
+						console.log('--version | -V : get the soft version');
+						console.log('--start | -S : start MIA');
+						console.log('--end | -E : stop MIA');
+						console.log('--restart | -R : restart MIA');
+						console.log('--webport | -WP : configure the watched port for the web interface');
+						console.log('--childrenport | -CP : configure the watched port for the children communication');
+
+					break;
+					
+					case '--start' : case '-S' :
+						sLaunchType = 'start';
+					break;
+					case '--end' : case '-E' :
+						sLaunchType = 'stop';
+					break;
+					case '--restart' : case '-R' :
+						sLaunchType = 'restart';
+					break;
+					
+					case '--webport' : case '-WP' :
+
+						if (i + 1 < l) {
+							Container.get('conf').set('webport', parseInt(process.argv[i+1]));
+						}
+
+					break;
+					
+					case '--childrenport' : case '-CP' :
+
+						if (i + 1 < l) {
+							Container.get('conf').set('childrenport', parseInt(process.argv[i+1]));
+						}
+
+					break;
+					
+				}
+
+			}
+
+			switch (sLaunchType) {
+
+				case 'start' :
+					that.start().catch(function (err) { m_clLog.err(err); });
+				break;
+				
+				case 'stop' :
+					that.stop().catch(function (err) { m_clLog.err(err); });
+				break;
+				
+				case 'restart' :
+
+					that.stop()
 						.then(function () {
-							m_clThis.start().catch(function (err) { m_clLog.err(err); });
+							that.start().catch(function (err) { m_clLog.err(err); });
 						})
 						.catch(function (err) { m_clLog.err(err); });
 
 				break;
-				
-				case '--webport' :
-				case '-WP' :
-					this.setWebPort().catch(function (err) { m_clLog.err(err); });
-				break;
-				
-				case '--childrenport' :
-				case '-CP' :
-					this.setChildrenPort().catch(function (err) { m_clLog.err(err); });
-				break;
-				
-				case '' :
-					m_clLog.err('Arg empty');
-				break;
-				
-				default :
-					m_clLog.err('Unknown arg \'' + m_sLaunchType + '\'');
-				break;
-				
+					
 			}
 			
 	};

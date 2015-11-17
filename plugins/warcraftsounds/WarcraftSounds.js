@@ -58,7 +58,7 @@
 
 			// events
 
-				Container.getHTTPSocketInstance()
+				Container.get('server.socket.web')
 					.onDisconnect(function(socket) {
 
 						socket.removeAllListeners('web.warcraftsounds.getall');
@@ -91,7 +91,7 @@
 									}
 									else {
 										m_clLog.log('web.warcraftsounds.action.play : ' + p_stData.action.name);
-										Container.getChildSocketInstance().emitTo(p_stData.child.token, 'child.warcraftsounds.action.play', p_stData.action);
+										Container.get('server.socket.child').emitTo(p_stData.child.token, 'child.warcraftsounds.action.play', p_stData.action);
 									}
 
 								}
@@ -111,7 +111,7 @@
 									}
 									else {
 										m_clLog.log('web.warcraftsounds.music.play : ' + p_stData.music.name);
-										Container.getChildSocketInstance().emitTo(p_stData.child.token, 'child.warcraftsounds.music.play', p_stData.music);
+										Container.get('server.socket.child').emitTo(p_stData.child.token, 'child.warcraftsounds.music.play', p_stData.music);
 									}
 
 								}
@@ -131,7 +131,7 @@
 									}
 									else {
 										m_clLog.log('web.warcraftsounds.warning.play : ' + p_stData.warning.name);
-										Container.getChildSocketInstance().emitTo(p_stData.child.token, 'child.warcraftsounds.warning.play', p_stData.warning);
+										Container.get('server.socket.child').emitTo(p_stData.child.token, 'child.warcraftsounds.warning.play', p_stData.warning);
 									}
 
 								}
@@ -140,7 +140,7 @@
 
 					});
 
-				Container.getChildSocketInstance()
+				Container.get('server.socket.child')
 					.onDisconnect(function(socket) {
 
 						socket.removeAllListeners('child.warcraftsounds.error');
@@ -156,19 +156,19 @@
 
 							.on('child.warcraftsounds.error', function (error) {
 								m_clLog.err(error);
-								Container.getHTTPSocketInstance().emit('child.warcraftsounds.error', error);
+								Container.get('server.socket.web').emit('child.warcraftsounds.error', error);
 							})
 							.on('child.warcraftsounds.action.played', function (p_stData) {
 								m_clLog.success('child.warcraftsounds.action.played : ' + p_stData.name);
-								Container.getHTTPSocketInstance().emit('child.warcraftsounds.action.played', p_stData);
+								Container.get('server.socket.web').emit('child.warcraftsounds.action.played', p_stData);
 							})
 							.on('child.warcraftsounds.music.played', function (p_stData) {
 								m_clLog.success('child.warcraftsounds.music.played : ' + p_stData.name);
-								Container.getHTTPSocketInstance().emit('child.warcraftsounds.music.played', p_stData);
+								Container.get('server.socket.web').emit('child.warcraftsounds.music.played', p_stData);
 							})
 							.on('child.warcraftsounds.warning.played', function (p_stData) {
 								m_clLog.success('child.warcraftsounds.warning.played : ' + p_stData.name);
-								Container.getHTTPSocketInstance().emit('child.warcraftsounds.warning.played', p_stData);
+								Container.get('server.socket.web').emit('child.warcraftsounds.warning.played', p_stData);
 							})
 
 							.emit('child.warcraftsounds.action.play', {"coderace":"humans","codecharacter":"peasant","code":"ready","name":"ready","url":"http://warhuman.voila.net/SoundHuman/Peasant/VF/PeasantReady1_w3.mp3"});
@@ -179,15 +179,15 @@
 
 				_readCache();
 
-				Container.getSikyAPIInstance().query('warcraftsounds', '/races/complete', 'GET')
+				Container.get('sikyapi').query('warcraftsounds', '/races/complete', 'GET')
 					.then(function (p_tabRaces) {
 						m_tabData = p_tabRaces;
-						Container.getHTTPSocketInstance().emit('child.warcraftsounds.getall', m_tabData);
+						Container.get('server.socket.web').emit('child.warcraftsounds.getall', m_tabData);
 						_writeCache();
 					})
 					.catch(function (err){
 						m_clLog.err(err);
-						Container.getHTTPSocketInstance().emit('child.warcraftsounds.error', err);
+						Container.get('server.socket.web').emit('child.warcraftsounds.error', err);
 					});
 					
 	};

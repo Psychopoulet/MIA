@@ -9,6 +9,7 @@
 		app = require('express')(),
 		http = require('http').Server(app),
 
+		Container = require(path.join(__dirname, 'Container.js')),
 		Logs = require(path.join(__dirname, 'Logs.js'));
 		
 // module
@@ -21,7 +22,7 @@
 			
 			var
 				m_sDirWeb = path.join(__dirname, '..', 'web'),
-				m_clPlugins = require(path.join(__dirname, 'Container.js')).getPluginsInstance(),
+				m_clPlugins = require(path.join(__dirname, 'Container.js')).get('plugins'),
 				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'httpserver')),
 
 				m_sTemplatesBufferFile = "",
@@ -157,7 +158,7 @@ q
 					return http;
 				};
 				
-				this.start = function (p_nPort) {
+				this.start = function () {
 
 					var deferred = q.defer();
 
@@ -319,8 +320,8 @@ q
 													_404(req, res);
 												});
 
-										http.listen(p_nPort, function () {
-											m_clLog.success('-- [HTTP server] started');
+										http.listen(Container.get('conf').get('webport'), function () {
+											m_clLog.success('-- [HTTP server] started on port ' + Container.get('conf').get('webport'));
 										});
 
 									deferred.resolve();
@@ -337,7 +338,7 @@ q
 
 				};
 				
-				this.stop = function (p_fCallback) {
+				this.stop = function () {
 
 					var deferred = q.defer();
 
