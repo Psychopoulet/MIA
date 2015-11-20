@@ -84,7 +84,6 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
                                 socket.emit('web.warcraftsounds.getall');
                             })
                             .on('web.warcraftsounds.getall', function (p_tabData) {
-                                console.log(p_tabData);
                                 $scope.races = p_tabData;
                                 $scope.loading = false;
                                 $scope.$apply();

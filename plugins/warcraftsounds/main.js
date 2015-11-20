@@ -24,13 +24,25 @@
 				function _readCache() {
 					
 					if (fs.existsSync(m_sLocalFile)) {
-						m_tabData = JSON.parse(fs.readFileSync(m_sLocalFile, 'utf8'));
+
+						try {
+							m_tabData = JSON.parse(fs.readFileSync(m_sLocalFile, 'utf8'));
+						}
+						catch(e) {
+							m_clLog.err((e.message) ? e.message : e);
+						}
+
 					}
 
 				}
 
 				function _writeCache() {
-					fs.writeFileSync(m_sLocalFile, JSON.stringify(m_tabData), 'utf8');
+					try {
+						fs.writeFileSync(m_sLocalFile, JSON.stringify(m_tabData), 'utf8');
+					}
+					catch(e) {
+						m_clLog.err((e.message) ? e.message : e);
+					}
 				}
 
 				function _check(p_clSocket, p_stData) {
@@ -159,15 +171,15 @@
 								Container.get('server.socket.web').emit('child.warcraftsounds.error', error);
 							})
 							.on('child.warcraftsounds.action.played', function (p_stData) {
-								m_clLog.success('child.warcraftsounds.action.played : ' + p_stData.name);
+								m_clLog.log('child.warcraftsounds.action.played : ' + p_stData.name);
 								Container.get('server.socket.web').emit('child.warcraftsounds.action.played', p_stData);
 							})
 							.on('child.warcraftsounds.music.played', function (p_stData) {
-								m_clLog.success('child.warcraftsounds.music.played : ' + p_stData.name);
+								m_clLog.log('child.warcraftsounds.music.played : ' + p_stData.name);
 								Container.get('server.socket.web').emit('child.warcraftsounds.music.played', p_stData);
 							})
 							.on('child.warcraftsounds.warning.played', function (p_stData) {
-								m_clLog.success('child.warcraftsounds.warning.played : ' + p_stData.name);
+								m_clLog.log('child.warcraftsounds.warning.played : ' + p_stData.name);
 								Container.get('server.socket.web').emit('child.warcraftsounds.warning.played', p_stData);
 							})
 
@@ -180,14 +192,15 @@
 				_readCache();
 
 				Container.get('sikyapi').query('warcraftsounds', '/races/complete', 'GET')
-					.then(function (p_tabRaces) {
-						m_tabData = p_tabRaces;
-						Container.get('server.socket.web').emit('child.warcraftsounds.getall', m_tabData);
+					.then(function (p_tabData) {
+						m_tabData = p_tabData;
+						Container.get('server.socket.web').emit('web.warcraftsounds.getall', m_tabData);
+						m_clLog.log('web.warcraftsounds.getall');
 						_writeCache();
 					})
 					.catch(function (err){
 						m_clLog.err(err);
-						Container.get('server.socket.web').emit('child.warcraftsounds.error', err);
+						Container.get('server.socket.web').emit('web.warcraftsounds.error', err);
 					});
 					
 	};

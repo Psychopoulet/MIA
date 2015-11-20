@@ -18,13 +18,17 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
             function _formateVideo(p_stVideo) {
 
+                p_stVideo.url = p_stVideo.url
+                            .replace('http://', 'https://')
+                            .replace('//youtu', '//www.youtu')
+                            .replace('youtu.be', 'youtube.com');
+
                 return {
                     name : p_stVideo.name,
-                    url : p_stVideo.url
-                            .replace('http://', 'https://').replace('http://', 'https://').replace('https://youtu', 'https://www.youtu')
-                            .replace('youtu.be', 'youtube.com')
-                            .replace('.com/', '.com/embed/')
-                            .replace('watch?v=', '')
+                    url : p_stVideo.url,
+                    urlembeded : p_stVideo.url
+                                    .replace('.com/', '.com/embed/')
+                                    .replace('watch?v=', '')
                 };
 
             }
@@ -59,7 +63,7 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
                         $scope.videos.push(video);
 
-                        // socket.emit('web.videos.add', video)
+                        socket.emit('web.videos.add', video)
 
     			};
 
@@ -79,7 +83,7 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
                         }
 
-                        // socket.emit('web.videos.edit', video)
+                        socket.emit('web.videos.edit', video)
 
     			};
 
@@ -98,7 +102,7 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
                         }
 
-                        // socket.emit('web.videos.delete', video)
+                        socket.emit('web.videos.delete', video)
 
                     }
 
@@ -107,7 +111,7 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
             // preview
 
                 $scope.preview = function () {
-                    $popup.preview($scope.selectedvideo.url, $scope.selectedvideo.name);
+                    $popup.preview($scope.selectedvideo.urlembeded, $scope.selectedvideo.name);
                 };
 
             // play
@@ -116,7 +120,7 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
                     socket.emit('web.videos.play', {
                         token : $scope.selectedchild.token,
-                        url : $scope.selectedvideo.url
+                        video : $scope.selectedvideo
                     });
 
                 };

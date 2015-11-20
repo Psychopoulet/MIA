@@ -107,7 +107,7 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
             // preview
 
                 $scope.preview = function () {
-                    $popup.preview($scope.selectedvideo.url, $scope.selectedvideo.name);
+                    $popup.preview($scope.selectedvideo.urlembeded, $scope.selectedvideo.name);
                 };
 
             // play
@@ -116,7 +116,7 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
                     socket.emit('web.videos.play', {
                         token : $scope.selectedchild.token,
-                        url : $scope.selectedvideo.url
+                        video : $scope.selectedvideo
                     });
 
                 };
@@ -247,7 +247,6 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                                 socket.emit('web.warcraftsounds.getall');
                             })
                             .on('web.warcraftsounds.getall', function (p_tabData) {
-                                console.log(p_tabData);
                                 $scope.races = p_tabData;
                                 $scope.loading = false;
                                 $scope.$apply();

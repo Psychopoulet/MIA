@@ -36,6 +36,7 @@
 						<tr>
 							<th>Name</th>
 							<th>Address</th>
+							<th>Embeded</th>
 						</tr>
 					</thead>
 
@@ -48,6 +49,7 @@
 						<tr data-ng-show="videos.length" data-ng-repeat="video in videos" data-ng-class="{ 'info' : selectedvideo && video.id == selectedvideo.id }" data-ng-click="selectVideo(video)">
 							<td>{{video.name}}</td>
 							<td>{{video.url}}</td>
+							<td>{{video.urlembeded}}</td>
 						</tr>
 
 					</tbody>
