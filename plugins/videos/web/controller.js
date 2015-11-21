@@ -102,7 +102,7 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
                         }
 
-                        socket.emit('web.videos.delete', video)
+                        socket.emit('web.videos.delete', $scope.selectedvideo)
 
                     }
 

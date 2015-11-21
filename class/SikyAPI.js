@@ -25,6 +25,10 @@
 
 				function _HTTPRequest(p_sUrl, p_sMethod, p_tabData) {
 
+					console.log(p_sUrl);
+					console.log(p_sMethod);
+					console.log(p_tabData);
+				
 					var deferred = q.defer(), sPOSTData = '', stOptions = {};
 						
 						p_tabData = (!p_tabData) ? {} : p_tabData;
@@ -144,7 +148,7 @@
 			// public
 
 				this.query = function (p_sApplicationUrl, p_sUrl, p_sMethod, p_stData) {
-				
+
 					var deferred = q.defer(), sUrl = '/fr/' + p_sApplicationUrl + '/api/' + p_sUrl;
 						
 						_HTTPRequest(sUrl, p_sMethod, p_stData)

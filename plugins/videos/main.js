@@ -37,12 +37,35 @@
 				}
 
 				function _writeCache() {
+
 					try {
 						fs.writeFileSync(m_sLocalFile, JSON.stringify(m_tabData), 'utf8');
 					}
 					catch(e) {
 						m_clLog.err((e.message) ? e.message : e);
 					}
+
+				}
+
+				function _loadFormSIKY() {
+
+					Container.get('sikyapi').onLogin(function() {
+
+						Container.get('sikyapi').query('videos', 'videos', 'GET')
+							.then(function (p_tabData) {
+								console.log(p_tabData);
+								m_tabData = p_tabData;
+								_writeCache();
+								Container.get('server.socket.web').emit('web.videos.getall', m_tabData);
+								m_clLog.log('web.videos.getall');
+							})
+							.catch(function (err){
+								m_clLog.err(err);
+								Container.get('server.socket.web').emit('web.videos.error', err);
+							});
+
+					});
+
 				}
 
 		// constructor
@@ -57,6 +80,66 @@
 					.onConnection(function(socket) {
 
 						socket
+						
+							.on('web.videos.add', function (data) {
+
+								m_tabData.push(data);
+								_writeCache();
+								Container.get('server.socket.web').emit('web.videos.getall', m_tabData);
+								
+								Container.get('sikyapi').query('videos', 'videos', 'POST')
+									.then(_loadFormSIKY)
+									.catch(function (err){
+										m_clLog.err(err);
+										Container.get('server.socket.web').emit('web.videos.error', err);
+									});
+
+							})
+							.on('web.videos.edit', function (data) {
+
+								for (var i = 0, l = m_tabData.length; i < l; ++i) {
+
+									if (data.id == m_tabData[i].id) {
+										m_tabData[i] = data;
+										break;
+									}
+
+								}
+
+								_writeCache();
+								Container.get('server.socket.web').emit('web.videos.getall', m_tabData);
+
+								Container.get('sikyapi').query('videos', 'videos/' + data.id, 'PUT')
+									.then(_loadFormSIKY)
+									.catch(function (err){
+										m_clLog.err(err);
+										Container.get('server.socket.web').emit('web.videos.error', err);
+									});
+
+							})
+							.on('web.videos.delete', function (data) {
+
+								for (var i = 0, l = m_tabData.length; i < l; ++i) {
+
+									if (data.id == m_tabData[i].id) {
+										m_tabData.slice(i, 1);
+										break;
+									}
+
+								}
+
+								_writeCache();
+								Container.get('server.socket.web').emit('web.videos.getall', m_tabData);
+
+								Container.get('sikyapi').query('videos', 'videos/' + data.id, 'DELETE')
+									.then(_loadFormSIKY)
+									.catch(function (err){
+										m_clLog.err(err);
+										Container.get('server.socket.web').emit('web.videos.error', err);
+									});
+
+							})
+
 							.on('web.videos.play', function (data) {
 
 								if (!data) {
@@ -72,14 +155,12 @@
 									socket.emit('web.videos.error', 'Missing \'video\' data');
 								}
 								else {
-									console.log(data.token);
-									console.log(data.video);
 									Container.get('server.socket.child').emitTo(data.token, 'child.videos.play', data.video);
 								}
 
 							})
+
 							.on('web.videos.getall', function () {
-								m_clLog.log('web.videos.getall');
 								socket.emit('web.videos.getall', m_tabData);
 							});
 
@@ -90,6 +171,7 @@
 
 						socket.removeAllListeners('child.videos.error');
 						socket.removeAllListeners('child.videos.played');
+						socket.removeAllListeners('child.videos.downloaded');
 
 						Container.get('server.socket.web').emit('child.disconnected', socket.MIA);
 
@@ -104,6 +186,10 @@
 							.on('child.videos.played', function () {
 								m_clLog.log('child.videos.played');
 								Container.get('server.socket.child').emit('child.videos.played');
+							})
+							.on('child.videos.downloaded', function (video) {
+								m_clLog.log('child.videos.downloaded');
+								Container.get('server.socket.child').emit('child.videos.downloaded', video);
 							});
 
 					});
@@ -111,21 +197,6 @@
 			// data
 
 				_readCache();
-
-				Container.get('sikyapi').onLogin(function() {
-					
-					Container.get('sikyapi').query('videos', 'videos', 'GET')
-						.then(function (p_tabData) {
-							m_tabData = p_tabData;
-							Container.get('server.socket.web').emit('web.videos.getall', m_tabData);
-							m_clLog.log('web.videos.getall');
-							_writeCache();
-						})
-						.catch(function (err){
-							m_clLog.err(err);
-							Container.get('server.socket.web').emit('web.videos.error', err);
-						});
-
-				});
+				_loadFormSIKY();
 
 	};

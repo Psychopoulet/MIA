@@ -169,7 +169,7 @@ q
 								m_clPlugins.getData()
 									.then(function (p_tabData) {
 
-										m_sTemplatesBufferFile = path.join(__dirname, '..', 'web', 'templates', 'plugins.html');
+										m_sTemplatesBufferFile = path.join(__dirname, '..', 'web', 'buffers', 'plugins.html');
 
 										try {
 											if (fs.lstatSync(m_sTemplatesBufferFile).isFile()) {
@@ -178,7 +178,7 @@ q
 										}
 										catch(e) {}
 
-										m_sJavascriptsBufferFile = path.join(__dirname, '..', 'web', 'js', 'plugins.js');
+										m_sJavascriptsBufferFile = path.join(__dirname, '..', 'web', 'buffers', 'plugins.js');
 
 										try {
 											if (fs.lstatSync(m_sJavascriptsBufferFile).isFile()) {
