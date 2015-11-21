@@ -53,7 +53,6 @@
 
 						Container.get('sikyapi').query('videos', 'videos', 'GET')
 							.then(function (p_tabData) {
-								console.log(p_tabData);
 								m_tabData = p_tabData;
 								_writeCache();
 								Container.get('server.socket.web').emit('web.videos.getall', m_tabData);

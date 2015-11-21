@@ -25,10 +25,6 @@
 
 				function _HTTPRequest(p_sUrl, p_sMethod, p_tabData) {
 
-					console.log(p_sUrl);
-					console.log(p_sMethod);
-					console.log(p_tabData);
-				
 					var deferred = q.defer(), sPOSTData = '', stOptions = {};
 						
 						p_tabData = (!p_tabData) ? {} : p_tabData;

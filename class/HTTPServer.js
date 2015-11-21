@@ -35,8 +35,12 @@
 				// response
 					
 					function _sendResponse(res, p_nCode, p_sContentType, p_sMessage) {
-						res.writeHead(p_nCode, {'Content-Type': p_sContentType});
-						res.end(p_sMessage);
+						if (res.writeHead) {
+							res.writeHead(p_nCode, {'Content-Type': p_sContentType});
+						}
+						if (res.end) {
+							res.end(p_sMessage);
+						}
 					}
 						
 						function _sendHTMLResponse(res, p_nCode, p_sMessage) {
@@ -218,7 +222,7 @@ q
 												_readFile('templates', 'index.html')
 													.then(function (index) {
 
-														_readFile('templates', 'plugins.html')
+														_readFile('buffers', 'plugins.html')
 															.then(function(sHTML) {
 																_sendHTMLResponse(res, 200, index.replace('{{pages}}', sHTML));
 															})
