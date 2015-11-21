@@ -73,6 +73,9 @@
 
 				Container.get('server.socket.web')
 					.onDisconnect(function(socket) {
+						socket.removeAllListeners('web.videos.add');
+						socket.removeAllListeners('web.videos.edit');
+						socket.removeAllListeners('web.videos.delete');
 						socket.removeAllListeners('web.videos.play');
 						socket.removeAllListeners('web.videos.getall');
 					})
