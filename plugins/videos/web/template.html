@@ -10,96 +10,121 @@
 
 			<div class="modal-body">
 
-                <form class="form-inline form-group">
+				<div class="row">
 
-                    <div class="form-group">
-                    	<input type="text" data-ng-model="selectedvideo.name" class="form-control" />
-                    </div>
+					<div class="col-xs-4">
+						
+						<ul class="list-group">
 
-                    <div class="form-group">
-                    	<input type="text" data-ng-model="selectedvideo.url" class="form-control" />
-                    </div>
+							<li data-ng-show="loadingCategories">
+								loading...
+							</li>
 
-                    <button type="button" class="btn btn-primary" data-ng-disabled="loading" data-ng-class="{'disabled' : loading }" data-ng-click="add()">
-                        Add
-                    </button>
+							<li class="list-group-item pointer" data-ng-hide="loadingCategories"
+								data-ng-repeat="category in categories" data-ng-click="selectCategory(category)">
+								{{category.name}}
+							</li>
 
-                    <button type="button" class="btn btn-primary" data-ng-disabled="loading || !selectedvideo" data-ng-class="{'disabled' : loading || !selectedvideo }" data-ng-click="edit()">
-                        Edit
-                    </button>
+						</ul>
 
-                </form>
+					</div>
+					
+					<div class="col-xs-8">
+						
+						<form class="form-inline form-group">
 
-				<table class="table table-bordered table-hover">
+							<div class="form-group">
+								<input type="text" data-ng-model="selectedvideo.name" class="form-control" />
+							</div>
 
-					<thead>
-						<tr>
-							<th>Name</th>
-							<th>Address</th>
-							<th>Embeded</th>
-						</tr>
-					</thead>
+							<div class="form-group">
+								<input type="text" data-ng-model="selectedvideo.url" class="form-control" />
+							</div>
 
-					<tbody>
+							<button type="button" class="btn btn-primary" data-ng-disabled="loading" data-ng-class="{'disabled' : loading }" data-ng-click="add()">
+								Add
+							</button>
 
-						<tr data-ng-show="loading && !videos.length">
-							<td colspan="2">loading...</td>
-						</tr>
+							<button type="button" class="btn btn-primary" data-ng-disabled="loading || !selectedvideo" data-ng-class="{'disabled' : loading || !selectedvideo }" data-ng-click="edit()">
+								Edit
+							</button>
 
-						<tr data-ng-show="videos.length" data-ng-repeat="video in videos" data-ng-class="{ 'info' : selectedvideo && video.id == selectedvideo.id }" data-ng-click="selectVideo(video)">
-							<td>{{video.name}}</td>
-							<td>{{video.url}}</td>
-							<td>{{video.urlembeded}}</td>
-						</tr>
+						</form>
 
-					</tbody>
+						<table class="table table-bordered table-hover">
 
-				</table>
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>Address</th>
+									<th>Embeded</th>
+								</tr>
+							</thead>
 
-                <div class="row">
+							<tbody>
 
-                    <div class="col-xs-6">
+								<tr data-ng-show="loading && !videos.length">
+									<td colspan="2">loading...</td>
+								</tr>
 
-		                <form class="form-inline">
+								<tr data-ng-show="videos.length" data-ng-repeat="video in videos" data-ng-class="{ 'info' : selectedvideo && video.id == selectedvideo.id }" data-ng-click="selectVideo(video)">
+									<td>{{video.name}}</td>
+									<td>{{video.url}}</td>
+									<td>{{video.urlembeded}}</td>
+								</tr>
 
-		                	<div class="form-group">
-                    			<input 	type="button" class="btn btn-primary" value="Preview"
-		                        		data-ng-disabled="loading || !selectedvideo" data-ng-class="{'disabled' : loading || !selectedvideo }"
-		                        		data-ng-click="preview()" />
-		                    </div>
+							</tbody>
 
-		                	<div class="form-group">
-		                        <select class="form-control"
-		                        		data-ng-disabled="loading || !selectedvideo" data-ng-class="{'disabled' : loading || !selectedvideo }"
-		                        		data-ng-options="child.name for child in children"
-		                        		data-ng-model="selectedchild">
-		                        	<option value="">-- NC --</option>
-		                        </select>
-		                    </div>
+						</table>
 
-		                	<div class="form-group">
-                    			<input 	type="button" class="btn btn-primary" value="Play"
-		                        		data-ng-disabled="loading || !selectedvideo || !selectedchild" data-ng-class="{'disabled' : loading || !selectedvideo || !selectedchild }"
-		                        		data-ng-click="play()" />
-		                    </div>
+						<div class="row">
 
-	                	</form>
+							<div class="col-xs-6">
 
-                    </div>
+								<form class="form-inline">
 
-                    <div class="col-xs-6">
-	        			<input 	type="button" class="btn btn-primary pull-right" value="Delete"
-	                    		data-ng-disabled="loading || !selectedvideo" data-ng-class="{'disabled' : loading || !selectedvideo }"
-	                    		data-ng-click="delete()" />
-                    </div>
+				                	<div class="form-group">
+		                    			<input 	type="button" class="btn btn-primary" value="Preview"
+				                        		data-ng-disabled="loading || !selectedvideo" data-ng-class="{'disabled' : loading || !selectedvideo }"
+				                        		data-ng-click="preview()" />
+				                    </div>
 
-                </div>
+				                	<div class="form-group">
+				                        <select class="form-control"
+				                        		data-ng-disabled="loading || !selectedvideo" data-ng-class="{'disabled' : loading || !selectedvideo }"
+				                        		data-ng-options="child.name for child in children"
+				                        		data-ng-model="selectedchild">
+				                        	<option value="">-- NC --</option>
+				                        </select>
+				                    </div>
+
+				                	<div class="form-group">
+		                    			<input 	type="button" class="btn btn-primary" value="Play"
+				                        		data-ng-disabled="loading || !selectedvideo || !selectedchild" data-ng-class="{'disabled' : loading || !selectedvideo || !selectedchild }"
+				                        		data-ng-click="play()" />
+				                    </div>
+
+								</form>
+
+							</div>
+
+							<div class="col-xs-6">
+								<input 	type="button" class="btn btn-primary pull-right" value="Delete"
+										data-ng-disabled="loading || !selectedvideo" data-ng-class="{'disabled' : loading || !selectedvideo }"
+										data-ng-click="delete()" />
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
 
 			</div>
 
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	  		</div>
+			</div>
 
 		</div>
 

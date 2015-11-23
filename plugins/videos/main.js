@@ -163,9 +163,7 @@
 								// read
 
 									.on('web.videos.categories.getall', function () {
-
 										console.log(m_tabCategories);
-
 										socket.emit('web.videos.categories.getall', m_tabCategories);
 
 									})
