@@ -45,7 +45,7 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                 if (selected) {
                     $scope.selectedcategory = selected;
                     $scope.loadingVideos = true;
-                    socket.on('web.videos.videos.getallbycategory', $scope.selectedcategory);
+                    socket.emit('web.videos.videos.getallbycategory', $scope.selectedcategory);
                 }
                 else {
                     $scope.selectedcategory = null;
@@ -66,36 +66,61 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
             // model
 
-    			$scope.add = function () {
+                $scope.addCategory = function () {
+
+                    $popup.prompt('Nouvelle catégorie', function(name) {
+                        $scope.loading = true;
+                        socket.emit('web.videos.categories.add', { name : name });
+                    });
+
+                };
+
+                $scope.editCategory = function () {
+
+                    $popup.prompt('', function(name) {
+                        $scope.loading = true;
+                        $scope.selectedcategory.name = name;
+                        socket.emit('web.videos.categories.edit', $scope.selectedcategory);
+                    });
+
+                };
+
+                $scope.deleteCategory = function () {
+
+                    $popup.confirm('Voulez-vous vraiment supprimer "' + $scope.selectedcategory.name + '" ?', 'Confirmation', function() {
+                        $scope.loading = true;
+                        socket.emit('web.videos.categories.delete', $scope.selectedcategory);
+                        $scope.selectCategory(null);
+                    });
+
+                };
+
+
+    			$scope.addVideo = function () {
                     $scope.loading = true;
                     socket.emit('web.videos.videos.add', $scope.selectedvideo);
     			};
 
-    			$scope.edit = function () {
+    			$scope.editVideo = function () {
                     $scope.loading = true;
                     socket.emit('web.videos.videos.edit', $scope.selectedvideo);
     			};
 
-                $scope.delete = function () {
+                $scope.deleteVideo = function () {
 
-                    if (true == confirm('Do you really want to delete "' + $scope.selectedvideo.name + '" ?')) {
+                    $popup.confirm('Voulez-vous vraiment supprimer "' + $scope.selectedvideo.name + '" ?', 'Confirmation', function() {
                         $scope.loading = true;
                         socket.emit('web.videos.videos.delete', $scope.selectedvideo);
-                    }
+                        $scope.selectVideo(null);
+                    });
 
-                };
-
-            // preview
-
-                $scope.preview = function () {
-                    $popup.preview($scope.selectedvideo.urlembeded, $scope.selectedvideo.name);
                 };
 
             // play
 
                 $scope.play = function () {
 
-                    socket.emit('web.videos.play', {
+                    socket.emit('web.videos.videos.play', {
                         token : $scope.selectedchild.token,
                         video : $scope.selectedvideo
                     });
@@ -112,7 +137,6 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                 .onChange(function(p_tabData) {
                     $scope.children = p_tabData;
                     $scope.selectedchild = null;
-                    $scope.$apply();
                 });
 
             // sockets
@@ -124,17 +148,14 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
                         // categories
 
-                        socket.removeAllListeners('web.videos.categories.getall');
-                        socket.removeAllListeners('web.videos.categories.added');
-                        socket.removeAllListeners('web.videos.categories.edited');
-                        socket.removeAllListeners('web.videos.categories.deleted');
+                            socket.removeAllListeners('web.videos.categories.getall');
 
                         // videos
 
-                        socket.removeAllListeners('web.videos.videos.getallbycategory');
-                        socket.removeAllListeners('web.videos.videos.added');
-                        socket.removeAllListeners('web.videos.videos.edited');
-                        socket.removeAllListeners('web.videos.videos.deleted');
+                            socket.removeAllListeners('web.videos.videos.getallbycategory');
+                            socket.removeAllListeners('web.videos.videos.added');
+                            socket.removeAllListeners('web.videos.videos.edited');
+                            socket.removeAllListeners('web.videos.videos.deleted');
 
                     })
                     .on('connect', function () {
@@ -142,7 +163,6 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                         socket
 
                             .on('web.logged', function () {
-                                console.log('send web.videos.categories.getall');
                                 socket.emit('web.videos.categories.getall');
                             })
 
@@ -150,37 +170,19 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
                             // categories
 
-                            .on('web.videos.categories.getall', function (p_tabData) {
-                                console.log('receive web.videos.categories.getall');
-                                console.log(p_tabData);
-                                $scope.categories = p_tabData;
-                                $scope.loading = false; $scope.loadingCategories = false;
-                            })
-                            .on('web.videos.categories.added', function () {
-                                $scope.loading = false;
-                            })
-                            .on('web.videos.categories.edited', function () {
-                                $scope.loading = false;
-                            })
-                            .on('web.videos.categories.deleted', function () {
-                                $scope.loading = false;
-                            })
+                                .on('web.videos.categories.getall', function (p_tabData) {
+                                    $scope.categories = p_tabData;
+                                    $scope.loading = false; $scope.loadingCategories = false;
+                                    $scope.$apply();
+                                })
 
                             // videos
 
-                            .on('web.videos.videos.getallbycategory', function (p_tabData) {
-                                $scope.videos = p_tabData;
-                                $scope.loading = false; $scope.loadingVideos = false;
-                            })
-                            .on('web.videos.videos.added', function () {
-                                $scope.loading = false;
-                            })
-                            .on('web.videos.videos.edited', function () {
-                                $scope.loading = false;
-                            })
-                            .on('web.videos.videos.deleted', function () {
-                                $scope.loading = false;
-                            });
+                                .on('web.videos.videos.getallbycategory', function (p_tabData) {
+                                    $scope.videos = p_tabData;
+                                    $scope.loading = false; $scope.loadingVideos = false;
+                                    $scope.$apply();
+                                });
 
                     });
 
