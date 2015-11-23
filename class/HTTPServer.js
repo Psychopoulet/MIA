@@ -8,6 +8,7 @@
 		q = require('q'),
 		app = require('express')(),
 		http = require('http').Server(app),
+		mkdirp = require('mkdirp'),
 
 		Container = require(path.join(__dirname, 'Container.js')),
 		Logs = require(path.join(__dirname, 'Logs.js'));
@@ -168,171 +169,182 @@ q
 
 						try {
 
-							// lancement
+							var sBuffersPath = path.join(__dirname, '..', 'web', 'buffers');
 
-								m_clPlugins.getData()
-									.then(function (p_tabData) {
+							mkdirp(sBuffersPath, function (err) {
 
-										m_sTemplatesBufferFile = path.join(__dirname, '..', 'web', 'buffers', 'plugins.html');
+								if (err) {
+									deferred.reject((err.message) ? err.message : err);
+								}
+								else {
 
-										try {
-											if (fs.lstatSync(m_sTemplatesBufferFile).isFile()) {
-												fs.unlinkSync(m_sTemplatesBufferFile);
-											}
-										}
-										catch(e) {}
+									m_clPlugins.getData()
+										.then(function (p_tabData) {
 
-										m_sJavascriptsBufferFile = path.join(__dirname, '..', 'web', 'buffers', 'plugins.js');
+											m_sTemplatesBufferFile = path.join(sBuffersPath, 'plugins.html');
 
-										try {
-											if (fs.lstatSync(m_sJavascriptsBufferFile).isFile()) {
-												fs.unlinkSync(m_sJavascriptsBufferFile);
-											}
-										}
-										catch(e) {}
-
-										p_tabData.forEach(function(plugin) {
-
-											if (plugin.web) {
-												
-												if (plugin.web.templates && 0 < plugin.web.templates.length) {
-
-													plugin.web.templates.forEach(function(template) {
-														fs.appendFileSync(m_sTemplatesBufferFile, fs.readFileSync(template, 'utf8'), 'utf8');
-													});
-
+											try {
+												if (fs.lstatSync(m_sTemplatesBufferFile).isFile()) {
+													fs.unlinkSync(m_sTemplatesBufferFile);
 												}
-
-												if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
-
-													plugin.web.javascripts.forEach(function(javascript) {
-														fs.appendFileSync(m_sJavascriptsBufferFile, fs.readFileSync(javascript, 'utf8'), 'utf8');
-													});
-
-												}
-
 											}
+											catch(e) {}
 
-										});
+											m_sJavascriptsBufferFile = path.join(sBuffersPath, 'plugins.js');
 
-										app
+											try {
+												if (fs.lstatSync(m_sJavascriptsBufferFile).isFile()) {
+													fs.unlinkSync(m_sJavascriptsBufferFile);
+												}
+											}
+											catch(e) {}
 
-											.get('/', function (req, res) {
+											p_tabData.forEach(function(plugin) {
 
-												_readFile('templates', 'index.html')
-													.then(function (index) {
-
-														_readFile('buffers', 'plugins.html')
-															.then(function(sHTML) {
-																_sendHTMLResponse(res, 200, index.replace('{{pages}}', sHTML));
-															})
-															.catch(function (error) {
-																_500(res, index.replace('{{pages}}', error));
-															});
-
-													})
-													.catch(function (error) {
-														_500(res, error);
-													});
+												if (plugin.web) {
 													
-											})
+													if (plugin.web.templates && 0 < plugin.web.templates.length) {
 
-											// js
+														plugin.web.templates.forEach(function(template) {
+															fs.appendFileSync(m_sTemplatesBufferFile, fs.readFileSync(template, 'utf8'), 'utf8');
+														});
 
-												.get('/js/plugins.js', function (req, res) {
-													res.sendFile(m_sJavascriptsBufferFile);
-												})
-												.get('/js/children.js', function (req, res) {
+													}
 
-													_readAllFiles(path.join(m_sDirWeb, 'js'))
-														.then(function (data) {
-															_sendJSResponse(res, 200, data);
+													if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
+
+														plugin.web.javascripts.forEach(function(javascript) {
+															fs.appendFileSync(m_sJavascriptsBufferFile, fs.readFileSync(javascript, 'utf8'), 'utf8');
+														});
+
+													}
+
+												}
+
+											});
+
+											app
+
+												.get('/', function (req, res) {
+
+													_readFile('templates', 'index.html')
+														.then(function (index) {
+
+															_readFile('buffers', 'plugins.html')
+																.then(function(sHTML) {
+																	_sendHTMLResponse(res, 200, index.replace('{{pages}}', sHTML));
+																})
+																.catch(function (error) {
+																	_500(res, index.replace('{{pages}}', error));
+																});
+
 														})
 														.catch(function (error) {
 															_500(res, error);
 														});
-
-												})
-
-											// pictures
-
-												.get('/pictures/favicon.png', function (req, res) {
-													res.sendFile(path.join(m_sDirWeb, 'pictures', 'favicon.png'));
-												})
-
-											// libs
-
-												// css
-
-												.get('/libs/bootstrap.css', function (req, res) {
-
-													_readAllFiles(path.join(m_sDirWeb, 'libs', 'bootstrap', 'css'))
-														.then(function (data) {
-															_sendCSSResponse(res, 200, data);
-														})
-														.catch(function (error) {
-															_500(res, error);
-														});
-
+														
 												})
 
 												// js
-													
-												.get('/libs/jquery.js', function (req, res) {
 
-													_readAllFiles(path.join(m_sDirWeb, 'libs', 'jquery'))
-														.then(function (data) {
-															_sendJSResponse(res, 200, data);
-														})
-														.catch(function (error) {
-															_500(res, error);
-														});
+													.get('/js/plugins.js', function (req, res) {
+														res.sendFile(m_sJavascriptsBufferFile);
+													})
+													.get('/js/children.js', function (req, res) {
 
-												})
-												.get('/libs/bootstrap.js', function (req, res) {
+														_readAllFiles(path.join(m_sDirWeb, 'js'))
+															.then(function (data) {
+																_sendJSResponse(res, 200, data);
+															})
+															.catch(function (error) {
+																_500(res, error);
+															});
 
-													_readAllFiles(path.join(m_sDirWeb, 'libs', 'bootstrap', 'js'))
-														.then(function (data) {
-															_sendJSResponse(res, 200, data);
-														})
-														.catch(function (error) {
-															_500(res, error);
-														});
+													})
 
-												})
-												.get('/libs/socketio.js', function (req, res) {
-													res.sendFile(path.join(m_sDirWeb, 'libs', 'socketio', 'socket.io.js'));
-												})
-												.get('/libs/angular.js', function (req, res) {
-													res.sendFile(path.join(m_sDirWeb, 'libs', 'angularjs', 'angular.min.js'));
-												})
-												.get('/libs/angular-modules.js', function (req, res) {
+												// pictures
 
-													_readAllFiles(path.join(m_sDirWeb, 'libs', 'angularjs', 'modules'))
-														.then(function (data) {
-															_sendJSResponse(res, 200, data);
-														})
-														.catch(function (error) {
-															_500(res, error);
-														});
+													.get('/pictures/favicon.png', function (req, res) {
+														res.sendFile(path.join(m_sDirWeb, 'pictures', 'favicon.png'));
+													})
 
-												})
+												// libs
 
-											// 404
+													// css
 
-												.use(function (req, res) {
-													_404(req, res);
-												});
+													.get('/libs/bootstrap.css', function (req, res) {
 
-										http.listen(Container.get('conf').get('webport'), function () {
-											m_clLog.success('-- [HTTP server] started on port ' + Container.get('conf').get('webport'));
-										});
+														_readAllFiles(path.join(m_sDirWeb, 'libs', 'bootstrap', 'css'))
+															.then(function (data) {
+																_sendCSSResponse(res, 200, data);
+															})
+															.catch(function (error) {
+																_500(res, error);
+															});
 
-									deferred.resolve();
+													})
 
-								})
-								.catch(deferred.reject);
+													// js
+														
+													.get('/libs/jquery.js', function (req, res) {
+
+														_readAllFiles(path.join(m_sDirWeb, 'libs', 'jquery'))
+															.then(function (data) {
+																_sendJSResponse(res, 200, data);
+															})
+															.catch(function (error) {
+																_500(res, error);
+															});
+
+													})
+													.get('/libs/bootstrap.js', function (req, res) {
+
+														_readAllFiles(path.join(m_sDirWeb, 'libs', 'bootstrap', 'js'))
+															.then(function (data) {
+																_sendJSResponse(res, 200, data);
+															})
+															.catch(function (error) {
+																_500(res, error);
+															});
+
+													})
+													.get('/libs/socketio.js', function (req, res) {
+														res.sendFile(path.join(m_sDirWeb, 'libs', 'socketio', 'socket.io.js'));
+													})
+													.get('/libs/angular.js', function (req, res) {
+														res.sendFile(path.join(m_sDirWeb, 'libs', 'angularjs', 'angular.min.js'));
+													})
+													.get('/libs/angular-modules.js', function (req, res) {
+
+														_readAllFiles(path.join(m_sDirWeb, 'libs', 'angularjs', 'modules'))
+															.then(function (data) {
+																_sendJSResponse(res, 200, data);
+															})
+															.catch(function (error) {
+																_500(res, error);
+															});
+
+													})
+
+												// 404
+
+													.use(function (req, res) {
+														_404(req, res);
+													});
+
+											http.listen(Container.get('conf').get('webport'), function () {
+												m_clLog.success('-- [HTTP server] started on port ' + Container.get('conf').get('webport'));
+											});
+
+											deferred.resolve();
+												
+										})
+										.catch(deferred.reject);
 									
+								}
+
+							});
+
 						}
 						catch (e) {
 							deferred.reject((e.message) ? e.message : e);
