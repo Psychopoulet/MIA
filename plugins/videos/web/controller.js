@@ -12,7 +12,6 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
         $scope.selectedcategory = null;
 
         $scope.videos = [];
-		$scope.selectedvideo = null;
 
         $scope.children = [];
         $scope.selectedchild = null;
@@ -53,17 +52,6 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
             };
 
-            $scope.selectVideo = function (selected) {
-
-                if (selected) {
-                    $scope.selectedvideo = selected;
-                }
-                else {
-                    $scope.selectedvideo = null;
-                }
-
-            };
-
             // model
 
                 $scope.addCategory = function () {
@@ -96,33 +84,35 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                 };
 
 
-    			$scope.addVideo = function () {
+                $scope.formVideo = function (video) {
+
                     $scope.loading = true;
-                    socket.emit('web.videos.videos.add', $scope.selectedvideo);
-    			};
 
-    			$scope.editVideo = function () {
-                    $scope.loading = true;
-                    socket.emit('web.videos.videos.edit', $scope.selectedvideo);
-    			};
+                    if (video && video.id && 0 < video.id) {
+                        socket.emit('web.videos.videos.edit', video);
+                    }
+                    else {
+                        socket.emit('web.videos.videos.add', video);
+                    }
 
-                $scope.deleteVideo = function () {
+                };
 
-                    $popup.confirm('Voulez-vous vraiment supprimer "' + $scope.selectedvideo.name + '" ?', 'Confirmation', function() {
+                $scope.deleteVideo = function (video) {
+
+                    $popup.confirm('Voulez-vous vraiment supprimer "' + video.name + '" ?', 'Confirmation', function() {
                         $scope.loading = true;
-                        socket.emit('web.videos.videos.delete', $scope.selectedvideo);
-                        $scope.selectVideo(null);
+                        socket.emit('web.videos.videos.delete', video);
                     });
 
                 };
 
             // play
 
-                $scope.play = function () {
+                $scope.play = function (video) {
 
                     socket.emit('web.videos.videos.play', {
                         token : $scope.selectedchild.token,
-                        video : $scope.selectedvideo
+                        video : video
                     });
 
                 };
