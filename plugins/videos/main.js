@@ -36,7 +36,7 @@
 
 					function _loadVideosByCategoryFromSIKY(p_stCategory) {
 
-						Container.get('sikyapi').query('videos', 'videos?category.id=' + parseInt(p_stCategory.id), 'GET')
+						Container.get('sikyapi').query('videos', 'categories/' + p_stCategory.id + 'videos', 'GET')
 							.then(function (p_tabData) {
 								Container.get('server.socket.web').emit('web.videos.videos.getallbycategory', p_tabData);
 							})
@@ -135,8 +135,7 @@
 
 									.on('web.videos.videos.add', function (p_stData) {
 
-										Container.get('sikyapi').query('videos', 'videos', 'POST', {
-											'category.id' : parseInt(p_stData.category.id),
+										Container.get('sikyapi').query('videos', 'categories/' + p_stData.category.id + 'videos', 'POST', {
 											name : p_stData.name,
 											url : p_stData.url
 										})
@@ -152,8 +151,7 @@
 									})
 									.on('web.videos.videos.edit', function (p_stData) {
 
-										Container.get('sikyapi').query('videos', 'videos/' + p_stData.id, 'PUT', {
-											'category.id' : parseInt(p_stData.category.id),
+										Container.get('sikyapi').query('videos', 'categories/' + p_stData.category.id + 'videos/' + p_stData.id, 'PUT', {
 											name : p_stData.name,
 											url : p_stData.url
 										})
@@ -169,7 +167,7 @@
 									})
 									.on('web.videos.videos.delete', function (p_stData) {
 
-										Container.get('sikyapi').query('videos', 'videos/' + p_stData.id, 'DELETE')
+										Container.get('sikyapi').query('videos', 'categories/' + p_stData.category.id + 'videos/' + p_stData.id, 'DELETE')
 											.then(function() {
 												Container.get('server.socket.web').emit('web.videos.videos.deleted');
 												_loadVideosByCategoryFromSIKY(p_stData.category.id);

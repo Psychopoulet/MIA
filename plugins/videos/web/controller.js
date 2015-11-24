@@ -178,6 +178,18 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                                     $scope.loading = false; $scope.loadingCategories = false;
                                     $scope.$apply();
                                 })
+                                .on('web.videos.categories.added', function () {
+                                    $scope.loadingCategories = true;
+                                    $scope.$apply();
+                                })
+                                .on('web.videos.categories.edited', function () {
+                                    $scope.loadingCategories = true;
+                                    $scope.$apply();
+                                })
+                                .on('web.videos.categories.deleted', function () {
+                                    $scope.loadingCategories = true;
+                                    $scope.$apply();
+                                })
 
                             // videos
 
