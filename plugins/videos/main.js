@@ -36,7 +36,7 @@
 
 					function _loadVideosByCategoryFromSIKY(p_stCategory) {
 
-						Container.get('sikyapi').query('videos', 'videos?category.id=' + p_stCategory.id, 'GET')
+						Container.get('sikyapi').query('videos', 'videos?category.id=' + parseInt(p_stCategory.id), 'GET')
 							.then(function (p_tabData) {
 								Container.get('server.socket.web').emit('web.videos.videos.getallbycategory', p_tabData);
 							})
@@ -88,7 +88,10 @@
 									.on('web.videos.categories.add', function (data) {
 
 										Container.get('sikyapi').query('videos', 'categories', 'POST', data)
-											.then(_loadCategoriesFromSIKY)
+											.then(function() {
+												Container.get('server.socket.web').emit('web.videos.categories.added');
+												_loadCategoriesFromSIKY();
+											})
 											.catch(function (err){
 												m_clLog.err(err);
 												Container.get('server.socket.web').emit('web.videos.error', err);
@@ -98,7 +101,10 @@
 									.on('web.videos.categories.edit', function (data) {
 
 										Container.get('sikyapi').query('videos', 'categories/' + data.id, 'PUT', data)
-											.then(_loadCategoriesFromSIKY)
+											.then(function() {
+												Container.get('server.socket.web').emit('web.videos.categories.edited');
+												_loadCategoriesFromSIKY();
+											})
 											.catch(function (err){
 												m_clLog.err(err);
 												Container.get('server.socket.web').emit('web.videos.error', err);
@@ -108,7 +114,10 @@
 									.on('web.videos.categories.delete', function (data) {
 
 										Container.get('sikyapi').query('videos', 'categories/' + data.id, 'DELETE')
-											.then(_loadCategoriesFromSIKY)
+											.then(function() {
+												Container.get('server.socket.web').emit('web.videos.categories.deleted');
+												_loadCategoriesFromSIKY();
+											})
 											.catch(function (err){
 												m_clLog.err(err);
 												Container.get('server.socket.web').emit('web.videos.error', err);
@@ -124,30 +133,47 @@
 								
 								// write
 
-									.on('web.videos.videos.add', function (data) {
+									.on('web.videos.videos.add', function (p_stData) {
 
-										Container.get('sikyapi').query('videos', 'videos', 'POST', data)
-											.then(_loadVideosByCategoryFromSIKY)
+										Container.get('sikyapi').query('videos', 'videos', 'POST', {
+											'category.id' : parseInt(p_stData.category.id),
+											name : p_stData.name,
+											url : p_stData.url
+										})
+											.then(function() {
+												Container.get('server.socket.web').emit('web.videos.videos.added');
+												_loadVideosByCategoryFromSIKY(p_stData.category.id);
+											})
 											.catch(function (err){
 												m_clLog.err(err);
 												Container.get('server.socket.web').emit('web.videos.error', err);
 											});
 
 									})
-									.on('web.videos.videos.edit', function (data) {
+									.on('web.videos.videos.edit', function (p_stData) {
 
-										Container.get('sikyapi').query('videos', 'videos/' + data.id, 'PUT')
-											.then(_loadVideosByCategoryFromSIKY)
+										Container.get('sikyapi').query('videos', 'videos/' + p_stData.id, 'PUT', {
+											'category.id' : parseInt(p_stData.category.id),
+											name : p_stData.name,
+											url : p_stData.url
+										})
+											.then(function() {
+												Container.get('server.socket.web').emit('web.videos.videos.edited');
+												_loadVideosByCategoryFromSIKY(p_stData.category.id);
+											})
 											.catch(function (err){
 												m_clLog.err(err);
 												Container.get('server.socket.web').emit('web.videos.error', err);
 											});
 
 									})
-									.on('web.videos.videos.delete', function (data) {
+									.on('web.videos.videos.delete', function (p_stData) {
 
-										Container.get('sikyapi').query('videos', 'videos/' + data.id, 'DELETE')
-											.then(_loadVideosByCategoryFromSIKY)
+										Container.get('sikyapi').query('videos', 'videos/' + p_stData.id, 'DELETE')
+											.then(function() {
+												Container.get('server.socket.web').emit('web.videos.videos.deleted');
+												_loadVideosByCategoryFromSIKY(p_stData.category.id);
+											})
 											.catch(function (err){
 												m_clLog.err(err);
 												Container.get('server.socket.web').emit('web.videos.error', err);

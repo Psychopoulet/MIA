@@ -42,9 +42,13 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
             $scope.selectCategory = function (selected) {
 
                 if (selected) {
-                    $scope.selectedcategory = selected;
-                    $scope.loadingVideos = true;
-                    socket.emit('web.videos.videos.getallbycategory', $scope.selectedcategory);
+
+                    if (!$scope.selectedcategory || $scope.selectedcategory.id != selected.id) {
+                        $scope.selectedcategory = selected;
+                        $scope.loadingVideos = true;
+                        socket.emit('web.videos.videos.getallbycategory', $scope.selectedcategory);
+                    }
+
                 }
                 else {
                     $scope.selectedcategory = null;
@@ -84,7 +88,15 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                 };
 
 
-                $scope.formVideo = function (video) {
+                $scope.openModalFormVideo = function (video) {
+                    $scope.formVideo = (video) ? video : {};
+                    jQuery('#modalFormVideo').modal('show');
+                };
+                $scope.closeModalFormVideo = function () {
+                    jQuery('#modalFormVideo').modal('hide');
+                };
+
+                $scope.sendVideo = function (video) {
 
                     $scope.loading = true;
 
@@ -92,6 +104,7 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                         socket.emit('web.videos.videos.edit', video);
                     }
                     else {
+                        video.category = $scope.selectedcategory;
                         socket.emit('web.videos.videos.add', video);
                     }
 
@@ -172,15 +185,30 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                                     $scope.videos = p_tabData;
                                     $scope.loading = false; $scope.loadingVideos = false;
                                     $scope.$apply();
+                                })
+                                .on('web.videos.videos.added', function () {
+                                    $scope.loadingVideos = true;
+                                    $scope.closeModalFormVideo();
+                                    $scope.$apply();
+                                })
+                                .on('web.videos.videos.edited', function () {
+                                    $scope.loadingVideos = true;
+                                    $scope.closeModalFormVideo();
+                                    $scope.$apply();
+                                })
+                                .on('web.videos.videos.deleted', function () {
+                                    $scope.loadingVideos = true;
+                                    $scope.closeModalFormVideo();
+                                    $scope.$apply();
                                 });
 
                     });
 
             // interface
 
-    			jQuery('#menuVideos').click(function(e) {
-    				e.preventDefault();
-    				jQuery('#modalVideos').modal('show');
-    			});
+                jQuery('#menuVideos').click(function(e) {
+                    e.preventDefault();
+                    jQuery('#modalVideos').modal('show');
+                });
                 
 }]);

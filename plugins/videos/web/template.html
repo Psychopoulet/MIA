@@ -67,17 +67,17 @@
 		                        </select>
 		                    </div>
 
-							<button type="button" class="btn btn-primary" data-ng-show="selectedcategory.id && !loadingVideos" data-ng-disabled="loading" data-ng-class="{'disabled' : loading }" data-ng-click="formVideo();">
+							<button type="button" class="btn btn-primary" data-ng-show="selectedcategory.id && !loadingVideos" data-ng-disabled="loading" data-ng-class="{'disabled' : loading }" data-ng-click="openModalFormVideo();">
 								Nouvelle vidéo
 							</button>
 
 						</form>
 
-						<table class="table">
+						<table class="table table-bordered text-center">
 
 							<tbody>
 
-								<tr class="col-xs-4" data-ng-repeat="video in videos">
+								<tr data-ng-repeat="video in videos">
 									
 									<td>{{video.name}}</td>
 
@@ -85,7 +85,7 @@
 
 								      	<button type="button" class="btn btn-primary"
 											data-ng-disabled="loading" data-ng-class="{'disabled' : loading  }"
-											data-ng-click="formVideo(video);">
+											data-ng-click="openModalFormVideo(video);">
 								      		Modifier
 								      	</button>
 
@@ -135,6 +135,47 @@
 
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			</div>
+
+		</div>
+
+	</div>
+
+	<div id="modalFormVideo" class="modal fade only-logged hidden">
+
+		<div class="modal-dialog modal-lg">
+
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<h4 class="modal-title">Vidéo</h4>
+				</div>
+
+				<form class="modal-body">
+
+					<div class="form-group">
+						<label for="formVideoName">Nom</label>
+						<input id="formVideoName" type="text" class="form-control" data-ng-model="formVideo.name" />
+					</div>
+
+					<div class="form-group">
+						<label for="formVideoUrl">Url</label>
+						<input id="formVideoUrl" type="url" class="form-control" data-ng-model="formVideo.url" />
+					</div>
+
+				</form>
+
+				<div class="modal-footer">
+
+					<button type="button" class="btn btn-primary" data-ng-click="sendVideo(formVideo);">
+						<span data-ng-show="!formVideo.id">Ajouter</span>
+						<span data-ng-show="formVideo.id && 0 < formVideo.id">Modifier</span>
+					</button>
+
+					<button type="button" class="btn btn-default" data-ng-click="closeModalFormVideo();">Close</button>
+
+				</div>
+
 			</div>
 
 		</div>
