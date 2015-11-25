@@ -18,25 +18,6 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
 	// methods
 
-        // private
-
-            function _formateVideo(p_stVideo) {
-
-                p_stVideo.url = p_stVideo.url
-                            .replace('http://', 'https://')
-                            .replace('//youtu', '//www.youtu')
-                            .replace('youtu.be', 'youtube.com');
-
-                return {
-                    name : p_stVideo.name,
-                    url : p_stVideo.url,
-                    urlembeded : p_stVideo.url
-                                    .replace('.com/', '.com/embed/')
-                                    .replace('watch?v=', '')
-                };
-
-            }
-
 		// public
 
             $scope.selectCategory = function (selected) {
@@ -89,9 +70,28 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
 
                 $scope.openModalFormVideo = function (video) {
+
+
                     $scope.formVideo = (video) ? video : {};
-                    jQuery('#modalFormVideo').modal('show');
+
+                    jQuery('#modalFormVideo')
+                        .on('shown.bs.modal', function () {
+
+                            var tabInputs = jQuery(this).find('form input');
+
+                            if (0 < tabInputs.length) {
+                                jQuery(tabInputs[0]).focus();
+                            }
+
+                        })
+                        .modal({
+                            backdrop : 'static',
+                            keyboard: false,
+                            show : true
+                        });
+
                 };
+
                 $scope.closeModalFormVideo = function () {
                     jQuery('#modalFormVideo').modal('hide');
                 };
@@ -120,6 +120,10 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                 };
 
             // play
+
+                $scope.preview = function (video) {
+                    $popup.preview(video.urlembeded);
+                };
 
                 $scope.play = function (video) {
 
@@ -219,8 +223,15 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
             // interface
 
                 jQuery('#menuVideos').click(function(e) {
+
                     e.preventDefault();
-                    jQuery('#modalVideos').modal('show');
+
+                    jQuery('#modalVideos').modal({
+                        backdrop : 'static',
+                        keyboard: false,
+                        show : true
+                    });
+                    
                 });
                 
 }]);
