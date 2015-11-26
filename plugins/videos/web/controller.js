@@ -70,9 +70,28 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
 
                 $scope.openModalFormVideo = function (video) {
+
+
                     $scope.formVideo = (video) ? video : {};
-                    jQuery('#modalFormVideo').modal('show');
+
+                    jQuery('#modalFormVideo')
+                        .on('shown.bs.modal', function () {
+
+                            var tabInputs = jQuery(this).find('form input');
+
+                            if (0 < tabInputs.length) {
+                                jQuery(tabInputs[0]).focus();
+                            }
+
+                        })
+                        .modal({
+                            backdrop : 'static',
+                            keyboard: false,
+                            show : true
+                        });
+
                 };
+
                 $scope.closeModalFormVideo = function () {
                     jQuery('#modalFormVideo').modal('hide');
                 };
@@ -101,6 +120,10 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                 };
 
             // play
+
+                $scope.preview = function (video) {
+                    $popup.preview(video.urlembeded);
+                };
 
                 $scope.play = function (video) {
 
@@ -159,6 +182,18 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                                     $scope.loading = false; $scope.loadingCategories = false;
                                     $scope.$apply();
                                 })
+                                .on('web.videos.categories.added', function () {
+                                    $scope.loadingCategories = true;
+                                    $scope.$apply();
+                                })
+                                .on('web.videos.categories.edited', function () {
+                                    $scope.loadingCategories = true;
+                                    $scope.$apply();
+                                })
+                                .on('web.videos.categories.deleted', function () {
+                                    $scope.loadingCategories = true;
+                                    $scope.$apply();
+                                })
 
                             // videos
 
@@ -188,8 +223,15 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
             // interface
 
                 jQuery('#menuVideos').click(function(e) {
+
                     e.preventDefault();
-                    jQuery('#modalVideos').modal('show');
+
+                    jQuery('#modalVideos').modal({
+                        backdrop : 'static',
+                        keyboard: false,
+                        show : true
+                    });
+                    
                 });
                 
 }]);

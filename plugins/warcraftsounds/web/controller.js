@@ -95,8 +95,15 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
             // interface
 
     			jQuery('#menuWarcraft').click(function(e) {
+
     				e.preventDefault();
-    				jQuery('#modalWarcraft').modal('show');
+                    
+    				jQuery('#modalWarcraft').modal({
+                        backdrop : 'static',
+                        keyboard: false,
+                        show : true
+                    });
+
     			});
                 
 }]);

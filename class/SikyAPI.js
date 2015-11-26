@@ -71,7 +71,7 @@
 								if ('' != m_sCookieSession) {
 									stOptions.headers.Cookie = m_sCookieSession;
 								}
-								
+
 								https.request(stOptions, function(response) {
 
 									var sStatusCode = '', sResponse = '';
@@ -124,22 +124,6 @@
 
 				}
 
-				function _errlog(p_sMessage) {
-				
-					if (m_bDebugMode) {
-						
-						console.log('rejected request on https://siky.fr' + sUrl + ' [' +  p_sMethod + ']');
-						
-						if (p_stData) {
-							console.log(p_stData);
-						}
-						
-						console.log(p_sMessage);
-						
-					}
-					
-				}
-
 			// public
 
 				this.query = function (p_sApplicationUrl, p_sUrl, p_sMethod, p_stData) {
@@ -151,7 +135,6 @@
 								
 								if (!sResult || 0 >= sResult.length) {
 									deferred.reject('there is no return');
-									_errlog('there is no return');
 								}
 								else if ('{' != sResult.charAt(0)) {
 									deferred.resolve(sResult);
@@ -175,15 +158,12 @@
 									}
 									else if (stResult.warning) {
 										deferred.reject(stResult.warning);
-										_errlog(stResult.warning);
 									}
 									else if (stResult.error) {
 										deferred.reject(stResult.error);
-										_errlog(stResult.error);
 									}
 									else {
 										deferred.reject('');
-										_errlog('');
 									}
 									
 								}
@@ -191,7 +171,6 @@
 							})
 							.catch(function (e) {
 								deferred.reject((e.message) ? e.message : e);
-								_errlog((e.message) ? e.message : e);
 							});
 							
 					return deferred.promise;
