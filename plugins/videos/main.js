@@ -198,7 +198,7 @@
 											socket.emit('web.videos.error', 'Missing \'video\' data');
 										}
 										else {
-											Container.get('server.socket.child').emitTo(data.token, 'child.videos.videos.played', data.video);
+											Container.get('server.socket.child').emitTo(data.token, 'child.videos.play', data.video);
 										}
 
 									});

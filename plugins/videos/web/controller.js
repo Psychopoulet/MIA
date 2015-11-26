@@ -18,25 +18,6 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
 	// methods
 
-        // private
-
-            function _formateVideo(p_stVideo) {
-
-                p_stVideo.url = p_stVideo.url
-                            .replace('http://', 'https://')
-                            .replace('//youtu', '//www.youtu')
-                            .replace('youtu.be', 'youtube.com');
-
-                return {
-                    name : p_stVideo.name,
-                    url : p_stVideo.url,
-                    urlembeded : p_stVideo.url
-                                    .replace('.com/', '.com/embed/')
-                                    .replace('watch?v=', '')
-                };
-
-            }
-
 		// public
 
             $scope.selectCategory = function (selected) {
