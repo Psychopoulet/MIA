@@ -170,7 +170,7 @@
 							.emit('child.sounds.play', {
 								"path" : "/humans/peasant/ready",
 								"name" : "ready",
-								"url" : "http://warhuman.voila.net/SoundHuman/Peasant/VF/PeasantReady1_w3.mp3"
+								"url" : "https://siky.fr/warcraftsounds/sounds/humans/actions/peasant/ready/ready1.mp3"
 							});
 							
 					});
