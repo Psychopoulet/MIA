@@ -63,7 +63,7 @@ app.service('ModelChildren', function() {
 							_execOnChange();
 
 						})
-						.on('web.connection', function(web) {
+						.on('web.connection', function(child) {
 
 							var bExists = false;
 
