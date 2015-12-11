@@ -1,8 +1,8 @@
 {
-  "name": "Youtube",
+  "name": "Vidéos",
   "description": "",
   "version": "0.0.1",
-  "main": "Youtube.js",
+  "main": "main.js",
   "author": "Sébastien VIDAL",
   "license": "ISC",
   "web" : {

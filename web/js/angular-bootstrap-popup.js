@@ -1,123 +1,306 @@
-angular.module('ngBootstrapPopup', []).service('$popup', function() {
+angular.module('ngBootstrapPopup', [])
 
-    "use strict";
+	.service('$popup', function() {
 
-    // methodes
+		"use strict";
 
-        // private
+		// attributes
 
-            function _create(p_stPopupOptions, p_stModaleOptions) {
+			// public
 
-                var clModal, clDialog, clContent, clHeader, clBody, clFooter, clButtonClose;
+				this.lng = {
+					titles : {
+						alert : 'Alert',
+						confirm : 'Confirm',
+						prompt : 'Prompt',
+						preview : 'Preview'
+					},
+					buttons : {
+						ok : 'Ok',
+						close : 'Close',
+						no : 'No',
+						yes : 'Yes'
+					}
+				};
 
-                p_stPopupOptions = (p_stPopupOptions) ? p_stPopupOptions : {};
-                p_stModaleOptions = (p_stModaleOptions) ? p_stModaleOptions : {};
+			// private
 
-                clModal = jQuery('<div class="modal fade text-left" data-backdrop="static" data-keyboard="true" data-show="false"></div>');
+				var that = this, m_nCountPrompt = 0;
 
-                    clDialog = jQuery('<div class="modal-dialog modal-' + ((p_stPopupOptions.size && 'large' == p_stPopupOptions.size) ? 'lg' : 'sm') + ' modal-vertical-centered"></div>');
+		// methodes
 
-                        clContent = jQuery('<div class="modal-content"></div>');
+			// private
 
-                            clHeader = jQuery('<div class="modal-header"><h4 class="modal-title"></h4></div>');
+				function _create(p_stPopupOptions, p_stModaleOptions) {
 
-                                if (p_stPopupOptions.title && 0 < p_stPopupOptions.title.length) {
+					var clModal, clDialog, clContent, clHeader, clBody, clFooter, clButtonClose;
 
-                                    if (1 == p_stPopupOptions.title.length) {
-                                        clHeader.text(p_stPopupOptions.title.toUpperCase());
-                                    }
-                                    else {
-                                        clHeader.text(p_stPopupOptions.title.charAt(0).toUpperCase() + p_stPopupOptions.title.slice(1));
-                                    }
+					p_stPopupOptions = (p_stPopupOptions) ? p_stPopupOptions : {};
+					p_stModaleOptions = (p_stModaleOptions) ? p_stModaleOptions : {};
 
-                                }
-                                else if (p_stPopupOptions.title_html) {
-                                    clHeader.html(p_stPopupOptions.title_html);
-                                }
-                                else {
-                                    clHeader.text('Alert');
-                                }
+					clModal = jQuery('<div class="modal fade text-left"></div>');
 
-                            clContent.append(clHeader);
+						clDialog = jQuery('<div class="modal-dialog modal-' + ((p_stPopupOptions.size && 'large' == p_stPopupOptions.size) ? 'lg' : 'sm') + ' modal-vertical-centered"></div>');
 
-                            clBody = jQuery('<div class="modal-body"></div>');
+							clContent = jQuery('<div class="modal-content"></div>');
 
-                                if (p_stPopupOptions.content && 0 < p_stPopupOptions.content.length) {
+								clHeader = jQuery('<div class="modal-header"><h4 class="modal-title"></h4></div>');
 
-                                    if (1 == p_stPopupOptions.content.length) {
-                                        clBody.text(p_stPopupOptions.content.toUpperCase());
-                                    }
-                                    else {
-                                        clBody.text(p_stPopupOptions.content.charAt(0).toUpperCase() + p_stPopupOptions.content.slice(1));
-                                    }
+									if (p_stPopupOptions.title && 0 < p_stPopupOptions.title.length) {
 
-                                }
-                                else if (p_stPopupOptions.content_html) {
-                                    clBody.html(p_stPopupOptions.content_html);
-                                }
-                                else {
-                                    clBody.text('Alert');
-                                }
+										if (1 == p_stPopupOptions.title.length) {
+											clHeader.text(p_stPopupOptions.title.toUpperCase());
+										}
+										else {
+											clHeader.text(p_stPopupOptions.title.charAt(0).toUpperCase() + p_stPopupOptions.title.slice(1));
+										}
 
-                            clContent.append(clBody);
+									}
+									else if (p_stPopupOptions.title_html) {
+										clHeader.html(p_stPopupOptions.title_html);
+									}
+									else {
+										clHeader.text(that.lng.titles.alert);
+									}
 
-                                clButtonClose = jQuery('<button type="button" class="btn btn-primary">Ok</button>');
+								clContent.append(clHeader);
 
-                                    clButtonClose.click(function () {
-                                        clModal.modal('hide');
-                                    });
+								clBody = jQuery('<div class="modal-body"></div>');
 
-                                clFooter = jQuery('<div class="modal-footer"></div>').append(clButtonClose);
+									if (p_stPopupOptions.content && 0 < p_stPopupOptions.content.length) {
 
-                            clContent.append(clFooter);
+										if (1 == p_stPopupOptions.content.length) {
+											clBody.text(p_stPopupOptions.content.toUpperCase());
+										}
+										else {
+											clBody.text(p_stPopupOptions.content.charAt(0).toUpperCase() + p_stPopupOptions.content.slice(1));
+										}
 
-                        clDialog.append(clContent);
+									}
+									else if (p_stPopupOptions.contentHTML) {
+										clBody.html(p_stPopupOptions.contentHTML);
+									}
+									else {
+										clBody.text(that.lng.titles.alert);
+									}
 
-                    clModal.append(clDialog);
+								clContent.append(clBody);
 
-                    p_stModaleOptions.show = true;
+									if (p_stPopupOptions.buttons && 0 < p_stPopupOptions.buttons.length) {
 
-                clModal.modal(p_stModaleOptions);
+										clFooter = jQuery('<div class="modal-footer"></div>');
 
-                clModal
-                    .on('hidden.bs.modal', function () {
-                        clModal.remove();
-                        clModal = null;
-                    });
+										angular.forEach(p_stPopupOptions.buttons, function(stButton) {
 
-                return clModal;
+											var clButton = jQuery('<button type="button" class="btn btn-default"></button>');
 
-            }
+												if (stButton.cls) {
+													clButton.addClass(stButton.cls);
+												}
 
-        // public
+												if (stButton.text) {
+													clButton.append(stButton.text);
+												}
 
-            this.alert = function (p_sMessage, p_sTitle) {
+												if (stButton.click) {
 
-                return _create({
-                    title : (p_sTitle) ? p_sTitle : 'Alert',
-                    content_html : p_sMessage
-                }, {
-                    backdrop : 'static',
-                    keyboard : true
-                });
+													if (!angular.isArray(stButton.click)) {
+														stButton.click = [ stButton.click ];
+													}
 
-            };
+													clButton.click(function() {
 
-            this.preview = function (p_sUrl, p_sTitle) {
+														angular.forEach(stButton.click, function(fClick) {
+															
+															if ('function' === typeof fClick) {
+																fClick();
+															}
+															else if ('close' == fClick) {
+																clModal.modal('hide');
+															}
 
-                return _create({
-                    title : (p_sTitle) ? p_sTitle : 'Preview',
-                    content_html : '<div class="embed-responsive embed-responsive-16by9"><iframe class="embed-responsive-item" src="' + p_sUrl + '" frameborder="0" allowfullscreen></iframe></div>',
-                    size : 'large'
-                }, {
-                    backdrop : 'static',
-                    keyboard : true
-                });
+														});
 
-            };
+													});
 
-            this.closeAll = function () {
-                jQuery('.modal').modal('hide');
-            };
+												}
 
-});
+											clFooter.append(clButton);
+
+										});
+
+									}
+
+								clContent.append(clFooter);
+
+							clDialog.append(clContent);
+
+						clModal.append(clDialog);
+
+						p_stModaleOptions.show = true;
+
+					clModal.modal(p_stModaleOptions);
+
+					clModal
+						.on('shown.bs.modal', function () {
+
+							if (p_stPopupOptions.shown && 'function' === typeof p_stPopupOptions.shown) {
+								p_stPopupOptions.shown();
+							}
+
+						})
+						.on('hidden.bs.modal', function () {
+							clModal.remove();
+							clModal = null;
+						});
+
+					return clModal;
+
+				}
+
+			// public
+
+				this.alert = function (p_sMessage, p_sTitle) {
+
+					return _create({
+						title : (p_sTitle) ? p_sTitle : that.lng.titles.alert,
+						contentHTML : p_sMessage,
+						buttons : [
+							{
+								text : that.lng.buttons.ok,
+								click : 'close'
+							}
+						]
+					},
+					{
+						backdrop : 'static',
+						keyboard : true
+					});
+
+				};
+
+				this.confirm = function (p_sMessage, p_sTitle, p_fOnYes, p_fOnNo) {
+
+					return _create({
+						title : (p_sTitle) ? p_sTitle : that.lng.titles.confirm,
+						contentHTML : p_sMessage,
+						buttons : [
+							{
+								cls : 'btn-primary',
+								text : that.lng.buttons.yes,
+								click : ('function' === typeof p_fOnYes) ? [ p_fOnYes, 'close' ] : 'close'
+							},
+							{
+								text : that.lng.buttons.no,
+								click : ('function' === typeof p_fOnNo) ? [ p_fOnNo, 'close' ] : 'close'
+							}
+						]
+					},
+					{
+						backdrop : 'static',
+						keyboard : true
+					});
+
+				};
+
+				this.prompt = function (p_sTitle, p_fOnConfirm, p_fOnAbort) {
+
+					p_sTitle = (p_sTitle) ? p_sTitle : that.lng.titles.prompt;
+
+					++m_nCountPrompt;
+
+					var sId = 'idPopupFormPrompt' + m_nCountPrompt;
+
+					return _create({
+						title : p_sTitle,
+						contentHTML : '<div class="form-group"><label for="' + sId + '">' + p_sTitle + '</label><input id="' + sId + '" type="text" class="form-control" /></div>',
+						buttons : [
+							{
+								cls : 'btn-primary',
+								text : that.lng.buttons.ok,
+								click : ('function' === typeof p_fOnConfirm) ? [ function() { p_fOnConfirm(jQuery('#' + sId).val()); }, 'close' ] : 'close'
+							},
+							{
+								text : that.lng.buttons.close,
+								click : ('function' === typeof p_fOnAbort) ? [ p_fOnAbort, 'close' ] : 'close'
+							}
+						],
+						shown : function () {
+							jQuery('#' + sId).focus()
+						}
+					},
+					{
+						backdrop : 'static',
+						keyboard : true
+					});
+
+				};
+
+				this.preview = function (p_sUrl, p_sTitle) {
+
+					return _create({
+						title : (p_sTitle) ? p_sTitle : that.lng.titles.preview,
+						contentHTML : '<div class="embed-responsive embed-responsive-16by9"><iframe class="embed-responsive-item" src="' + p_sUrl + '" frameborder="0" allowfullscreen></iframe></div>',
+						size : 'large',
+						buttons : [
+							{
+								text : that.lng.buttons.close,
+								click : 'close'
+							}
+						]
+					},
+					{
+						backdrop : 'static',
+						keyboard : true
+					});
+
+				};
+
+				this.closeAll = function () {
+					jQuery('.modal').modal('hide');
+				};
+
+	})
+
+	.directive('popupTranslate', ['$popup', function($popup) {
+
+		return {
+
+			scope: {
+				titleAlert: '@', titleConfirm: '@', titlePrompt: '@', titlePreview: '@',
+				buttonOk: '@', buttonClose: '@', buttonNo: '@', buttonYes: '@'
+			},
+
+			link: function ($scope) {
+
+				if ($scope.titleAlert && '' != $scope.titleAlert) {
+					$popup.lng.titles.alert = $scope.titleAlert;
+				}
+				if ($scope.titleConfirm && '' != $scope.titleConfirm) {
+					$popup.lng.titles.confirm = $scope.titleConfirm;
+				}
+				if ($scope.titlePrompt && '' != $scope.titlePrompt) {
+					$popup.lng.titles.prompt = $scope.titlePrompt;
+				}
+				if ($scope.titlePreview && '' != $scope.titlePreview) {
+					$popup.lng.titles.preview = $scope.titlePreview;
+				}
+
+				if ($scope.buttonOk && '' != $scope.buttonOk) {
+					$popup.lng.buttons.ok = $scope.buttonOk;
+				}
+				if ($scope.buttonClose && '' != $scope.buttonClose) {
+					$popup.lng.buttons.close = $scope.buttonClose;
+				}
+				if ($scope.buttonNo && '' != $scope.buttonNo) {
+					$popup.lng.buttons.no = $scope.buttonNo;
+				}
+				if ($scope.buttonYes && '' != $scope.buttonYes) {
+					$popup.lng.buttons.yes = $scope.buttonYes;
+				}
+				
+			}
+
+		};
+
+	}]);

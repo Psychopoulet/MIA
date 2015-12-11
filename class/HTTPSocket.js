@@ -4,6 +4,8 @@
 	var
 		path = require('path'),
 		q = require('q'),
+		
+		Container = require(path.join(__dirname, 'Container.js')),
 		Logs = require(path.join(__dirname, 'Logs.js'));
 
 // module
@@ -25,7 +27,7 @@
 
 			// public
 				
-				this.start = function (p_clHTTPServer, p_fCallback) {
+				this.start = function (p_clHTTPServer) {
 
 					var deferred = q.defer();
 
@@ -66,7 +68,7 @@
 					
 				}
 
-				this.stop = function (p_fCallback) {
+				this.stop = function () {
 
 					var deferred = q.defer();
 

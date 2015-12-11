@@ -1,3 +1,5 @@
 *.tmp
 conf.json
 node_modules/
+web/buffers/
+*backup.json

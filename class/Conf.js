@@ -14,53 +14,26 @@
 		// attributes
 			
 			var
-				m_clThis = this,
+				that = this,
 				m_sConfFile = require('path').join(__dirname, '..', 'conf.json'),
-				m_stConf = JSON.parse(fs.readFileSync(m_sConfFile), 'utf8');
+				m_stConf = { };
 				
 		// methodes
 			
 			// public
 
-				this.getConf = function () {
-					return m_stConf;
+				this.get = function (p_sKey, p_vValue) {
+					return (m_stConf[p_sKey]) ? m_stConf[p_sKey] : '';
 				};
-				
-				this.setConfOption = function (p_sKey, p_vValue) {
+
+				this.set = function (p_sKey, p_vValue) {
 					m_stConf[p_sKey] = p_vValue;
-					return m_clThis;
+					return that;
 				};
 				
-				this.save = function() {
+		// constructor
 
-					var deferred = q.defer();
-
-						try {
-
-							fs.writeFile(m_sConfFile, JSON.stringify(m_stConf), 'utf8', function (err) {
-
-								if (err) {
-									if (err.message) {
-										deferred.reject(err.message);
-									}
-									else {
-										deferred.reject(err);
-									}
-								}
-								else {
-									deferred.resolve();
-								}
-
-							});
-
-						}
-						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
-						}
-						
-					return deferred.promise;
-
-				}
-
+			m_stConf = { webport: 1337, childrenport: 1338 };
+			
 	};
 	

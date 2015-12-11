@@ -3,11 +3,11 @@
 	
 // module
 	
-	module.exports = function (Factory) {
+	module.exports = function (Container) {
 
 		// constructor
 
-			Factory.getChildSocketInstance()
+			Container.get('server.socket.child')
 				.onDisconnect(function(socket) {
 					socket.removeAllListeners('child.temperature');
 				})
@@ -16,7 +16,7 @@
 					socket
 						.on('child.temperature', function (data) {
 							socket.MIA.temperature = data;
-							Factory.getHTTPSocketInstance().emit('web.temperature', socket.MIA);
+							Container.get('server.socket.web').emit('web.temperature', socket.MIA);
 						});
 
 				});
