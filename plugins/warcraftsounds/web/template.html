@@ -137,7 +137,7 @@
 
                         <select id="WarcraftActions" class="form-control"
                                 data-ng-disabled="!actions.length" data-ng-class="{'disabled' : !actions.length }"
-                                data-ng-options="action.name group by action.codetype for action in actions"
+                                data-ng-options="action.name group by action.type.name for action in actions"
                                 data-ng-model="selectedaction">
                             <option value="">-- NC --</option>
                         </select>
