@@ -12,6 +12,7 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
         $scope.selectedcategory = null;
 
         $scope.videos = [];
+        $scope.selectedvideo = null;
 
         $scope.children = [];
         $scope.selectedchild = null;
@@ -41,7 +42,7 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
                 $scope.addCategory = function () {
 
-                    $popup.prompt('Nouvelle catégorie', function(name) {
+                    $popup.prompt('Nouvelle catégorie', '', function(name) {
                         $scope.loading = true;
                         socket.emit('web.videos.categories.add', { name : name });
                     });
@@ -50,7 +51,7 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
                 $scope.editCategory = function () {
 
-                    $popup.prompt('', function(name) {
+                    $popup.prompt('', $scope.selectedcategory.name, function(name) {
                         $scope.loading = true;
                         $scope.selectedcategory.name = name;
                         socket.emit('web.videos.categories.edit', $scope.selectedcategory);
@@ -119,10 +120,14 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
                 };
 
+                $scope.selectVideo = function (video) {
+                    $scope.selectedvideo = video;
+                };
+
             // play
 
                 $scope.preview = function (video) {
-                    $popup.preview(video.urlembeded);
+                    $popup.iframe(video.urlembeded);
                 };
 
                 $scope.play = function (video) {
