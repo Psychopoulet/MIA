@@ -13,7 +13,8 @@ angular.module('ngBootstrapPopup', [])
 						alert : 'Alert',
 						confirm : 'Confirm',
 						prompt : 'Prompt',
-						preview : 'Preview'
+						preview : 'Preview',
+						sound : 'Sound'
 					},
 					buttons : {
 						ok : 'Ok',
@@ -33,14 +34,14 @@ angular.module('ngBootstrapPopup', [])
 
 				function _create(p_stPopupOptions, p_stModaleOptions) {
 
-					var clModal, clDialog, clContent, clHeader, clBody, clFooter, clButtonClose;
+					var clModal, clDialog, clContent, clHeader, clBody, clFooter;
 
 					p_stPopupOptions = (p_stPopupOptions) ? p_stPopupOptions : {};
 					p_stModaleOptions = (p_stModaleOptions) ? p_stModaleOptions : {};
 
 					clModal = jQuery('<div class="modal fade text-left"></div>');
 
-						clDialog = jQuery('<div class="modal-dialog modal-' + ((p_stPopupOptions.size && 'large' == p_stPopupOptions.size) ? 'lg' : 'sm') + ' modal-vertical-centered"></div>');
+						clDialog = jQuery('<div class="modal-dialog modal-' + ((p_stPopupOptions.size && 'large' === p_stPopupOptions.size) ? 'lg' : 'sm') + ' modal-vertical-centered"></div>');
 
 							clContent = jQuery('<div class="modal-content"></div>');
 
@@ -48,7 +49,7 @@ angular.module('ngBootstrapPopup', [])
 
 									if (p_stPopupOptions.title && 0 < p_stPopupOptions.title.length) {
 
-										if (1 == p_stPopupOptions.title.length) {
+										if (1 === p_stPopupOptions.title.length) {
 											clHeader.text(p_stPopupOptions.title.toUpperCase());
 										}
 										else {
@@ -69,7 +70,7 @@ angular.module('ngBootstrapPopup', [])
 
 									if (p_stPopupOptions.content && 0 < p_stPopupOptions.content.length) {
 
-										if (1 == p_stPopupOptions.content.length) {
+										if (1 === p_stPopupOptions.content.length) {
 											clBody.text(p_stPopupOptions.content.toUpperCase());
 										}
 										else {
@@ -115,7 +116,7 @@ angular.module('ngBootstrapPopup', [])
 															if ('function' === typeof fClick) {
 																fClick();
 															}
-															else if ('close' == fClick) {
+															else if ('close' === fClick) {
 																clModal.modal('hide');
 															}
 
@@ -213,7 +214,12 @@ angular.module('ngBootstrapPopup', [])
 
 					return _create({
 						title : p_sTitle,
-						contentHTML : '<div class="form-group"><label for="' + sId + '">' + p_sTitle + '</label><input id="' + sId + '" type="text" class="form-control" /></div>',
+						contentHTML :   '<div class="form-group">'+
+                                            '<label for="' + sId + '">' +
+                                                p_sTitle +
+                                            '</label>' +
+                                            '<input id="' + sId + '" type="text" class="form-control" />' +
+                                        '</div>',
 						buttons : [
 							{
 								cls : 'btn-primary',
@@ -226,7 +232,7 @@ angular.module('ngBootstrapPopup', [])
 							}
 						],
 						shown : function () {
-							jQuery('#' + sId).focus()
+							jQuery('#' + sId).focus();
 						}
 					},
 					{
@@ -236,11 +242,13 @@ angular.module('ngBootstrapPopup', [])
 
 				};
 
-				this.preview = function (p_sUrl, p_sTitle) {
+				this.iframe = function (p_sUrl, p_sTitle) {
 
 					return _create({
 						title : (p_sTitle) ? p_sTitle : that.lng.titles.preview,
-						contentHTML : '<div class="embed-responsive embed-responsive-16by9"><iframe class="embed-responsive-item" src="' + p_sUrl + '" frameborder="0" allowfullscreen></iframe></div>',
+						contentHTML :   '<div class="embed-responsive embed-responsive-16by9">' +
+                                            '<iframe class="embed-responsive-item" src="' + p_sUrl + '" frameborder="0" allowfullscreen></iframe>' +
+                                        '</div>',
 						size : 'large',
 						buttons : [
 							{
@@ -256,6 +264,31 @@ angular.module('ngBootstrapPopup', [])
 
 				};
 
+                this.sound = function (p_sUrl, p_sTitle) {
+
+                    return _create({
+                            title : (p_sTitle) ? p_sTitle : that.lng.titles.sound,
+                            contentHTML :   '<div class="row">' +
+                                                '<audio class="col-xs-12" controls autoplay>' +
+                                                    'Votre navigateur ne supporte pas l\'élément <code>audio</code>.' +
+                                                    '<source src="' + p_sUrl + '" type="audio/wav">' +
+                                                '</audio>' +
+                                            '</div>',
+                            size : 'large',
+                            buttons : [
+                                {
+                                    text : that.lng.buttons.close,
+                                    click : 'close'
+                                }
+                            ]
+                        },
+                        {
+                            backdrop : 'static',
+                            keyboard : true
+                        });
+
+                };
+
 				this.closeAll = function () {
 					jQuery('.modal').modal('hide');
 				};
@@ -264,10 +297,12 @@ angular.module('ngBootstrapPopup', [])
 
 	.directive('popupTranslate', ['$popup', function($popup) {
 
+        "use strict";
+
 		return {
 
 			scope: {
-				titleAlert: '@', titleConfirm: '@', titlePrompt: '@', titlePreview: '@',
+				titleAlert: '@', titleConfirm: '@', titlePrompt: '@', titlePreview: '@', titleSound: '@',
 				buttonOk: '@', buttonClose: '@', buttonNo: '@', buttonYes: '@'
 			},
 
@@ -284,6 +319,9 @@ angular.module('ngBootstrapPopup', [])
 				}
 				if ($scope.titlePreview && '' != $scope.titlePreview) {
 					$popup.lng.titles.preview = $scope.titlePreview;
+				}
+				if ($scope.titleSound && '' != $scope.titleSound) {
+					$popup.lng.titles.sound = $scope.titleSound;
 				}
 
 				if ($scope.buttonOk && '' != $scope.buttonOk) {

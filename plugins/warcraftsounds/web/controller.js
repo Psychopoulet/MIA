@@ -37,15 +37,15 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
                 };
 
                 $scope.previewAction = function() {
-                    $popup.preview($scope.selectedaction.url);
+                    $popup.sound($scope.selectedaction.url, $scope.selectedaction.name);
                 };
 
                 $scope.previewMusic = function() {
-                    $popup.preview($scope.selectedmusic.url);
+                    $popup.sound($scope.selectedmusic.url, $scope.selectedmusic.name);
                 };
 
                 $scope.previewWarning = function() {
-                    $popup.preview($scope.selectedwarning.url);
+                    $popup.sound($scope.selectedwarning.url, $scope.selectedwarning.name);
                 };
 
             // plays
