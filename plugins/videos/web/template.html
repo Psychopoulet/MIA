@@ -112,7 +112,7 @@
 									<div class="input-group">
 									
 				                        <select class="form-control"
-				                        		data-ng-disabled="loading || !selectedvideo" data-ng-class="{'disabled' : loading || !selectedvideo }"
+				                        		data-ng-disabled="loading || !selectedvideo || 0 >= children" data-ng-class="{'disabled' : loading || !selectedvideo || 0 >= children }"
 				                        		data-ng-options="child.name for child in children"
 				                        		data-ng-model="selectedchild">
 				                        	<option value="">-- NC --</option>

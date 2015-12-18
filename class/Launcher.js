@@ -155,6 +155,7 @@
 					case '--help' : case '-H' :
 						
 						console.log('--help | -H : get the commands');
+						console.log('--debug | -D : initialize the debug mode');
 						console.log('--version | -V : get the soft version');
 						console.log('--start | -S : start MIA');
 						console.log('--end | -E : stop MIA');
@@ -164,6 +165,9 @@
 
 					break;
 					
+					case '--debug' : case '-D' :
+						Container.get('conf').set('debug', true);
+					break;
 					case '--start' : case '-S' :
 						sLaunchType = 'start';
 					break;

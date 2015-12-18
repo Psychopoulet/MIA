@@ -1,1 +1,1 @@
-cls && cd %~dp0 && node main.js --restart
+cls && cd %~dp0 && node main.js --restart --debug

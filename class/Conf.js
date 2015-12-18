@@ -33,7 +33,7 @@
 				
 		// constructor
 
-			m_stConf = { webport: 1337, childrenport: 1338 };
+			m_stConf = { webport: 1337, childrenport: 1338, debug: false };
 			
 	};
 	
