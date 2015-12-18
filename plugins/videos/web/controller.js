@@ -187,11 +187,13 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                                     $scope.loading = false; $scope.loadingCategories = false;
                                     $scope.$apply();
                                 })
-                                .on('web.videos.categories.added', function () {
+                                .on('web.videos.categories.added', function (p_stData) {
+                                    $scope.selectCategory(p_stData);
                                     $scope.loadingCategories = true;
                                     $scope.$apply();
                                 })
-                                .on('web.videos.categories.edited', function () {
+                                .on('web.videos.categories.edited', function (p_stData) {
+                                    $scope.selectCategory(p_stData);
                                     $scope.loadingCategories = true;
                                     $scope.$apply();
                                 })

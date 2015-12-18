@@ -88,8 +88,8 @@
 									.on('web.videos.categories.add', function (data) {
 
 										Container.get('sikyapi').query('videos', 'categories', 'POST', data)
-											.then(function() {
-												Container.get('server.socket.web').emit('web.videos.categories.added');
+											.then(function(response) {
+												Container.get('server.socket.web').emit('web.videos.categories.added', response);
 												_loadCategoriesFromSIKY();
 											})
 											.catch(function (err){
@@ -101,8 +101,8 @@
 									.on('web.videos.categories.edit', function (data) {
 
 										Container.get('sikyapi').query('videos', 'categories/' + data.id, 'PUT', data)
-											.then(function() {
-												Container.get('server.socket.web').emit('web.videos.categories.edited');
+											.then(function(response) {
+												Container.get('server.socket.web').emit('web.videos.categories.edited', response);
 												_loadCategoriesFromSIKY();
 											})
 											.catch(function (err){
