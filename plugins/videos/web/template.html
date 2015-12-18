@@ -176,7 +176,9 @@
 
 				<div class="modal-footer">
 
-					<button type="button" class="btn btn-primary" data-ng-click="sendVideo(formVideo);">
+					<button type="button" class="btn btn-primary"
+							data-ng-disabled="loading" data-ng-class="{'disabled' : loading }"
+							data-ng-click="sendVideo(formVideo);">
 						<span data-ng-show="!formVideo.id">Ajouter</span>
 						<span data-ng-show="formVideo.id && 0 < formVideo.id">Modifier</span>
 					</button>

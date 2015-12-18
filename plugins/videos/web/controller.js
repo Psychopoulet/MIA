@@ -178,7 +178,11 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                                 socket.emit('web.videos.categories.getall');
                             })
 
-                            .on('web.videos.error', $popup.alert)
+                            .on('web.videos.error', function (p_sMessage) {
+                                $popup.alert(p_sMessage);
+                                $scope.loading = false; $scope.loadingCategories = false; $scope.loadingVideos = false;
+                                $scope.$apply();
+                            })
 
                             // categories
 
@@ -209,12 +213,14 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
                                     $scope.loading = false; $scope.loadingVideos = false;
                                     $scope.$apply();
                                 })
-                                .on('web.videos.videos.added', function () {
+                                .on('web.videos.videos.added', function (p_stData) {
+                                    $scope.selectVideo(p_stData);
                                     $scope.loadingVideos = true;
                                     $scope.closeModalFormVideo();
                                     $scope.$apply();
                                 })
-                                .on('web.videos.videos.edited', function () {
+                                .on('web.videos.videos.edited', function (p_stData) {
+                                    $scope.selectVideo(p_stData);
                                     $scope.loadingVideos = true;
                                     $scope.closeModalFormVideo();
                                     $scope.$apply();
