@@ -211,23 +211,23 @@ angular.module('ngBootstrapPopup', [])
 					++m_nCountPrompt;
 
 					var sId = 'idPopupFormPrompt' + m_nCountPrompt,
-                        sInput = '';
+						sInput = '';
 
-                    if (p_sValue && '' != p_sValue) {
-                        sInput = '<input id="' + sId + '" type="text" class="form-control" value="' + p_sValue + '" />';
-                    }
-                    else {
-                        sInput = '<input id="' + sId + '" type="text" class="form-control" />';
-                    }
+					if (p_sValue && '' != p_sValue) {
+						sInput = '<input id="' + sId + '" type="text" class="form-control" value="' + p_sValue + '" />';
+					}
+					else {
+						sInput = '<input id="' + sId + '" type="text" class="form-control" />';
+					}
 
 					return _create({
 						title : p_sTitle,
 						contentHTML :   '<div class="form-group">'+
-                                            '<label for="' + sId + '">' +
-                                                p_sTitle +
-                                            '</label>' +
-                                            sInput +
-                                        '</div>',
+											'<label for="' + sId + '">' +
+												p_sTitle +
+											'</label>' +
+											sInput +
+										'</div>',
 						buttons : [
 							{
 								cls : 'btn-primary',
@@ -255,8 +255,8 @@ angular.module('ngBootstrapPopup', [])
 					return _create({
 						title : (p_sTitle && '' != p_sTitle) ? p_sTitle : that.lng.titles.preview,
 						contentHTML :   '<div class="embed-responsive embed-responsive-16by9">' +
-                                            '<iframe class="embed-responsive-item" src="' + p_sUrl + '" frameborder="0" allowfullscreen></iframe>' +
-                                        '</div>',
+											'<iframe class="embed-responsive-item" src="' + p_sUrl + '" frameborder="0" allowfullscreen></iframe>' +
+										'</div>',
 						size : 'large',
 						buttons : [
 							{
@@ -272,30 +272,44 @@ angular.module('ngBootstrapPopup', [])
 
 				};
 
-                this.sound = function (p_sUrl, p_sTitle) {
+				this.sound = function (p_sUrl, p_sTitle) {
 
-                    return _create({
-                            title : (p_sTitle && '' != p_sTitle) ? p_sTitle : that.lng.titles.sound,
-                            contentHTML :   '<div class="row">' +
-                                                '<audio class="col-xs-12" controls autoplay>' +
-                                                    'Votre navigateur ne supporte pas l\'élément <code>audio</code>.' +
-                                                    '<source src="' + p_sUrl + '" type="audio/wav">' +
-                                                '</audio>' +
-                                            '</div>',
-                            size : 'large',
-                            buttons : [
-                                {
-                                    text : that.lng.buttons.close,
-                                    click : 'close'
-                                }
-                            ]
-                        },
-                        {
-                            backdrop : 'static',
-                            keyboard : true
-                        });
+					var clResult, sDocumentTitle = document.title;
 
-                };
+						function _close() {
+							clResult.modal('hide');
+							document.title = sDocumentTitle;
+						}
+
+						document.title = p_sTitle;
+
+						clResult = _create({
+							title : (p_sTitle && '' != p_sTitle) ? p_sTitle : that.lng.titles.sound,
+							contentHTML :   '<div class="row">' +
+												'<audio class="col-xs-12" controls>' +
+													'Votre navigateur ne supporte pas l\'Ã©lÃ©ment <code>audio</code>.' +
+													'<source src="' + p_sUrl + '" type="audio/wav">' +
+												'</audio>' +
+											'</div>',
+							size : 'large',
+							buttons : [
+								{
+									text : that.lng.buttons.close,
+									click : _close
+								}
+							]
+						},
+						{
+							backdrop : 'static',
+							keyboard : true
+						});
+
+						clResult.find('audio')[0].onended = _close;
+						clResult.find('audio')[0].play();
+
+					return clResult;
+
+				};
 
 				this.closeAll = function () {
 					jQuery('.modal').modal('hide');
@@ -305,7 +319,7 @@ angular.module('ngBootstrapPopup', [])
 
 	.directive('popupTranslate', ['$popup', function($popup) {
 
-        "use strict";
+		"use strict";
 
 		return {
 
