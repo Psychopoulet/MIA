@@ -19,7 +19,7 @@
 							<button type="button" class="list-group-item active"
 									data-ng-disabled="loading" data-ng-class="{'disabled' : loading }"
 									data-ng-click="addCategory();">
-								Nouvelle catégorie
+								<span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp; Ajouter
 							</button>
 
 							<a href="#" class="list-group-item" data-ng-show="loadingCategories">
@@ -34,21 +34,17 @@
 
 						</div>
 
-						<div class="btn-group btn-group-justified">
-
-					      	<a href="#" class="btn btn-primary"
+						<button type="button" class="btn btn-primary btn-block"
 								data-ng-disabled="loading || !selectedcategory.id" data-ng-class="{'disabled' : loading || !selectedcategory.id  }"
-								data-ng-click="editCategory();">
-					      		Modifier
-					      	</a>
+								data-ng-click="editCategory(selectedcategory);">
+								<span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp; Modifier
+					  	</button>
 
-					      	<a href="#" class="btn btn-primary"
-								data-ng-disabled="loading || !selectedcategory.id" data-ng-class="{'disabled' : loading || !selectedcategory.id }"
-								data-ng-click="deleteCategory();">
-					      		Supprimer
-					      	</a>
-
-					    </div>
+						<button type="button" class="btn btn-primary btn-block"
+								data-ng-disabled="loading || !selectedcategory.id" data-ng-class="{'disabled' : loading || !selectedcategory.id  }"
+								data-ng-click="deleteCategory(selectedcategory);">
+								<span class="glyphicon glyphicon-trash"></span>&nbsp;&nbsp; Supprimer
+					  	</button>
 
 					</div>
 
@@ -69,28 +65,28 @@
 										<button type="button" class="btn btn-primary"
 												data-ng-disabled="loading" data-ng-class="{'disabled' : loading }"
 												data-ng-click="openModalFormVideo();">
-											Ajouter
+											<span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp; Ajouter
 										</button>
 
-								      	<button type="button" class="btn btn-primary"
+									  	<button type="button" class="btn btn-primary"
 												data-ng-disabled="loading || !selectedvideo.id" data-ng-class="{'disabled' : loading || !selectedvideo.id }"
 												data-ng-click="openModalFormVideo(selectedvideo);">
-								      		Modifier
-								      	</button>
+											<span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp; Modifier
+									  	</button>
 
-								      	<button type="button" class="btn btn-primary"
+									  	<button type="button" class="btn btn-primary"
 												data-ng-disabled="loading || !selectedvideo.id" data-ng-class="{'disabled' : loading || !selectedvideo.id }"
 												data-ng-click="deleteVideo(selectedvideo);">
-								      		Supprimer
-								      	</button>
+									  		<span class="glyphicon glyphicon-trash"></span>&nbsp;&nbsp; Supprimer
+									  	</button>
 
 									</div>
 
-							      	<button type="button" class="btn btn-primary pull-right"
+								  	<button type="button" class="btn btn-primary pull-right"
 											data-ng-disabled="loading || !selectedvideo.id" data-ng-class="{'disabled' : loading || !selectedvideo.id  }"
 											data-ng-click="preview(selectedvideo);">
-							      		Prévisualisation
-							      	</button>
+								  		<span class="glyphicon glyphicon-play"></span>&nbsp;&nbsp; Lire
+								  	</button>
 
 								</div>
 
@@ -111,22 +107,22 @@
 
 									<div class="input-group">
 									
-				                        <select class="form-control"
-				                        		data-ng-disabled="loading || !selectedvideo || 0 >= children" data-ng-class="{'disabled' : loading || !selectedvideo || 0 >= children }"
-				                        		data-ng-options="child.name for child in children"
-				                        		data-ng-model="selectedchild">
-				                        	<option value="">-- NC --</option>
-				                        </select>
+										<select class="form-control"
+												data-ng-disabled="loading || !selectedvideo || 0 >= children" data-ng-class="{'disabled' : loading || !selectedvideo || 0 >= children }"
+												data-ng-options="child.name for child in children"
+												data-ng-model="selectedchild">
+											<option value="">-- NC --</option>
+										</select>
 
-				                        <span class="input-group-btn">
+										<span class="input-group-btn">
 
-									      	<button type="button" class="btn btn-primary"
+										  	<button type="button" class="btn btn-primary"
 													data-ng-disabled="loading || !selectedchild" data-ng-class="{'disabled' : loading || !selectedchild  }"
 													data-ng-click="play(selectedvideo);">
-									      		Envoyer
-									      	</button>
+										  		<span class="glyphicon glyphicon-cloud-upload"></span>&nbsp;&nbsp; Envoyer
+										  	</button>
 
-								      	</span>
+									  	</span>
 
 									</div>
 									

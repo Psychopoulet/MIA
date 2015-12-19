@@ -330,6 +330,24 @@ q
 
 									})
 
+									// fonts
+
+									.get('/fonts/glyphicons-halflings-regular.eot', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'bootstrap', 'fonts', 'glyphicons-halflings-regular.eot'));
+									})
+									.get('/fonts/glyphicons-halflings-regular.svg', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'bootstrap', 'fonts', 'glyphicons-halflings-regular.svg'));
+									})
+									.get('/fonts/glyphicons-halflings-regular.ttf', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'bootstrap', 'fonts', 'glyphicons-halflings-regular.ttf'));
+									})
+									.get('/fonts/glyphicons-halflings-regular.woff', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'bootstrap', 'fonts', 'glyphicons-halflings-regular.woff'));
+									})
+									.get('/fonts/glyphicons-halflings-regular.woff2', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'bootstrap', 'fonts', 'glyphicons-halflings-regular.woff2'));
+									})
+
 									// js
 										
 									.get('/libs/jquery.js', function (req, res) {
