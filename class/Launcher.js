@@ -155,6 +155,7 @@
 					case '--help' : case '-H' :
 						
 						console.log('--help | -H : get the commands');
+						console.log('--ssl : using ssl security');
 						console.log('--debug | -D : initialize the debug mode');
 						console.log('--version | -V : get the soft version');
 						console.log('--start | -S : start MIA');
@@ -167,6 +168,9 @@
 					
 					case '--debug' : case '-D' :
 						Container.get('conf').set('debug', true);
+					break;
+					case '--ssl' :
+						Container.get('conf').set('ssl', true);
 					break;
 					case '--start' : case '-S' :
 						sLaunchType = 'start';

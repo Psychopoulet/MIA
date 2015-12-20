@@ -110,7 +110,7 @@
 											
 										// start
 											
-											Container.get('server.socket.web').start(Container.get('server.http').getServer())
+											Container.get('server.socket.web').start()
 												.then(function () {
 													
 													Container.get('server.socket.child').start()

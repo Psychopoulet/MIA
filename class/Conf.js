@@ -15,7 +15,6 @@
 			
 			var
 				that = this,
-				m_sConfFile = require('path').join(__dirname, '..', 'conf.json'),
 				m_stConf = { };
 				
 		// methodes
@@ -33,7 +32,7 @@
 				
 		// constructor
 
-			m_stConf = { webport: 1337, childrenport: 1338, debug: false };
+			m_stConf = { webport: 1337, childrenport: 1338, debug: false, ssl: false };
 			
 	};
 	

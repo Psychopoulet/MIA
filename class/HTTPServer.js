@@ -1,13 +1,12 @@
 
 // dépendances
-	
+
 	var
 		path = require('path'),
 		fs = require('fs'),
 		url = require('url'),
 		q = require('q'),
 		app = require('express')(),
-		http = require('http').Server(app),
 		mkdirp = require('mkdirp'),
 
 		Container = require(path.join(__dirname, 'Container.js')),
@@ -23,13 +22,15 @@
 			
 			var
 				m_sDirWeb = path.join(__dirname, '..', 'web'),
-				m_clPlugins = require(path.join(__dirname, 'Container.js')).get('plugins'),
+				m_sDirSSL = path.join(__dirname, '..', 'ssl'),
+				m_clServer = false,
+				m_clPlugins = Container.get('plugins'),
 				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'httpserver')),
 
 				m_bPluginsBuffersCreated = false,
-				m_sPluginsBuffersPath = "",
-				m_sPluginsTemplatesBufferFile = "",
-				m_sPluginsJavascriptsBufferFile = "";
+				m_sPluginsBuffersPath = path.join(__dirname, '..', 'web', 'buffers'),
+				m_sPluginsTemplatesBufferFile = path.join(m_sPluginsBuffersPath, 'plugins.html'),
+				m_sPluginsJavascriptsBufferFile = path.join(m_sPluginsBuffersPath, 'plugins.js');
 				
 		// methodes
 
@@ -176,53 +177,52 @@ q
 										}
 										else {
 
-											m_clPlugins.getData()
-												.then(function (p_tabData) {
+											m_clPlugins.getData().then(function (p_tabData) {
 
-													try {
-														if (fs.lstatSync(m_sPluginsTemplatesBufferFile).isFile()) {
-															fs.unlinkSync(m_sPluginsTemplatesBufferFile);
-														}
+												try {
+													if (fs.lstatSync(m_sPluginsTemplatesBufferFile).isFile()) {
+														fs.unlinkSync(m_sPluginsTemplatesBufferFile);
 													}
-													catch(e) {}
+												}
+												catch(e) {}
 
-													try {
-														if (fs.lstatSync(m_sPluginsJavascriptsBufferFile).isFile()) {
-															fs.unlinkSync(m_sPluginsJavascriptsBufferFile);
-														}
+												try {
+													if (fs.lstatSync(m_sPluginsJavascriptsBufferFile).isFile()) {
+														fs.unlinkSync(m_sPluginsJavascriptsBufferFile);
 													}
-													catch(e) {}
+												}
+												catch(e) {}
 
-													p_tabData.forEach(function(plugin) {
+												p_tabData.forEach(function(plugin) {
 
-														if (plugin.web) {
-															
-															if (plugin.web.templates && 0 < plugin.web.templates.length) {
+													if (plugin.web) {
+														
+														if (plugin.web.templates && 0 < plugin.web.templates.length) {
 
-																plugin.web.templates.forEach(function(template) {
-																	fs.appendFileSync(m_sPluginsTemplatesBufferFile, fs.readFileSync(template, 'utf8'), 'utf8');
-																});
-
-															}
-
-															if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
-
-																plugin.web.javascripts.forEach(function(javascript) {
-																	fs.appendFileSync(m_sPluginsJavascriptsBufferFile, fs.readFileSync(javascript, 'utf8'), 'utf8');
-																});
-
-															}
+															plugin.web.templates.forEach(function(template) {
+																fs.appendFileSync(m_sPluginsTemplatesBufferFile, fs.readFileSync(template, 'utf8'), 'utf8');
+															});
 
 														}
 
-													});
+														if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
 
-													m_bPluginsBuffersCreated = true;
+															plugin.web.javascripts.forEach(function(javascript) {
+																fs.appendFileSync(m_sPluginsJavascriptsBufferFile, fs.readFileSync(javascript, 'utf8'), 'utf8');
+															});
 
-													deferred.resolve();
+														}
 
-												})
-												.catch(deferred.reject);
+													}
+
+												});
+
+												m_bPluginsBuffersCreated = true;
+
+												deferred.resolve();
+
+											})
+											.catch(deferred.reject);
 
 										}
 													
@@ -238,11 +238,63 @@ q
 						return deferred.promise;
 
 					}
+
+					function _initServer() {
+
+						var deferred = q.defer(), clOpenSSL,
+							sKeyFilePath, sCSRFilePath, sCRTFilePath;
+
+							try {
+
+								if (!Container.get('conf').get('ssl')) {
+									deferred.resolve(require('http').createServer(app));
+								}
+								else {
+									
+									clOpenSSL = Container.get('openssl');
+									sKeyFilePath = path.join(m_sDirSSL, 'server.key');
+									sCSRFilePath = path.join(m_sDirSSL, 'server.csr');
+									sCRTFilePath = path.join(m_sDirSSL, 'server.crt');
+
+									clOpenSSL.generateKey(sKeyFilePath).then(function() {
+
+										clOpenSSL.signingRequestCertificate(sKeyFilePath, sCSRFilePath).then(function() {
+
+											clOpenSSL.autosignCertificate(sKeyFilePath, sCSRFilePath, sCRTFilePath).then(function() {
+
+												deferred.resolve(require('https').createServer({
+													key: sKeyFilePath,
+													cert: sCSRFilePath,
+													ca: sCRTFilePath,
+													requestCert: true,
+													rejectUnauthorized: false,
+													agent: false
+												}, app));
+
+											})
+											.catch(deferred.reject);
+
+										})
+										.catch(deferred.reject);
+
+									})
+									.catch(deferred.reject);
+
+								}
+
+							}
+							catch (e) {
+								deferred.reject((e.message) ? e.message : e);
+							}
+							
+						return deferred.promise;
+
+					}
 					
 			// public
 
 				this.getServer = function () {
-					return http;
+					return m_clServer;
 				};
 				
 				this.start = function () {
@@ -251,35 +303,32 @@ q
 
 						try {
 
-							m_sPluginsBuffersPath = path.join(__dirname, '..', 'web', 'buffers');
-							m_sPluginsTemplatesBufferFile = path.join(m_sPluginsBuffersPath, 'plugins.html');
-							m_sPluginsJavascriptsBufferFile = path.join(m_sPluginsBuffersPath, 'plugins.js');
+							_initServer().then(function (p_clServer) {
 
-							app.get('/', function (req, res) {
+								m_clServer = p_clServer;
 
-									_readFile(path.join(m_sDirWeb, 'templates', 'index.html'))
-										.then(function (index) {
+								app.get('/', function (req, res) {
 
-											_createBuffers()
-												.then(function() {
-													
-													_readFile(m_sPluginsTemplatesBufferFile)
-														.then(function(sHTML) {
-															_sendHTMLResponse(res, 200, index.replace('{{plugins}}', sHTML));
-														})
-														.catch(function (error) {
-															_500(res, index.replace('{{plugins}}', error));
-														});
+									_readFile(path.join(m_sDirWeb, 'templates', 'index.html')).then(function (index) {
 
-												})
-												.catch(function() {
-													_500(res, index.replace('{{plugins}}', error));
-												});
+										_createBuffers().then(function() {
+											
+											_readFile(m_sPluginsTemplatesBufferFile).then(function(sHTML) {
+												_sendHTMLResponse(res, 200, index.replace('{{plugins}}', sHTML));
+											})
+											.catch(function (error) {
+												_500(res, index.replace('{{plugins}}', error));
+											});
 
 										})
-										.catch(function (error) {
-											_500(res, error);
+										.catch(function() {
+											_500(res, index.replace('{{plugins}}', error));
 										});
+
+									})
+									.catch(function (error) {
+										_500(res, error);
+									});
 										
 								})
 
@@ -287,24 +336,22 @@ q
 
 									.get('/js/plugins.js', function (req, res) {
 
-										_createBuffers()
-											.then(function() {
-												res.sendFile(m_sPluginsJavascriptsBufferFile);
-											})
-											.catch(function() {
-												_sendJSResponse(res, 500, 'Impossible to buffer plugins\'s scripts')
-											});
+										_createBuffers().then(function() {
+											res.sendFile(m_sPluginsJavascriptsBufferFile);
+										})
+										.catch(function() {
+											_sendJSResponse(res, 500, 'Impossible to buffer plugins\'s scripts')
+										});
 
 									})
 									.get('/js/children.js', function (req, res) {
 
-										_readAllFiles(path.join(m_sDirWeb, 'js'))
-											.then(function (data) {
-												_sendJSResponse(res, 200, data);
-											})
-											.catch(function (error) {
-												_500(res, error);
-											});
+										_readAllFiles(path.join(m_sDirWeb, 'js')).then(function (data) {
+											_sendJSResponse(res, 200, data);
+										})
+										.catch(function (error) {
+											_500(res, error);
+										});
 
 									})
 
@@ -320,13 +367,12 @@ q
 
 									.get('/libs/bootstrap.css', function (req, res) {
 
-										_readAllFiles(path.join(m_sDirWeb, 'libs', 'bootstrap', 'css'))
-											.then(function (data) {
-												_sendCSSResponse(res, 200, data);
-											})
-											.catch(function (error) {
-												_500(res, error);
-											});
+										_readAllFiles(path.join(m_sDirWeb, 'libs', 'bootstrap', 'css')).then(function (data) {
+											_sendCSSResponse(res, 200, data);
+										})
+										.catch(function (error) {
+											_500(res, error);
+										});
 
 									})
 
@@ -352,24 +398,22 @@ q
 										
 									.get('/libs/jquery.js', function (req, res) {
 
-										_readAllFiles(path.join(m_sDirWeb, 'libs', 'jquery'))
-											.then(function (data) {
-												_sendJSResponse(res, 200, data);
-											})
-											.catch(function (error) {
-												_500(res, error);
-											});
+										_readAllFiles(path.join(m_sDirWeb, 'libs', 'jquery')).then(function (data) {
+											_sendJSResponse(res, 200, data);
+										})
+										.catch(function (error) {
+											_500(res, error);
+										});
 
 									})
 									.get('/libs/bootstrap.js', function (req, res) {
 
-										_readAllFiles(path.join(m_sDirWeb, 'libs', 'bootstrap', 'js'))
-											.then(function (data) {
-												_sendJSResponse(res, 200, data);
-											})
-											.catch(function (error) {
-												_500(res, error);
-											});
+										_readAllFiles(path.join(m_sDirWeb, 'libs', 'bootstrap', 'js')).then(function (data) {
+											_sendJSResponse(res, 200, data);
+										})
+										.catch(function (error) {
+											_500(res, error);
+										});
 
 									})
 									.get('/libs/socketio.js', function (req, res) {
@@ -380,13 +424,12 @@ q
 									})
 									.get('/libs/angular-modules.js', function (req, res) {
 
-										_readAllFiles(path.join(m_sDirWeb, 'libs', 'angularjs', 'modules'))
-											.then(function (data) {
-												_sendJSResponse(res, 200, data);
-											})
-											.catch(function (error) {
-												_500(res, error);
-											});
+										_readAllFiles(path.join(m_sDirWeb, 'libs', 'angularjs', 'modules')).then(function (data) {
+											_sendJSResponse(res, 200, data);
+										})
+										.catch(function (error) {
+											_500(res, error);
+										});
 
 									})
 
@@ -396,12 +439,15 @@ q
 										_404(req, res);
 									});
 
-							http.listen(Container.get('conf').get('webport'), function () {
-								m_clLog.success('-- [HTTP server] started on port ' + Container.get('conf').get('webport'));
-							});
+								m_clServer.listen(Container.get('conf').get('webport'), function () {
+									m_clLog.success('-- [HTTP server] started on port ' + Container.get('conf').get('webport'));
+								});
 
-							deferred.resolve();
-							
+								deferred.resolve();
+								
+							})
+							.catch(deferred.reject);
+
 						}
 						catch (e) {
 							deferred.reject((e.message) ? e.message : e);

@@ -27,13 +27,13 @@
 
 			// public
 				
-				this.start = function (p_clHTTPServer) {
+				this.start = function () {
 
 					var deferred = q.defer();
 
 						try {
 
-							m_clSocketServer = require('socket.io').listen(p_clHTTPServer);
+							m_clSocketServer = require('socket.io').listen(Container.get('server.http').getServer());
 
 							m_clSocketServer.sockets.on('connection', function (socket) {
 

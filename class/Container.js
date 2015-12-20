@@ -11,7 +11,8 @@
 		m_clHTTPServerInstance = false,
 		m_clHTTPSocketInstance = false,
 		m_clChildSocketInstance = false,
-		m_clSikyAPIInstance = false;
+		m_clSikyAPIInstance = false,
+		m_clOpenSSLInstance = false;
 
 // module
 	
@@ -29,6 +30,17 @@
 					}
 
 					return m_clConfInstance;
+
+				break;
+
+				case 'openssl':
+
+					if (!m_clOpenSSLInstance) {
+						var OpenSSL = require(path.join(__dirname, 'OpenSSL.js'));
+						m_clOpenSSLInstance = new OpenSSL();
+					}
+
+					return m_clOpenSSLInstance;
 
 				break;
 
