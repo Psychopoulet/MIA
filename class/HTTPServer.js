@@ -6,7 +6,7 @@
 		fs = require('fs'),
 		url = require('url'),
 		q = require('q'),
-		app = require('express')(),
+		express = require('express')(),
 		mkdirp = require('mkdirp'),
 
 		Container = require(path.join(__dirname, 'Container.js')),
@@ -241,41 +241,27 @@ q
 
 					function _initServer() {
 
-						var deferred = q.defer(), clOpenSSL,
-							sKeyFilePath, sCSRFilePath, sCRTFilePath;
+						var deferred = q.defer();
 
 							try {
 
 								if (!Container.get('conf').get('ssl')) {
-									deferred.resolve(require('http').createServer(app));
+									deferred.resolve(require('http').createServer(express));
 								}
 								else {
-									
-									clOpenSSL = Container.get('openssl');
-									sKeyFilePath = path.join(m_sDirSSL, 'server.key');
-									sCSRFilePath = path.join(m_sDirSSL, 'server.csr');
-									sCRTFilePath = path.join(m_sDirSSL, 'server.crt');
 
-									clOpenSSL.generateKey(sKeyFilePath).then(function() {
+									Container.get('openssl').createCertificate(
+										path.join(m_sDirSSL, 'server.key'),
+										path.join(m_sDirSSL, 'server.csr'),
+										path.join(m_sDirSSL, 'server.crt')
+									).then(function(data) {
 
-										clOpenSSL.signingRequestCertificate(sKeyFilePath, sCSRFilePath).then(function() {
-
-											clOpenSSL.autosignCertificate(sKeyFilePath, sCSRFilePath, sCRTFilePath).then(function() {
-
-												deferred.resolve(require('https').createServer({
-													key: sKeyFilePath,
-													cert: sCSRFilePath,
-													ca: sCRTFilePath,
-													requestCert: true,
-													rejectUnauthorized: false,
-													agent: false
-												}, app));
-
-											})
-											.catch(deferred.reject);
-
-										})
-										.catch(deferred.reject);
+										deferred.resolve(
+											require('https').createServer({
+												key: data.privateKey,
+												cert: data.certificate
+											}, express)
+										);
 
 									})
 									.catch(deferred.reject);
@@ -307,7 +293,7 @@ q
 
 								m_clServer = p_clServer;
 
-								app.get('/', function (req, res) {
+								express.get('/', function (req, res) {
 
 									_readFile(path.join(m_sDirWeb, 'templates', 'index.html')).then(function (index) {
 
