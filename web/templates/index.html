@@ -104,7 +104,7 @@
 
 				</div>
 
-				<div data-ng-controller="ControllerChildren" class="col-xs-12 only-logged hidden">
+				<div data-ng-controller="ControllerChildren" class="col-xs-2 only-logged hidden">
 
 					<div class="row">
 						
@@ -135,7 +135,38 @@
 
 				</div>
 
-				{{plugins}}
+				<div class="col-xs-8 only-logged hidden">
+					{{widgets}}
+				</div>
+
+				<div class="col-xs-2 only-logged hidden" data-ng-controller="ControllerEvents">
+
+					<div class="panel panel-default">
+						
+						<div class="panel-heading">
+							<h4 class="panel-title">Evènements</h4>
+						</div>
+
+						<table class="table table-bordered">
+
+							<tbody>
+								
+								<tr data-ng-repeat="event in events">
+									<td>
+										
+										<u>event.app</u><br />
+										event.text
+
+									</td>
+								</tr>
+
+							</tbody>
+							
+						</table>
+
+					</div>
+
+				</div>
 
 			</div>
 			

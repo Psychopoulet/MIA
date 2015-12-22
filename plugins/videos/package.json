@@ -6,9 +6,9 @@
   "author": "Sébastien VIDAL",
   "license": "ISC",
   "web" : {
-  	"templates" : [
-  		"web/template.html"
-  	],
+    "templates" : {
+      "widget" : "web/template.html"
+    },
   	"javascripts" : [
   		"web/controller.js"
   	]

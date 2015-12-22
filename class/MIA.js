@@ -85,40 +85,48 @@
 
 							// run
 
+								// server http
+
 								Container.get('server.http').start()
 									.then(function() {
 
-										// plugins
+										// server http socket
 
-											Container.get('plugins').getData()
-												.then(function(p_tabData) {
+										Container.get('server.socket.web').start()
+											.then(function() {
 
-													p_tabData.forEach(function(p_stPlugin) {
+												// server childs
+												
+												Container.get('server.socket.child').start()
+													.then(function() {
 
-														try {
-															require(p_stPlugin.main)(Container);
-															m_clLog.success('-- [plugin] ' + p_stPlugin.name + ' loaded');
-														}
-														catch (e) {
-															m_clLog.err((e.message) ? e.message : e);
-														}
+														// plugins
 
-													});
+														Container.get('plugins').getData()
+															.then(function(p_tabData) {
 
-												})
-												.catch(deferred.reject);
+																p_tabData.forEach(function(p_stPlugin) {
+
+																	try {
+																		require(p_stPlugin.main)(Container);
+																		m_clLog.success('-- [plugin] ' + p_stPlugin.name + ' loaded');
+																	}
+																	catch (e) {
+																		m_clLog.err((e.message) ? e.message : e);
+																	}
+
+																});
+
+															})
+															.catch(deferred.reject);
+
+														deferred.resolve();
 											
-										// start
-											
-											Container.get('server.socket.web').start()
-												.then(function () {
+													})
+													.catch(deferred.reject);
 													
-													Container.get('server.socket.child').start()
-														.then(deferred.resolve)
-														.catch(deferred.reject);
-														
-												})
-												.catch(deferred.reject);
+											})
+											.catch(deferred.reject);
 
 									})
 									.catch(deferred.reject);

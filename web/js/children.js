@@ -5,7 +5,7 @@ app.service('ModelChildren', function() {
     // attributes
 
         var
-            CST_THAT = this,
+            that = this,
             m_tabOnChange = [],
             m_tabData = [];
 
@@ -19,7 +19,7 @@ app.service('ModelChildren', function() {
                     p_fCallback(m_tabData);
                 });
 
-                return CST_THAT;
+                return that;
 
             }
 
@@ -31,7 +31,7 @@ app.service('ModelChildren', function() {
                     m_tabOnChange.push(p_fCallback);
                 }
 
-                return CST_THAT;
+                return that;
 
             };
 

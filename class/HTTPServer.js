@@ -7,7 +7,6 @@
 		url = require('url'),
 		q = require('q'),
 		express = require('express')(),
-		mkdirp = require('mkdirp'),
 
 		Container = require(path.join(__dirname, 'Container.js')),
 		Logs = require(path.join(__dirname, 'Logs.js'));
@@ -29,7 +28,7 @@
 
 				m_bPluginsBuffersCreated = false,
 				m_sPluginsBuffersPath = path.join(__dirname, '..', 'web', 'buffers'),
-				m_sPluginsTemplatesBufferFile = path.join(m_sPluginsBuffersPath, 'plugins.html'),
+				m_sPluginsWidgetsBufferFile = path.join(m_sPluginsBuffersPath, 'plugins.html'),
 				m_sPluginsJavascriptsBufferFile = path.join(m_sPluginsBuffersPath, 'plugins.js');
 				
 		// methodes
@@ -39,12 +38,14 @@
 				// response
 					
 					function _sendResponse(res, p_nCode, p_sContentType, p_sMessage) {
+
 						if (res.writeHead) {
 							res.writeHead(p_nCode, {'Content-Type': p_sContentType});
 						}
 						if (res.end) {
 							res.end(p_sMessage);
 						}
+
 					}
 						
 						function _sendHTMLResponse(res, p_nCode, p_sMessage) {
@@ -169,64 +170,60 @@ q
 									deferred.resolve();
 								}
 								else {
-									
-									mkdirp(m_sPluginsBuffersPath, function (err) {
 
-										if (err) {
-											deferred.reject((err.message) ? err.message : err);
+									m_clPlugins.getData().then(function (p_tabData) {
+
+										try {
+											if (fs.lstatSync(m_sPluginsWidgetsBufferFile).isFile()) {
+												fs.unlinkSync(m_sPluginsWidgetsBufferFile);
+											}
 										}
-										else {
+										catch(e) {}
 
-											m_clPlugins.getData().then(function (p_tabData) {
-
-												try {
-													if (fs.lstatSync(m_sPluginsTemplatesBufferFile).isFile()) {
-														fs.unlinkSync(m_sPluginsTemplatesBufferFile);
-													}
-												}
-												catch(e) {}
-
-												try {
-													if (fs.lstatSync(m_sPluginsJavascriptsBufferFile).isFile()) {
-														fs.unlinkSync(m_sPluginsJavascriptsBufferFile);
-													}
-												}
-												catch(e) {}
-
-												p_tabData.forEach(function(plugin) {
-
-													if (plugin.web) {
-														
-														if (plugin.web.templates && 0 < plugin.web.templates.length) {
-
-															plugin.web.templates.forEach(function(template) {
-																fs.appendFileSync(m_sPluginsTemplatesBufferFile, fs.readFileSync(template, 'utf8'), 'utf8');
-															});
-
-														}
-
-														if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
-
-															plugin.web.javascripts.forEach(function(javascript) {
-																fs.appendFileSync(m_sPluginsJavascriptsBufferFile, fs.readFileSync(javascript, 'utf8'), 'utf8');
-															});
-
-														}
-
-													}
-
-												});
-
-												m_bPluginsBuffersCreated = true;
-
-												deferred.resolve();
-
-											})
-											.catch(deferred.reject);
-
+										try {
+											if (fs.lstatSync(m_sPluginsJavascriptsBufferFile).isFile()) {
+												fs.unlinkSync(m_sPluginsJavascriptsBufferFile);
+											}
 										}
+										catch(e) {}
+
+										p_tabData.forEach(function(plugin) {
+
+											if (plugin.web) {
+
+												if (plugin.web.templates && plugin.web.templates.widget) {
+
+													fs.appendFileSync(
+														m_sPluginsWidgetsBufferFile,
+														fs.readFileSync(plugin.web.templates.widget, 'utf8')
+															.replace('{{plugin.name}}', plugin.name)
+															.replace('{{plugin.description}}', plugin.description)
+															.replace('{{plugin.version}}', plugin.version),
+														'utf8'
+													);
 													
-									});
+												}
+
+												if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
+
+													plugin.web.javascripts.forEach(
+														function(javascript) {
+															fs.appendFileSync(m_sPluginsJavascriptsBufferFile, fs.readFileSync(javascript, 'utf8'), 'utf8'
+														);
+													});
+
+												}
+
+											}
+
+										});
+
+										m_bPluginsBuffersCreated = true;
+
+										deferred.resolve();
+
+									})
+									.catch(deferred.reject);
 
 								}
 
@@ -257,10 +254,12 @@ q
 									).then(function(data) {
 
 										deferred.resolve(
+
 											require('https').createServer({
 												key: data.privateKey,
 												cert: data.certificate
 											}, express)
+
 										);
 
 									})
@@ -298,22 +297,22 @@ q
 									_readFile(path.join(m_sDirWeb, 'templates', 'index.html')).then(function (index) {
 
 										_createBuffers().then(function() {
-											
-											_readFile(m_sPluginsTemplatesBufferFile).then(function(sHTML) {
-												_sendHTMLResponse(res, 200, index.replace('{{plugins}}', sHTML));
+
+											_readFile(m_sPluginsWidgetsBufferFile).then(function(sHTML) {
+												_sendHTMLResponse(res, 200, index.replace('{{widgets}}', sHTML));
 											})
-											.catch(function (error) {
-												_500(res, index.replace('{{plugins}}', error));
+											.catch(function (err) {
+												_500(res, index.replace('{{widgets}}', err));
 											});
 
 										})
-										.catch(function() {
-											_500(res, index.replace('{{plugins}}', error));
-										});
+										.catch(function(err) {
+											_500(res, index.replace('{{widgets}}', err));
+										});	
 
 									})
-									.catch(function (error) {
-										_500(res, error);
+									.catch(function (err) {
+										_500(res, err);
 									});
 										
 								})
