@@ -49,11 +49,6 @@
 
 					<div class="collapse navbar-collapse bs-example-js-navbar-collapse">
 
-						<ul class="nav navbar-nav only-logged hidden">
-							<li><a id="menuVideos" href="#">Vidéos</a></li>
-							<li><a id="menuWarcraft" href="#">Warcraft</a></li>
-						</ul>
-
 						<div class="navbar-form navbar-right">
 							<span class="label label-danger only-disconnected">diconnected</span>
 							<span class="label label-warning only-connected hidden">connected</span>
@@ -136,7 +131,13 @@
 				</div>
 
 				<div class="col-xs-8 only-logged hidden">
-					{{widgets}}
+
+					<div class="row">
+
+						{{widgets}}
+						
+					</div>
+
 				</div>
 
 				<div class="col-xs-2 only-logged hidden" data-ng-controller="ControllerEvents">

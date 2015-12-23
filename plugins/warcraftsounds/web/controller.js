@@ -19,21 +19,53 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 
 			// previews
 
-				$scope.selectRace = function() {
+				$scope.emptyRace = function() {
+
+					$scope.selectedrace = false;
 
 					$scope.characters = [];
 						$scope.actions = [];
 					$scope.musics = [];
 					$scope.warnings = [];
 
-					socket.emit('web.warcraftsounds.characters.get', { race : $scope.selectedrace.code });
-					socket.emit('web.warcraftsounds.musics.get', { race : $scope.selectedrace.code });
-					socket.emit('web.warcraftsounds.warnings.get', { race : $scope.selectedrace.code });
+				};
+
+				$scope.selectRace = function(p_stRace) {
+
+					$scope.emptyRace();
+
+					if (p_stRace && p_stRace.code) {
+
+						$scope.selectedrace = p_stRace;
+
+						socket.emit('web.warcraftsounds.characters.get', { race : p_stRace.code });
+						socket.emit('web.warcraftsounds.musics.get', { race : p_stRace.code });
+						socket.emit('web.warcraftsounds.warnings.get', { race : p_stRace.code });
+
+					}
 
 				};
-				$scope.selectCharacter = function() {
+
+				$scope.emptyCharacter = function() {
+					$scope.selectedcharacter = false;
 					$scope.actions = [];
-					socket.emit('web.warcraftsounds.actions.get', { race : $scope.selectedrace.code, character : $scope.selectedcharacter.code });
+				};
+
+				$scope.selectCharacter = function(p_stCharacter) {
+
+					$scope.emptyCharacter();
+
+					if (p_stCharacter && p_stCharacter.code) {
+
+						$scope.selectedcharacter = p_stCharacter;
+
+						socket.emit('web.warcraftsounds.actions.get', {
+							race : $scope.selectedrace.code,
+							character : p_stCharacter.code
+						});
+
+					}
+
 				};
 
 

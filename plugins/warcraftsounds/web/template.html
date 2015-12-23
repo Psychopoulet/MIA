@@ -1,157 +1,348 @@
 
-<div class="panel panel-default" data-ng-controller="ControllerWarcraftSounds">
+<div class="col-xs-6">
 
-	<div class="panel-heading">
-		<h4 class="panel-title">{{plugin.name}}</h4>
-	</div>
+	<div class="panel panel-default" data-ng-controller="ControllerWarcraftSounds">
 
-	<div class="panel-body">
-
-		<div class="row">
-
-			<div class="form-group col-xs-6">
-
-				<label for="WarcraftRaces">Enfant ({{children.length}})</label>
-
-				<select class="form-control"
-						data-ng-disabled="!children.length" data-ng-class="{'disabled' : !children.length }"
-						data-ng-options="child.name for child in children"
-						data-ng-model="selectedchild">
-					<option value="">-- NC --</option>
-				</select>
-
-			</div>
-
-			<div class="form-group col-xs-6">
-
-				<label for="WarcraftRaces">Races ({{races.length}})</label>
-
-				<select id="WarcraftRaces" class="form-control"
-						data-ng-disabled="!races.length" data-ng-class="{'disabled' : !races.length }"
-						data-ng-options="race.name for race in races"
-						data-ng-model="selectedrace"
-						data-ng-change="selectRace();">
-					<option value="">-- NC --</option>
-				</select>
-
-			</div>
-
+		<div class="panel-heading">
+			<h4 class="panel-title">{{plugin.name}}</h4>
 		</div>
 
-		<div class="row">
+		<div class="panel-body">
 
-			<div class="form-group col-xs-12 col-md-6">
+			<!-- SMALL VERSION -->
 
-				<label for="WarcraftMusics">Musiques ({{musics.length}})</label>
+			<div class="hidden-md hidden-lg">
+				
+				<div class="form-group" data-ng-show="!selectedrace">
 
-				<div class="input-group">
+					<label>Races ({{races.length}})</label>
 
-					<select id="WarcraftMusics" class="form-control"
-							data-ng-disabled="!musics.length" data-ng-class="{'disabled' : !musics.length }"
-							data-ng-options="music.name for music in musics"
-							data-ng-model="selectedmusic">
+					<select class="form-control"
+							data-ng-disabled="!races.length" data-ng-class="{'disabled' : !races.length }"
+							data-ng-options="race.name for race in races"
+							data-ng-model="selectedrace"
+							data-ng-change="selectRace(selectedrace);">
 						<option value="">-- NC --</option>
 					</select>
 
-					<span class="input-group-btn">
+				</div>
 
-						<button type="button" class="btn btn-primary"
-								data-ng-disabled="!selectedmusic" data-ng-class="{'disabled' : !selectedmusic }"
-								data-ng-click="previewMusic(selectedrace, selectedmusic)">
-							<span class="glyphicon glyphicon-play"></span>&nbsp;&nbsp; Lire
-						</button>
+				<div data-ng-show="selectedrace">
 
-						<button type="button" class="btn btn-primary"
-								data-ng-disabled="!selectedmusic || !selectedchild" data-ng-class="{'disabled' : !selectedmusic || !selectedchild }"
-								data-ng-click="playMusicOnChild(selectedmusic, selectedchild)">
-							<span class="glyphicon glyphicon-cloud-upload"></span>&nbsp;&nbsp; Envoyer
-						</button>
+					<div class="form-group" data-ng-show="children.length">
 
-					</span>
+						<label>Enfant ({{children.length}})</label>
+
+						<select class="form-control"
+								data-ng-options="child.name for child in children"
+								data-ng-model="selectedchild">
+							<option value="">-- NC --</option>
+						</select>
+
+					</div>
+
+					<div data-ng-hide="selectedcharacter">
+
+						<div class="form-group">
+
+							<button type="button" class="btn btn-primary form-control"
+									data-ng-click="emptyRace();">
+								<span class="glyphicon glyphicon-arrow-left"></span>&nbsp;&nbsp; Retour
+							</button>
+
+						</div>
+
+						<div class="form-group">
+
+							<label>Musiques ({{musics.length}})</label>
+
+							<div class="input-group">
+
+								<select class="form-control"
+										data-ng-disabled="!musics.length" data-ng-class="{'disabled' : !musics.length }"
+										data-ng-options="music.name for music in musics"
+										data-ng-model="selectedmusic">
+									<option value="">-- NC --</option>
+								</select>
+
+								<span class="input-group-btn">
+
+									<button type="button" class="btn btn-primary"
+											data-ng-disabled="!selectedmusic" data-ng-class="{'disabled' : !selectedmusic }"
+											data-ng-click="previewMusic(selectedrace, selectedmusic);">
+										<span class="glyphicon glyphicon-play"></span>
+									</button>
+
+									<button type="button" class="btn btn-primary"
+									 		data-ng-show="children.length"
+											data-ng-disabled="!selectedmusic || !selectedchild" data-ng-class="{'disabled' : !selectedmusic || !selectedchild }"
+											data-ng-click="playMusicOnChild(selectedmusic, selectedchild);">
+										<span class="glyphicon glyphicon-cloud-upload"></span>
+									</button>
+
+								</span>
+
+							</div>
+
+						</div>
+
+						<div class="form-group">
+
+							<label>Warnings ({{warnings.length}})</label>
+
+							<div class="input-group">
+
+								<select class="form-control"
+										data-ng-disabled="!warnings.length" data-ng-class="{'disabled' : !warnings.length }"
+										data-ng-options="warning.name for warning in warnings"
+										data-ng-model="selectedwarning">
+									<option value="">-- NC --</option>
+								</select>
+
+								<span class="input-group-btn">
+
+									<button type="button" class="btn btn-primary"
+											data-ng-disabled="!selectedwarning" data-ng-class="{'disabled' : !selectedwarning }"
+											data-ng-click="previewWarning(selectedrace, selectedwarning);">
+										<span class="glyphicon glyphicon-play"></span>
+									</button>
+
+									<button type="button" class="btn btn-primary"
+									 		data-ng-show="children.length"
+											data-ng-disabled="!selectedwarning || !selectedchild" data-ng-class="{'disabled' : !selectedwarning || !selectedchild }"
+											data-ng-click="playWarningOnChild(selectedwarning, selectedchild);">
+										<span class="glyphicon glyphicon-cloud-upload"></span>
+									</button>
+
+								</span>
+
+							</div>
+
+						</div>
+
+						<div class="form-group">
+
+							<label>Personnages ({{characters.length}})</label>
+
+							<select class="form-control"
+									data-ng-disabled="!characters.length" data-ng-class="{'disabled' : !characters.length }"
+									data-ng-options="character.name for character in characters"
+									data-ng-model="selectedcharacter"
+									data-ng-change="selectCharacter(selectedcharacter);">
+								<option value="">-- NC --</option>
+							</select>
+
+						</div>
+
+					</div>
+
+					<div data-ng-show="selectedcharacter">
+
+						<div class="form-group">
+
+							<button type="button" class="btn btn-primary form-control"
+									data-ng-click="emptyCharacter();">
+								<span class="glyphicon glyphicon-arrow-left"></span>&nbsp;&nbsp; Retour
+							</button>
+
+						</div>
+
+						<div class="form-group">
+						
+							<label>Actions ({{actions.length}})</label>
+
+							<div class="input-group">
+
+								<select class="form-control"
+										data-ng-disabled="!actions.length" data-ng-class="{'disabled' : !actions.length }"
+										data-ng-options="action.name group by action.type.name for action in actions"
+										data-ng-model="selectedaction">
+									<option value="">-- NC --</option>
+								</select>
+
+								<span class="input-group-btn">
+
+									<button type="button" class="btn btn-primary"
+											data-ng-disabled="!selectedaction" data-ng-class="{'disabled' : !selectedaction }"
+											data-ng-click="previewAction(selectedrace, selectedcharacter, selectedaction)">
+										<span class="glyphicon glyphicon-play"></span>
+									</button>
+
+									<button type="button" class="btn btn-primary"
+									 		data-ng-show="children.length"
+											data-ng-disabled="!selectedaction || !selectedchild" data-ng-class="{'disabled' : !selectedaction || !selectedchild }"
+											data-ng-click="playActionOnChild(selectedaction, selectedchild)">
+										<span class="glyphicon glyphicon-cloud-upload"></span>
+									</button>
+
+								</span>
+
+							</div>
+
+						</div>
+
+					</div>
 
 				</div>
 
 			</div>
 
-			<div class="form-group col-xs-12 col-md-6">
+			<!-- LARGE VERSION -->
 
-				<label for="WarcraftWarnings">Warnings ({{warnings.length}})</label>
+			<div class="hidden-xs hidden-sm">
+				
+				<div class="row">
 
-				<div class="input-group">
+					<div class="form-group col-xs-6" data-ng-show="children.length">
 
-					<select id="WarcraftWarnings" class="form-control"
-							data-ng-disabled="!warnings.length" data-ng-class="{'disabled' : !warnings.length }"
-							data-ng-options="warning.name for warning in warnings"
-							data-ng-model="selectedwarning">
-						<option value="">-- NC --</option>
-					</select>
+						<label>Enfant ({{children.length}})</label>
 
-					<span class="input-group-btn">
+						<select class="form-control"
+								data-ng-disabled="!children.length" data-ng-class="{'disabled' : !children.length }"
+								data-ng-options="child.name for child in children"
+								data-ng-model="selectedchild">
+							<option value="">-- NC --</option>
+						</select>
 
-						<button type="button" class="btn btn-primary"
-								data-ng-disabled="!selectedwarning" data-ng-class="{'disabled' : !selectedwarning }"
-								data-ng-click="previewWarning(selectedrace, selectedwarning)">
-							<span class="glyphicon glyphicon-play"></span>&nbsp;&nbsp; Lire
-						</button>
+					</div>
 
-						<button type="button" class="btn btn-primary"
-								data-ng-disabled="!selectedwarning || !selectedchild" data-ng-class="{'disabled' : !selectedwarning || !selectedchild }"
-								data-ng-click="playWarningOnChild(selectedwarning, selectedchild)">
-							<span class="glyphicon glyphicon-cloud-upload"></span>&nbsp;&nbsp; Envoyer
-						</button>
+					<div class="form-group" data-ng-class="{ 'col-xs-6' : children.length, 'col-xs-12' : !children.length }">
 
-					</span>
+						<label>Races ({{races.length}})</label>
+
+						<select class="form-control"
+								data-ng-disabled="!races.length" data-ng-class="{'disabled' : !races.length }"
+								data-ng-options="race.name for race in races"
+								data-ng-model="selectedrace"
+								data-ng-change="selectRace(selectedrace);">
+							<option value="">-- NC --</option>
+						</select>
+
+					</div>
 
 				</div>
 
-			</div>
+				<div class="row">
 
-		</div>
+					<div class="form-group col-xs-12 col-md-6">
 
-		<div class="row">
+						<label>Musiques ({{musics.length}})</label>
 
-			<div class="form-group col-xs-4 col-md-6">
+						<div class="input-group">
 
-				<label for="WarcraftCharacters">Personnages ({{characters.length}})</label>
+							<select class="form-control"
+									data-ng-disabled="!musics.length" data-ng-class="{'disabled' : !musics.length }"
+									data-ng-options="music.name for music in musics"
+									data-ng-model="selectedmusic">
+								<option value="">-- NC --</option>
+							</select>
 
-				<select id="WarcraftCharacters" class="form-control"
-						data-ng-disabled="!characters.length" data-ng-class="{'disabled' : !characters.length }"
-						data-ng-options="character.name for character in characters"
-						data-ng-model="selectedcharacter"
-						data-ng-change="selectCharacter();">
-					<option value="">-- NC --</option>
-				</select>
+							<span class="input-group-btn">
 
-			</div>
+								<button type="button" class="btn btn-primary"
+										data-ng-disabled="!selectedmusic" data-ng-class="{'disabled' : !selectedmusic }"
+										data-ng-click="previewMusic(selectedrace, selectedmusic)">
+									<span class="glyphicon glyphicon-play"></span>&nbsp;&nbsp; Lire
+								</button>
 
-			<div class="form-group col-xs-8 col-md-6">
+								<button type="button" class="btn btn-primary"
+									 	data-ng-show="children.length"
+										data-ng-disabled="!selectedmusic || !selectedchild" data-ng-class="{'disabled' : !selectedmusic || !selectedchild }"
+										data-ng-click="playMusicOnChild(selectedmusic, selectedchild)">
+									<span class="glyphicon glyphicon-cloud-upload"></span>&nbsp;&nbsp; Envoyer
+								</button>
 
-				<label for="WarcraftActions">Actions ({{actions.length}})</label>
+							</span>
 
-				<div class="input-group">
+						</div>
 
-					<select id="WarcraftActions" class="form-control"
-							data-ng-disabled="!actions.length" data-ng-class="{'disabled' : !actions.length }"
-							data-ng-options="action.name group by action.type.name for action in actions"
-							data-ng-model="selectedaction">
-						<option value="">-- NC --</option>
-					</select>
+					</div>
 
-					<span class="input-group-btn">
+					<div class="form-group col-xs-12 col-md-6">
 
-						<button type="button" class="btn btn-primary"
-								data-ng-disabled="!selectedaction" data-ng-class="{'disabled' : !selectedaction }"
-								data-ng-click="previewAction(selectedrace, selectedcharacter, selectedaction)">
-							<span class="glyphicon glyphicon-play"></span>&nbsp;&nbsp; Lire
-						</button>
+						<label>Warnings ({{warnings.length}})</label>
 
-						<button type="button" class="btn btn-primary"
-								data-ng-disabled="!selectedaction || !selectedchild" data-ng-class="{'disabled' : !selectedaction || !selectedchild }"
-								data-ng-click="playActionOnChild(selectedaction, selectedchild)">
-							<span class="glyphicon glyphicon-cloud-upload"></span>&nbsp;&nbsp; Envoyer
-						</button>
+						<div class="input-group">
 
-					</span>
+							<select class="form-control"
+									data-ng-disabled="!warnings.length" data-ng-class="{'disabled' : !warnings.length }"
+									data-ng-options="warning.name for warning in warnings"
+									data-ng-model="selectedwarning">
+								<option value="">-- NC --</option>
+							</select>
+
+							<span class="input-group-btn">
+
+								<button type="button" class="btn btn-primary"
+										data-ng-disabled="!selectedwarning" data-ng-class="{'disabled' : !selectedwarning }"
+										data-ng-click="previewWarning(selectedrace, selectedwarning)">
+									<span class="glyphicon glyphicon-play"></span>&nbsp;&nbsp; Lire
+								</button>
+
+								<button type="button" class="btn btn-primary"
+									 	data-ng-show="children.length"
+										data-ng-disabled="!selectedwarning || !selectedchild" data-ng-class="{'disabled' : !selectedwarning || !selectedchild }"
+										data-ng-click="playWarningOnChild(selectedwarning, selectedchild)">
+									<span class="glyphicon glyphicon-cloud-upload"></span>&nbsp;&nbsp; Envoyer
+								</button>
+
+							</span>
+
+						</div>
+
+					</div>
+
+				</div>
+
+				<div class="row">
+
+					<div class="form-group col-xs-4 col-md-6">
+
+						<label>Personnages ({{characters.length}})</label>
+
+						<select class="form-control"
+								data-ng-disabled="!characters.length" data-ng-class="{'disabled' : !characters.length }"
+								data-ng-options="character.name for character in characters"
+								data-ng-model="selectedcharacter"
+								data-ng-change="selectCharacter(selectedcharacter);">
+							<option value="">-- NC --</option>
+						</select>
+
+					</div>
+
+					<div class="form-group col-xs-8 col-md-6">
+
+						<label>Actions ({{actions.length}})</label>
+
+						<div class="input-group">
+
+							<select class="form-control"
+									data-ng-disabled="!actions.length" data-ng-class="{'disabled' : !actions.length }"
+									data-ng-options="action.name group by action.type.name for action in actions"
+									data-ng-model="selectedaction">
+								<option value="">-- NC --</option>
+							</select>
+
+							<span class="input-group-btn">
+
+								<button type="button" class="btn btn-primary"
+										data-ng-disabled="!selectedaction" data-ng-class="{'disabled' : !selectedaction }"
+										data-ng-click="previewAction(selectedrace, selectedcharacter, selectedaction)">
+									<span class="glyphicon glyphicon-play"></span>&nbsp;&nbsp; Lire
+								</button>
+
+								<button type="button" class="btn btn-primary"
+									 	data-ng-show="children.length"
+										data-ng-disabled="!selectedaction || !selectedchild" data-ng-class="{'disabled' : !selectedaction || !selectedchild }"
+										data-ng-click="playActionOnChild(selectedaction, selectedchild)">
+									<span class="glyphicon glyphicon-cloud-upload"></span>&nbsp;&nbsp; Envoyer
+								</button>
+
+							</span>
+
+						</div>
+
+					</div>
 
 				</div>
 
