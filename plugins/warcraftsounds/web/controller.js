@@ -17,11 +17,15 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 
 		// public
 
-			// previews
+			// selects
 
 				$scope.emptyRace = function() {
 
 					$scope.selectedrace = false;
+
+						$scope.selectedmusic = false;
+						$scope.selectedwarning = false;
+						$scope.selectedcharacter = false;
 
 					$scope.characters = [];
 						$scope.actions = [];
@@ -51,11 +55,11 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 					$scope.actions = [];
 				};
 
-				$scope.selectCharacter = function(p_stCharacter) {
+				$scope.selectCharacter = function(p_stRace, p_stCharacter) {
 
 					$scope.emptyCharacter();
 
-					if (p_stCharacter && p_stCharacter.code) {
+					if (p_stRace && p_stRace.code && p_stCharacter && p_stCharacter.code) {
 
 						$scope.selectedcharacter = p_stCharacter;
 
@@ -68,6 +72,7 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 
 				};
 
+			// previews
 
 				$scope.previewMusic = function(p_stRace, p_stMusic) {
                     $popup.sound(p_stMusic.url, p_stRace.name + ' - ' + p_stMusic.name);
