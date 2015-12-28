@@ -99,38 +99,30 @@
 
 				</div>
 
-				<div data-ng-controller="ControllerChildren" class="col-xs-2 only-logged hidden">
+				<div data-ng-controller="ControllerChildren" class="col-xs-12 col-md-2 only-logged hidden">
 
-					<div class="row">
+					<div class="panel" data-ng-class="{ 'panel-default' : child.connected, 'panel-danger' : !child.connected }" data-ng-repeat="child in children">
 						
-						<div data-ng-repeat="child in children" class="col-xs-12 col-md-6 col-lg-3">
+						<div class="panel-heading">{{child.name}}</div>
 
-							<div class="panel" data-ng-class="{ 'panel-default' : child.connected, 'panel-danger' : !child.connected }">
-								
-								<div class="panel-heading">{{child.name}}</div>
-
-								<table class="table table-bordered">
-									<tbody>
-										<tr>
-											<td>token</td>
-											<td>{{child.token}}</td>
-										</tr>
-										<tr>
-											<td>temperature</td>
-											<td>{{child.temperature}}°C</td>
-										</tr>
-									</tbody>
-								</table>
-
-							</div>
-						
-						</div>
+						<table class="table table-bordered">
+							<tbody>
+								<tr>
+									<td>token</td>
+									<td>{{child.token}}</td>
+								</tr>
+								<tr>
+									<td>temperature</td>
+									<td>{{child.temperature}}°C</td>
+								</tr>
+							</tbody>
+						</table>
 
 					</div>
-
+						
 				</div>
 
-				<div class="col-xs-8 only-logged hidden">
+				<div class="col-xs-12 col-md-10 col-lg-8 only-logged hidden">
 
 					<div class="row">
 
@@ -140,7 +132,7 @@
 
 				</div>
 
-				<div class="col-xs-2 only-logged hidden" data-ng-controller="ControllerEvents">
+				<div class="col-xs-2 hidden-xs hidden-sm hidden-md only-logged hidden" data-ng-controller="ControllerEvents">
 
 					<div class="panel panel-default">
 						

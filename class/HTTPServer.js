@@ -191,14 +191,32 @@ q
 
 											if (plugin.web) {
 
-												if (plugin.web.templates && plugin.web.templates.widget) {
+												if (plugin.web.templates && plugin.web.templates.widget && plugin.web.widgetcontroller) {
 
 													fs.appendFileSync(
 														m_sPluginsWidgetsBufferFile,
-														fs.readFileSync(plugin.web.templates.widget, 'utf8')
-															.replace('{{plugin.name}}', plugin.name)
-															.replace('{{plugin.description}}', plugin.description)
-															.replace('{{plugin.version}}', plugin.version),
+
+														'<div class="col-xs-12 col-md-6">' +
+
+															'<div class="panel panel-default" data-ng-controller="' + plugin.web.widgetcontroller + '">' +
+
+																'<div class="panel-heading">' +
+																	'<h4 class="panel-title">' + plugin.name + '</h4>' +
+																'</div>' +
+
+																'<div class="panel-body">' +
+
+																	fs.readFileSync(plugin.web.templates.widget, 'utf8')
+																		.replace('{{plugin.name}}', plugin.name)
+																		.replace('{{plugin.description}}', plugin.description)
+																		.replace('{{plugin.version}}', plugin.version) +
+
+																'</div>' +
+
+															'</div>' +
+
+														'</div>',
+
 														'utf8'
 													);
 													
@@ -206,10 +224,14 @@ q
 
 												if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
 
-													plugin.web.javascripts.forEach(
-														function(javascript) {
-															fs.appendFileSync(m_sPluginsJavascriptsBufferFile, fs.readFileSync(javascript, 'utf8'), 'utf8'
+													plugin.web.javascripts.forEach(function(javascript) {
+
+														fs.appendFileSync(
+															m_sPluginsJavascriptsBufferFile,
+															fs.readFileSync(javascript, 'utf8'),
+															'utf8'
 														);
+
 													});
 
 												}
@@ -263,7 +285,15 @@ q
 										);
 
 									})
-									.catch(deferred.reject);
+									.catch(function(e) {
+
+										m_clLog.err('-- [HTTP server] openssl : ' ((e.message) ? e.message : e));
+
+										deferred.resolve(
+											require('http').createServer(express)
+										);
+
+									});
 
 								}
 

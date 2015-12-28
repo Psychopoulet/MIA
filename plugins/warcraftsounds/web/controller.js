@@ -4,14 +4,20 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 
 	// attributes
 
-		$scope.races = [];
-			$scope.characters = [];
-				$scope.actions = [];
-			$scope.musics = [];
-			$scope.warnings = [];
+		// private
+		
+			var m_tabRaces = [];
 
-		$scope.children = [];
-		$scope.selectedchild = null;
+		// public
+
+			$scope.races = [];
+				$scope.characters = [];
+					$scope.actions = [];
+				$scope.musics = [];
+				$scope.warnings = [];
+
+			$scope.children = [];
+			$scope.selectedchild = false;
 
 	// methods
 
@@ -42,10 +48,35 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 
 						$scope.selectedrace = p_stRace;
 
-						socket.emit('web.warcraftsounds.characters.get', { race : p_stRace.code });
-						socket.emit('web.warcraftsounds.musics.get', { race : p_stRace.code });
-						socket.emit('web.warcraftsounds.warnings.get', { race : p_stRace.code });
+						m_tabRaces.forEach(function(race) {
+								
+							if (race.code === p_stRace.code) {
 
+								if (race.characters && 0 < race.characters.length) {
+									$scope.characters = race.characters;
+								}
+								else {
+									socket.emit('web.warcraftsounds.characters.get', { race : p_stRace });
+								}
+
+								if (race.musics && 0 < race.musics.length) {
+									$scope.musics = race.musics;
+								}
+								else {
+									socket.emit('web.warcraftsounds.musics.get', { race : p_stRace });
+								}
+
+								if (race.warnings && 0 < race.warnings.length) {
+									$scope.warnings = race.warnings;
+								}
+								else {
+									socket.emit('web.warcraftsounds.warnings.get', { race : p_stRace });
+								}
+
+							}
+							
+						});
+						
 					}
 
 				};
@@ -63,11 +94,34 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 
 						$scope.selectedcharacter = p_stCharacter;
 
-						socket.emit('web.warcraftsounds.actions.get', {
-							race : $scope.selectedrace.code,
-							character : p_stCharacter.code
-						});
+						m_tabRaces.forEach(function(race) {
+								
+							if (race.code === p_stRace.code) {
 
+								race.characters.forEach(function(character) {
+
+									if (character.code === p_stCharacter.code) {
+
+										if (character.actions && 0 < character.actions.length) {
+											$scope.actions = character.actions;
+										}
+										else {
+											
+											socket.emit('web.warcraftsounds.actions.get', {
+												race : p_stRace,
+												character : p_stCharacter
+											});
+
+										}
+
+									}
+
+								});
+
+							}
+							
+						});
+						
 					}
 
 				};
@@ -115,7 +169,7 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 			ModelChildren
 				.onChange(function(p_tabData) {
 					$scope.children = p_tabData;
-					$scope.selectedchild = null;
+					$scope.selectedchild = false;
 					$scope.$apply();
 				});
 
@@ -136,44 +190,90 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 
 						socket
 							.on('web.logged', function () {
-								socket.emit('web.warcraftsounds.races.get');
+
+								if (0 < m_tabRaces.length) {
+									$scope.races = m_tabRaces;
+									$scope.$apply();
+								}
+								else {
+									socket.emit('web.warcraftsounds.races.get');
+								}
+
 							})
 							.on('web.warcraftsounds.races.get', function (p_tabData) {
+
+								m_tabRaces = p_tabData;
+
 								$scope.races = p_tabData;
 								$scope.$apply();
+
 							})
-							.on('web.warcraftsounds.characters.get', function (p_tabData) {
-								$scope.characters = p_tabData;
+							.on('web.warcraftsounds.characters.get', function (p_stData) {
+
+								m_tabRaces.forEach(function(race, key) {
+										
+									if (race.code === p_stData.race.code) {
+										m_tabRaces[key].characters = p_stData.characters;
+									}
+									
+								});
+								
+								$scope.characters = p_stData.characters;
 								$scope.$apply();
+
 							})
-								.on('web.warcraftsounds.actions.get', function (p_tabData) {
-									$scope.actions = p_tabData;
+								.on('web.warcraftsounds.actions.get', function (p_stData) {
+
+									m_tabRaces.forEach(function(race, racekey) {
+										
+										if (race.code === p_stData.race.code) {
+
+											race.characters.forEach(function(character, characterkey) {
+												
+												if (character.code === p_stData.character.code) {
+													m_tabRaces[racekey].characters[characterkey].actions = p_stData.actions;
+												}
+												
+											});
+
+										}
+										
+									});
+								
+									$scope.actions = p_stData.actions;
 									$scope.$apply();
+
 								})
-							.on('web.warcraftsounds.musics.get', function (p_tabData) {
-								$scope.musics = p_tabData;
+							.on('web.warcraftsounds.musics.get', function (p_stData) {
+
+								m_tabRaces.forEach(function(race, key) {
+										
+									if (race.code === p_stData.race.code) {
+										m_tabRaces[key].musics = p_stData.musics;
+									}
+									
+								});
+								
+								$scope.musics = p_stData.musics;
 								$scope.$apply();
+
 							})
-							.on('web.warcraftsounds.warnings.get', function (p_tabData) {
-								$scope.warnings = p_tabData;
+							.on('web.warcraftsounds.warnings.get', function (p_stData) {
+
+								m_tabRaces.forEach(function(race, key) {
+										
+									if (race.code === p_stData.race.code) {
+										m_tabRaces[key].warnings = p_stData.warnings;
+									}
+									
+								});
+								
+								$scope.warnings = p_stData.warnings;
 								$scope.$apply();
+
 							})
 							.on('web.warcraftsounds.error', $popup.alert);
 
 					});
 
-			// interface
-
-				jQuery('#menuWarcraft').click(function(e) {
-
-					e.preventDefault();
-					
-					jQuery('#modalWarcraft').modal({
-						backdrop : 'static',
-						keyboard: false,
-						show : true
-					});
-
-				});
-				
 }]);

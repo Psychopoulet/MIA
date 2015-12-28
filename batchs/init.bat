@@ -1,0 +1,1 @@
+cls && cd %~dp0\..\ && npm update && node main.js --restart --debug --ssl

@@ -6,6 +6,7 @@
   "author": "Sébastien VIDAL",
   "license": "ISC",
   "web" : {
+    "widgetcontroller" : "ControllerVideosList",
     "templates" : {
       "widget" : "web/template.html"
     },

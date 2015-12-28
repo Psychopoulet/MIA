@@ -52,14 +52,19 @@
 							})
 								.on('web.warcraftsounds.characters.get', function (p_stData) {
 
-									if (!p_stData.race) {
+									if (!p_stData.race || !p_stData.race.code) {
 										Container.get('server.socket.web').emit('web.warcraftsounds.error', 'Missing race code.');
 									}
 									else {
 
-										Container.get('sikyapi').query('warcraftsounds', '/races/' + p_stData.race + '/characters', 'GET')
+										Container.get('sikyapi').query('warcraftsounds', '/races/' + p_stData.race.code + '/characters', 'GET')
 											.then(function (p_tabData) {
-												Container.get('server.socket.web').emit('web.warcraftsounds.characters.get', p_tabData);
+
+												Container.get('server.socket.web').emit('web.warcraftsounds.characters.get', {
+													race : p_stData.race,
+													characters : p_tabData
+												});
+
 											})
 											.catch(function (err){
 												m_clLog.err(err);
@@ -71,17 +76,23 @@
 								})
 									.on('web.warcraftsounds.actions.get', function (p_stData) {
 
-										if (!p_stData.race) {
+										if (!p_stData.race || !p_stData.race.code) {
 											Container.get('server.socket.web').emit('web.warcraftsounds.error', 'Missing race code.');
 										}
-										else if (!p_stData.character) {
+										else if (!p_stData.character || !p_stData.character.code) {
 											Container.get('server.socket.web').emit('web.warcraftsounds.error', 'Missing character code.');
 										}
 										else {
 
-											Container.get('sikyapi').query('warcraftsounds', '/races/' + p_stData.race + '/characters/' + p_stData.character + '/actions', 'GET')
+											Container.get('sikyapi').query('warcraftsounds', '/races/' + p_stData.race.code + '/characters/' + p_stData.character.code + '/actions', 'GET')
 												.then(function (p_tabData) {
-													Container.get('server.socket.web').emit('web.warcraftsounds.actions.get', p_tabData);
+
+													Container.get('server.socket.web').emit('web.warcraftsounds.actions.get', {
+														race : p_stData.race,
+														character : p_stData.character,
+														actions : p_tabData
+													});
+
 												})
 												.catch(function (err){
 													m_clLog.err(err);
@@ -93,14 +104,19 @@
 									})
 								.on('web.warcraftsounds.musics.get', function (p_stData) {
 
-									if (!p_stData.race) {
+									if (!p_stData.race || !p_stData.race.code) {
 										Container.get('server.socket.web').emit('web.warcraftsounds.error', 'Missing race code.');
 									}
 									else {
 
-										Container.get('sikyapi').query('warcraftsounds', '/races/' + p_stData.race + '/musics', 'GET')
+										Container.get('sikyapi').query('warcraftsounds', '/races/' + p_stData.race.code + '/musics', 'GET')
 											.then(function (p_tabData) {
-												Container.get('server.socket.web').emit('web.warcraftsounds.musics.get', p_tabData);
+
+												Container.get('server.socket.web').emit('web.warcraftsounds.musics.get', {
+													race : p_stData.race,
+													musics : p_tabData
+												});
+
 											})
 											.catch(function (err){
 												m_clLog.err(err);
@@ -112,14 +128,19 @@
 								})
 								.on('web.warcraftsounds.warnings.get', function (p_stData) {
 
-									if (!p_stData.race) {
+									if (!p_stData.race || !p_stData.race.code) {
 										Container.get('server.socket.web').emit('web.warcraftsounds.error', 'Missing race code.');
 									}
 									else {
 
-										Container.get('sikyapi').query('warcraftsounds', '/races/' + p_stData.race + '/warnings', 'GET')
+										Container.get('sikyapi').query('warcraftsounds', '/races/' + p_stData.race.code + '/warnings', 'GET')
 											.then(function (p_tabData) {
-												Container.get('server.socket.web').emit('web.warcraftsounds.warnings.get', p_tabData);
+												
+												Container.get('server.socket.web').emit('web.warcraftsounds.warnings.get', {
+													race : p_stData.race,
+													warnings : p_tabData
+												});
+
 											})
 											.catch(function (err){
 												m_clLog.err(err);
