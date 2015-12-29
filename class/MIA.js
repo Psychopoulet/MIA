@@ -35,43 +35,129 @@
 
 								Container.get('server.socket.web')
 									.onDisconnect(function(socket) {
-										socket.removeAllListeners('web.getconnected');
+
+										socket.removeAllListeners('web.childs');
+										socket.removeAllListeners('web.clients');
+
 										socket.removeAllListeners('web.login');
+										socket.removeAllListeners('web.mainuser.creation');
+
+										m_stSIKYUser.clients.forEach(function(client, key) {
+
+											if (socket.token === client.token) {
+												m_stSIKYUser.clients[key].connected = false;
+											}
+
+										});
+
+										Container.get('server.socket.web').emit('web.clients', m_stSIKYUser.clients);
+
 									})
 									.onConnection(function(socket) {
 
 										socket
-											.on('web.getconnected', function () {
-												Container.get('server.socket.web').emit('web.getconnected', Container.get('server.socket.child').getConnectedChilds());
-											})
-											.on('web.login', function (p_stData) {
 
-												if (m_stSIKYUser && m_stSIKYUser.email == p_stData.email && m_stSIKYUser.password == p_stData.password) {
-													socket.emit('web.logged');
+											.on('web.childs', function () {
+												socket.emit('web.childs', Container.get('server.socket.child').getConnectedChilds());
+											})
+											.on('web.clients', function () {
+												socket.emit('web.clients', m_stSIKYUser.clients);
+											})
+
+											.on('web.mainuser.creation', function (p_stData) {
+												
+												if (m_stSIKYUser) {
+													Container.get('server.socket.web').emit('web.mainuser.created');
 												}
 												else {
 
-													Container.get('sikyapi').login(p_stData.email, p_stData.password)
-														.then(function () {
+													if (!p_stData.login) {
+														socket.emit('web.mainuser.creation.error', 'Login manquant.');
+													}
+													else if (!p_stData.password) {
+														socket.emit('web.mainuser.creation.error', 'Mot de passe manquant.');
+													}
+													else {
 
-															m_stSIKYUser = {
-																token : Container.get('sikyapi').getToken(),
-																email : p_stData.email,
-																password : p_stData.password
+														m_stSIKYUser = {
+															login : p_stData.login,
+															password : p_stData.password,
+															clients : []
+														};
+
+														Container.get('server.socket.web').emit('web.mainuser.created');
+
+													}
+
+												}
+
+											})
+
+											.on('web.login', function (p_stData) {
+
+												if (m_stSIKYUser) {
+
+													if (p_stData.login && p_stData.password) {
+
+														if (m_stSIKYUser.login == p_stData.login && m_stSIKYUser.password == p_stData.password) {
+															socket.emit('web.login.error', 'Le login ou le mot de passe est incorrect.');
+														}
+														else {
+
+															var client = {
+																connected : true,
+																token : socket.id
 															};
 
-															m_clLog.success('-- [socket server] logged to SIKY');
-															socket.emit('web.logged');
-															
-														})
-														.catch(function (e) {
-															m_clLog.err((e.message) ? e.message : e);
-															socket.emit('web.login.error', (e.message) ? e.message : e);
+															m_stSIKYUser.clients.push(client);
+
+															socket.emit('web.logged', client);
+															Container.get('server.socket.web').emit('web.clients', m_stSIKYUser.clients);
+
+														}
+
+													}
+													else if (p_stData.token) {
+
+														var currentClient = false;
+
+														m_stSIKYUser.clients.forEach(function(client, key) {
+
+															if (p_stData.token === client.token) {
+																m_stSIKYUser.clients[key].connected = true;
+																socket.token = p_stData.token;
+																currentClient = client;
+															}
+
 														});
-														
+
+														if (!currentClient) {
+															socket.emit('web.login.error', 'Ce client n\'a pas été validé.');
+														}
+														else {
+															socket.emit('web.logged', currentClient);
+															Container.get('server.socket.web').emit('web.clients', m_stSIKYUser.clients);
+														}
+
+													}
+													else {
+														socket.emit('web.login.error', 'Vous n\'avez envoyé aucune donnée de connexion valide.');
+													}
+
+												}
+
+												else {
+													socket.emit('web.user.creation');
 												}
 
 											});
+
+										if (!m_stSIKYUser) {
+											socket.emit('web.user.creation');
+										}
+										else {
+											socket.emit('web.mainuser.created');
+										}
 
 									});
 
