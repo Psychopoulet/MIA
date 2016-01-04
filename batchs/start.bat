@@ -1,1 +1,1 @@
-cls && cd %~dp0\..\ && node main.js --start --debug --ssl
+cls && cd %~dp0\..\ && node main.js

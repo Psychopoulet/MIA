@@ -4,7 +4,6 @@
 	var
 		path = require('path'),
 		fs = require('fs'),
-		url = require('url'),
 		q = require('q'),
 		express = require('express')(),
 

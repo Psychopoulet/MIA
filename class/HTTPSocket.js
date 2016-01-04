@@ -17,7 +17,7 @@
 		// attributes
 			
 			var
-				m_clThis = this,
+				that = this,
 				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'httpsocket')),
 				m_clSocketServer,
 				m_tabOnConnection = [],
@@ -95,7 +95,7 @@
 						m_tabOnConnection.push(p_fCallback);
 					}
 					
-					return m_clThis;
+					return that;
 					
 				};
 				
@@ -105,7 +105,7 @@
 						m_tabOnDisconnect.push(p_fCallback);
 					}
 							
-					return m_clThis;
+					return that;
 					
 				};
 				

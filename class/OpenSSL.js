@@ -2,7 +2,6 @@
 // dépendances
 	
 	var
-		path = require('path'),
 		fs = require('fs'),
 		q = require('q'),
 		pem = require('pem');
