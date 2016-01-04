@@ -42,6 +42,11 @@
 
 									try {
 
+										if (m_stConf.debug) {
+											console.log('load');
+											console.log(data);
+										}
+
 										m_stConf = JSON.parse(data);
 										deferred.resolve();
 										
@@ -110,15 +115,17 @@
 
 				this.save = function () {
 
-					var deferred = q.defer();
+					var deferred = q.defer(), conf;
 
 						m_clSavingPromise = deferred.promise;
 
-						if (m_stConf.clients) {
-							
-							m_stConf.clients.forEach(function (value, key) {
+						conf = m_stConf;
 
-								m_stConf.clients[key] = {
+						if (conf.clients) {
+							
+							conf.clients.forEach(function (value, key) {
+
+								conf.clients[key] = {
 									allowed : value.allowed,
 									token : value.token,
 									name : value.name
@@ -128,11 +135,11 @@
 
 						}
 
-						if (m_stConf.childs) {
+						if (conf.childs) {
 							
-							m_stConf.childs.forEach(function (value, key) {
+							conf.childs.forEach(function (value, key) {
 
-								m_stConf.childs[key] = {
+								conf.childs[key] = {
 									allowed : value.allowed,
 									token : value.token,
 									name : value.name
@@ -141,10 +148,13 @@
 							});
 
 						}
+						
+						if (m_stConf.debug) {
+							console.log('save');
+							console.log(JSON.stringify(conf));
+						}
 
-						JSON.stringify(m_stConf);
-
-						fs.writeFile(m_sFilePath, JSON.stringify(m_stConf), function (err) {
+						fs.writeFile(m_sFilePath, JSON.stringify(conf), function (err) {
 
 							if (err) {
 								deferred.reject('Impossible de sauvegarder le fichier de conf : ' + ((err.message) ? err.message : err) + '.');
@@ -161,13 +171,31 @@
 
 				};
 
-				this.get = function (p_sKey, p_vValue) {
+				this.get = function (p_sKey) {
+
+					if (m_stConf.debug) {
+
+						console.log('get ' + p_sKey);
+						console.log((m_stConf[p_sKey]) ? m_stConf[p_sKey] : '');
+
+					}
+
 					return (m_stConf[p_sKey]) ? m_stConf[p_sKey] : '';
+
 				};
 
 				this.set = function (p_sKey, p_vValue) {
+
+					if (m_stConf.debug) {
+						
+						console.log('set ' + p_sKey);
+						console.log(p_vValue);
+
+					}
+
 					m_stConf[p_sKey] = p_vValue;
 					return that;
+
 				};
 				
 	};

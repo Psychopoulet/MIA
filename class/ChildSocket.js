@@ -5,7 +5,6 @@
 		path = require('path'),
 		q = require('q'),
 		
-		Container = require(path.join(__dirname, 'Container.js')),
 		Logs = require(path.join(__dirname, 'Logs.js'));
 		
 // module
@@ -30,11 +29,11 @@
 				
 				this.start = function () {
 					
-					var deferred = q.defer();
+					var deferred = q.defer(), nChildrenPort = require(path.join(__dirname, 'Container.js')).get('conf').get('childrenport');
 
 						try {
 
-							m_clSocketServer = require('socket.io').listen(Container.get('conf').get('childrenport'));
+							m_clSocketServer = require('socket.io').listen(nChildrenPort);
 
 							m_clSocketServer.sockets.on('connection', function (socket) {
 
@@ -94,7 +93,7 @@
 								
 							});
 
-							m_clLog.success('-- [child socket server] started on port ' + Container.get('conf').get('childrenport'));
+							m_clLog.success('-- [child socket server] started on port ' + nChildrenPort);
 							
 							deferred.resolve();
 

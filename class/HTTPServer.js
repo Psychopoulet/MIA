@@ -313,7 +313,7 @@ q
 				
 				this.start = function () {
 
-					var deferred = q.defer();
+					var deferred = q.defer(), nWebPort = Container.get('conf').get('webport');
 
 						try {
 
@@ -453,8 +453,8 @@ q
 										_404(req, res);
 									});
 
-								m_clServer.listen(Container.get('conf').get('webport'), function () {
-									m_clLog.success('-- [HTTP server] started on port ' + Container.get('conf').get('webport'));
+								m_clServer.listen(nWebPort, function () {
+									m_clLog.success('-- [HTTP server] started on port ' + nWebPort);
 								});
 
 								deferred.resolve();

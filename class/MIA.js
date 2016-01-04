@@ -86,17 +86,17 @@
 
 							conf.load().then(function() {
 
-								var bOtherInstanceRunning = true;
+								var bOtherInstanceRunning = true, nPreviousPID = conf.get('pid');
 
-								if (-1 >= conf.get('pid')) {
+								if (-1 >= nPreviousPID) {
 									bOtherInstanceRunning = false;
 								}
 								else {
 
 									try {
 
-										process.kill(conf.get('pid'));
-										m_clLog.log('[END ' + conf.get('pid') + ']');
+										process.kill(nPreviousPID);
+										m_clLog.log('[END ' + nPreviousPID + ']');
 
 									}
 									catch (e) { }
@@ -130,7 +130,7 @@
 												});
 
 												conf.set('clients', clients);
-												websockets.emit('web.clients', clients);
+												websockets.emit('web.clients', conf.get('clients'));
 
 											}
 
@@ -144,6 +144,8 @@
 
 										})
 										.onConnection(function(socket) {
+
+											websockets.emit('web.clients', conf.get('clients'));
 
 											// childs
 
@@ -175,7 +177,7 @@
 													});
 
 													conf.set('clients', clients).save().then(function() {
-														websockets.emit('web.clients', clients);
+														websockets.emit('web.clients', conf.get('clients'));
 													})
 													.catch(function(e) {
 														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
@@ -207,7 +209,7 @@
 													});
 
 													conf.set('clients', clients).save().then(function() {
-														websockets.emit('web.clients', clients);
+														websockets.emit('web.clients', conf.get('clients'));
 													})
 													.catch(function(e) {
 														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
@@ -313,8 +315,10 @@
 														conf.set('clients', clients);
 
 														conf.save().then(function() {
+
 															socket.emit('web.user.logged', currentClient);
 															websockets.emit('web.clients', conf.get('clients'));
+
 														})
 														.catch(function(e) {
 															m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
@@ -341,8 +345,10 @@
 													conf.set('clients', clients);
 
 													conf.save().then(function() {
+
 														socket.emit('web.user.login.waitvalidation', currentClient);
 														websockets.emit('web.clients', conf.get('clients'));
+
 													})
 													.catch(function(e) {
 														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));

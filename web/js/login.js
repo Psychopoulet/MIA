@@ -2,7 +2,7 @@ jQuery(document).ready(function() {
 	
 	"use strict";
 
-	var login_form = jQuery('#login_form'), token = '';
+	var login_form = jQuery('#login_form');
 
 	// cookies
 
@@ -48,8 +48,35 @@ jQuery(document).ready(function() {
 
 		socket.on('connect', function() {
 
+			var token = '';
+
 			jQuery('.only-disconnected, .only-logged').addClass('hidden');
 			jQuery('.only-connected').removeClass('hidden');
+
+			// check token
+
+				if (localStorage) {
+					token = localStorage.getItem('token');
+				}
+				if (!token) {
+
+					token = _readCookie('token');
+
+					if (token) {
+						_createCookie('token', token, 360);
+					}
+
+				}
+
+				if (token) {
+
+					login_form.find('input, button, select, checkbox').attr('disabled', 'disabled').addClass('disabled');
+
+					socket.emit('web.user.login', {
+						token : token
+					});
+
+				}
 
 		})
 		.on('disconnect', function () {
@@ -69,44 +96,17 @@ jQuery(document).ready(function() {
 		})
 		.on('web.user.logged', function (data) {
 
-			token = data.token;
-
 			if (localStorage) {
-				localStorage.setItem('token', token);
+				localStorage.setItem('token', data.token);
 			}
 			else {
-				_createCookie('token', token, 360);
+				_createCookie('token', data.token, 360);
 			}
 
 			jQuery('.only-disconnected, .only-connected').addClass('hidden');
 			jQuery('.only-logged').removeClass('hidden');
 
 		});
-
-	// check token
-
-		if (localStorage) {
-			token = localStorage.getItem('token');
-		}
-		if (!token) {
-
-			token = _readCookie('token');
-
-			if (token) {
-				_createCookie('token', token, 360);
-			}
-
-		}
-
-		if (token) {
-
-			login_form.find('input, button, select, checkbox').attr('disabled', 'disabled').addClass('disabled');
-
-			socket.emit('web.user.login', {
-				token : token
-			});
-
-		}
 
 	// form
 
