@@ -50,9 +50,9 @@
 					<div class="collapse navbar-collapse bs-example-js-navbar-collapse">
 
 						<div class="navbar-form navbar-right">
-							<span class="label label-danger only-disconnected">diconnected</span>
-							<span class="label label-warning only-connected hidden">connected</span>
-							<span class="label label-success only-logged hidden">logged</span>
+							<span class="label label-danger only-disconnected">déconnecté</span>
+							<span class="label label-warning only-connected hidden">connecté</span>
+							<span class="label label-success only-logged hidden">enregistré</span>
 						</div>
 
 					</div>
@@ -82,16 +82,16 @@
 						<div class="panel-body">
 
 							<div class="form-group">
-								<label for="login_email">Email</label>
-								<input id="login_email" type="email" placeholder="Login" class="form-control">
+								<label for="login_login">Login</label>
+								<input id="login_login" type="text" placeholder="Login" class="form-control">
 							</div>
 
 							<div class="form-group">
-								<label for="login_password">Password</label>
-								<input id="login_password" type="password" placeholder="Password" class="form-control">
+								<label for="login_password">Mot de passe</label>
+								<input id="login_password" type="password" placeholder="Mot de passe" class="form-control">
 							</div>
 
-							<button type="submit" class="btn btn-default">Submit</button>
+							<button type="submit" class="btn btn-default">Envoyer</button>
 
 						</div>
 
@@ -99,27 +99,46 @@
 
 				</div>
 
-				<div data-ng-controller="ControllerChildren" class="col-xs-12 col-md-2 only-logged hidden">
+				<div class="col-xs-12 col-md-2 only-logged hidden">
 
-					<div class="panel" data-ng-class="{ 'panel-default' : child.connected, 'panel-danger' : !child.connected }" data-ng-repeat="child in children">
+					<div data-ng-controller="ControllerClients">
 						
-						<div class="panel-heading">{{child.name}}</div>
+						<div 	class="panel"
+								
+								data-ng-class="{ 'panel-success' : client.connected && client.allowed, 'panel-warning' : client.connected && !client.allowed }"
+								data-ng-repeat="client in clients">
+							
+							<div class="panel-heading">{{client.name}}</div>
 
-						<table class="table table-bordered">
-							<tbody>
-								<tr>
-									<td>token</td>
-									<td>{{child.token}}</td>
-								</tr>
-								<tr>
-									<td>temperature</td>
-									<td>{{child.temperature}}°C</td>
-								</tr>
-							</tbody>
-						</table>
-
+						</div>
+						
 					</div>
+
+					<div data-ng-controller="ControllerChildren">
 						
+						<div 	class="panel"
+								data-ng-class="{ 'panel-success' : child.connected && child.allowed, 'panel-warning' : child.connected && !child.allowed }"
+								data-ng-repeat="child in children">
+								
+							<div class="panel-heading">{{child.name}}</div>
+
+							<table class="table table-bordered">
+								<tbody>
+									<tr>
+										<td>token</td>
+										<td>{{child.token}}</td>
+									</tr>
+									<tr>
+										<td>temperature</td>
+										<td>{{child.temperature}}°C</td>
+									</tr>
+								</tbody>
+							</table>
+
+						</div>
+					
+					</div>
+
 				</div>
 
 				<div class="col-xs-12 col-md-10 col-lg-8 only-logged hidden">

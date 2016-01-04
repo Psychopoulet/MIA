@@ -1,4 +1,4 @@
-app.service('ModelChildren', function() {
+app.service('ModelClients', function() {
 
     "use strict";
 
@@ -24,24 +24,24 @@ app.service('ModelChildren', function() {
 
     // constructor
 
-		socket.on('web.childs', function (children) {
+		socket.on('web.clients', function (clients) {
 
 			angular.forEach(m_tabOnChange, function (p_fCallback) {
-                p_fCallback(children);
-            });
+	            p_fCallback(clients);
+	        });
 
 		});
 
 });
 
-app.controller('ControllerChildren', ['$scope', '$popup', 'ModelChildren', function($scope, $popup, ModelChildren) {
-
+app.controller('ControllerClients', ['$scope', '$popup', 'ModelClients', function($scope, $popup, ModelClients) {
+		
     "use strict";
 
-	$scope.children = [];
+	$scope.clients = [];
 
-	ModelChildren.onChange(function(p_tabData) {
-		$scope.children = p_tabData;
+	ModelClients.onChange(function(p_tabData) {
+		$scope.clients = p_tabData;
 		$scope.$apply();
 	});
 	

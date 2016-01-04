@@ -119,6 +119,7 @@
 							m_stConf.clients.forEach(function (value, key) {
 
 								m_stConf.clients[key] = {
+									allowed : value.allowed,
 									token : value.token,
 									name : value.name
 								};
@@ -132,6 +133,7 @@
 							m_stConf.childs.forEach(function (value, key) {
 
 								m_stConf.childs[key] = {
+									allowed : value.allowed,
 									token : value.token,
 									name : value.name
 								};
