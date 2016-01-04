@@ -18,16 +18,22 @@
 		// attributes
 			
 			var
-				m_clLog = new Logs(path.join(__dirname, '..', 'logs')),
-				m_stSIKYUser;
+				conf = Container.get('conf'),
+				m_clLog = new Logs(path.join(__dirname, '..', 'logs'));
 				
 		// methodes
+
+			// private
+
+				function _isSocketAllowed(socket) {
+					return (socket.token && socket.allowed);
+				}
 
 			// public
 
 				this.start = function () {
 
-					var deferred = q.defer(), conf = Container.get('conf');
+					var deferred = q.defer();
 
 						try {
 
@@ -39,101 +45,143 @@
 									.set('ssl', false)
 									.set('user', {
 										login : 'rasp',
-										password : 'password',
-										clients : []
-									});
-
-								conf.save()
-									.catch(function(e) {
-										m_clLog.err('-- [conf] ' + (e.message) ? e.message : e);
+										password : 'password'
 									})
+									.set('pid', -1)
+									.set('clients', [])
+									.set('childs', [])
+
+									.save();
 
 							}
 
 							conf.load().then(function() {
 
-								// events
+								var bOtherInstanceRunning = true;
 
-								Container.get('server.socket.web')
-									.onDisconnect(function(socket) {
+								if (-1 >= conf.get('pid')) {
+									bOtherInstanceRunning = false;
+								}
+								else {
 
-										socket.removeAllListeners('web.childs');
-										socket.removeAllListeners('web.clients');
+									try {
 
-										socket.removeAllListeners('web.login');
-										socket.removeAllListeners('web.mainuser.creation');
+										process.kill(conf.get('pid'));
+										m_clLog.log('[END ' + conf.get('pid') + ']');
 
-										m_stSIKYUser.clients.forEach(function(client, key) {
+									}
+									catch (e) { }
 
-											if (socket.token === client.token) {
-												m_stSIKYUser.clients[key].connected = false;
-											}
+									bOtherInstanceRunning = false;
 
-										});
+								}
 
-										Container.get('server.socket.web').emit('web.clients', m_stSIKYUser.clients);
+								if (!bOtherInstanceRunning) {
 
-									})
-									.onConnection(function(socket) {
+									conf.set('pid', process.pid).save().then(function() {
 
-										socket
+										m_clLog.log('[START ' + process.pid + ']');
 
-											.on('web.childs', function () {
-												socket.emit('web.childs', Container.get('server.socket.child').getConnectedChilds());
-											})
-											.on('web.clients', function () {
-												socket.emit('web.clients', m_stSIKYUser.clients);
-											})
+										// events
 
-											.on('web.mainuser.creation', function (p_stData) {
-												
-												if (m_stSIKYUser) {
-													Container.get('server.socket.web').emit('web.mainuser.created');
+										Container.get('server.socket.web').onDisconnect(function(socket) {
+
+											// conf
+
+											var clients = conf.get('clients');
+
+											clients.forEach(function(client, key) {
+
+												if (socket.token === client.token) {
+													clients[key].connected = false;
 												}
-												else {
 
-													if (!p_stData.login) {
-														socket.emit('web.mainuser.creation.error', 'Login manquant.');
+											});
+
+											conf.set('clients', clients);
+											Container.get('server.socket.web').emit('web.clients', clients);
+
+											// listeners
+
+											socket.removeAllListeners('web.childs');
+											socket.removeAllListeners('web.clients');
+
+											socket.removeAllListeners('web.user.update');
+											socket.removeAllListeners('web.login');
+
+										})
+										.onConnection(function(socket) {
+
+											socket
+
+												.on('web.childs', function () {
+													socket.emit('web.childs', conf.get('childs'));
+												})
+												.on('web.clients', function () {
+													socket.emit('web.clients', conf.get('clients'));
+												})
+
+												.on('web.user.update', function (p_stData) {
+
+													if (!_isSocketAllowed(socket)) {
+														socket.emit('web.user.update.error', "Vous n'avez pas été autorisé à vous connecter.");
+													}
+													else if (!p_stData.login) {
+														socket.emit('web.user.update.error', 'Login manquant.');
 													}
 													else if (!p_stData.password) {
-														socket.emit('web.mainuser.creation.error', 'Mot de passe manquant.');
+														socket.emit('web.user.update.error', 'Mot de passe manquant.');
 													}
 													else {
 
-														m_stSIKYUser = {
+														conf.set('user', {
 															login : p_stData.login,
-															password : p_stData.password,
-															clients : []
-														};
+															password : p_stData.password
+														});
 
-														Container.get('server.socket.web').emit('web.mainuser.created');
+														conf.save().then(function() {
+															Container.get('server.socket.web').emit('web.user.updated');
+														})
+														.catch(function(e) {
+															m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
+															socket.emit('web.user.update.error', 'Impossible de sauvegarder la configuration.');
+														});
 
 													}
 
-												}
+												})
 
-											})
+												.on('web.user.login', function (p_stData) {
 
-											.on('web.login', function (p_stData) {
-
-												if (m_stSIKYUser) {
+													var clients = conf.get('clients');
 
 													if (p_stData.login && p_stData.password) {
 
-														if (m_stSIKYUser.login == p_stData.login && m_stSIKYUser.password == p_stData.password) {
-															socket.emit('web.login.error', 'Le login ou le mot de passe est incorrect.');
+														var user = conf.get('user');
+
+														if (user.login === p_stData.login && user.password === p_stData.password) {
+															socket.emit('web.user.login.error', 'Le login ou le mot de passe est incorrect.');
 														}
 														else {
 
 															var client = {
+																allowed : true,
 																connected : true,
-																token : socket.id
+																token : socket.id,
+																name : socket.id
 															};
 
-															m_stSIKYUser.clients.push(client);
+															clients.push(client)
+															conf.set('clients', clients);
 
-															socket.emit('web.logged', client);
-															Container.get('server.socket.web').emit('web.clients', m_stSIKYUser.clients);
+															conf.save().then(function() {
+																socket.emit('web.user.logged', client);
+																Container.get('server.socket.web').emit('web.clients', clients);
+															})
+															.catch(function(e) {
+																m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
+																socket.emit('web.mainuser.update.error', 'Impossible de sauvegarder la configuration.');
+															});
 
 														}
 
@@ -142,10 +190,10 @@
 
 														var currentClient = false;
 
-														m_stSIKYUser.clients.forEach(function(client, key) {
+														clients.forEach(function(client, key) {
 
-															if (p_stData.token === client.token) {
-																m_stSIKYUser.clients[key].connected = true;
+															if (p_stData.token === client.token && client.allowed) {
+																clients[key].connected = true;
 																socket.token = p_stData.token;
 																currentClient = client;
 															}
@@ -153,127 +201,87 @@
 														});
 
 														if (!currentClient) {
-															socket.emit('web.login.error', 'Ce client n\'a pas été validé.');
+															socket.emit('web.user.login.error', "Ce client n'existe pas ou n'a pas été autorisé.");
 														}
 														else {
-															socket.emit('web.logged', currentClient);
-															Container.get('server.socket.web').emit('web.clients', m_stSIKYUser.clients);
+
+															conf.set('clients', clients);
+
+															socket.emit('web.user.logged', currentClient);
+															Container.get('server.socket.web').emit('web.clients', clients);
+
 														}
 
 													}
 													else {
-														socket.emit('web.login.error', 'Vous n\'avez envoyé aucune donnée de connexion valide.');
+														socket.emit('web.user.login.error', "Vous n'avez envoyé aucune donnée de connexion valide.");
 													}
 
-												}
+												});
 
-												else {
-													socket.emit('web.user.creation');
-												}
+										});
 
+										Container.get('server.socket.child')
+											.onDisconnect(function(socket) {
+												Container.get('server.socket.web').emit('web.disconnected', socket.MIA);
+											})
+											.onConnection(function(socket) {
+												Container.get('server.socket.web').emit('web.connection', socket.MIA);
 											});
 
-										if (!m_stSIKYUser) {
-											socket.emit('web.user.creation');
-										}
-										else {
-											socket.emit('web.mainuser.created');
-										}
+										// run
 
-									});
+											// server http
 
-								Container.get('server.socket.child')
-									.onDisconnect(function(socket) {
-										Container.get('server.socket.web').emit('web.disconnected', socket.MIA);
-									})
-									.onConnection(function(socket) {
-										Container.get('server.socket.web').emit('web.connection', socket.MIA);
-									});
+											Container.get('server.http').start().then(function() {
 
-								// run
+												// server http socket
 
-									// server http
-
-									Container.get('server.http').start()
-										.then(function() {
-
-											// server http socket
-
-											Container.get('server.socket.web').start()
-												.then(function() {
+												Container.get('server.socket.web').start().then(function() {
 
 													// server childs
 													
-													Container.get('server.socket.child').start()
-														.then(function() {
+													Container.get('server.socket.child').start().then(function() {
 
-															// plugins
+														// plugins
 
-															Container.get('plugins').getData()
-																.then(function(p_tabData) {
+														Container.get('plugins').getData().then(function(p_tabData) {
 
-																	p_tabData.forEach(function(p_stPlugin) {
+															p_tabData.forEach(function(p_stPlugin) {
 
-																		try {
-																			require(p_stPlugin.main)(Container);
-																			m_clLog.success('-- [plugin] ' + p_stPlugin.name + ' loaded');
-																		}
-																		catch (e) {
-																			m_clLog.err((e.message) ? e.message : e);
-																		}
+																try {
+																	require(p_stPlugin.main)(Container);
+																	m_clLog.success('-- [plugin] ' + p_stPlugin.name + ' loaded');
+																}
+																catch (e) {
+																	m_clLog.err((e.message) ? e.message : e);
+																}
 
-																	});
+															});
 
-																})
-																.catch(deferred.reject);
-
-															deferred.resolve();
-												
 														})
 														.catch(deferred.reject);
+
+														deferred.resolve();
+											
+													})
+													.catch(deferred.reject);
 														
 												})
 												.catch(deferred.reject);
 
-										})
-										.catch(deferred.reject);
-								
+											})
+											.catch(deferred.reject);
+
+									})
+									.catch(function(e) {
+										deferred.reject('-- [conf] ' + ((e.message) ? e.message : e));
+									});
+								}
+
 							})
-							.catch(function(e) {
-								deferred.reject('-- [conf] ' + (e.message) ? e.message : e);
-							});
+							.catch(deferred.reject);
 
-						}
-						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
-						}
-						
-					return deferred.promise;
-
-				};
-				
-				this.stop = function () {
-
-					var deferred = q.defer();
-
-						try {
-
-							Container.get('server.socket.child').stop()
-								.then(function () {
-									
-									Container.get('server.socket.web').stop()
-										.then(function () {
-											
-											Container.get('server.http').stop()
-												.then(deferred.resolve)
-												.catch(deferred.reject);
-											
-										})
-										.catch(deferred.reject);
-
-								})
-								.catch(deferred.reject);
-								
 						}
 						catch (e) {
 							deferred.reject((e.message) ? e.message : e);

@@ -2,14 +2,21 @@
 
 // dépendances
 
-	var Launcher = require(require('path').join(__dirname, 'class', 'Launcher.js'));
+	var
+		path = require('path'),
+		
+		Logs = require(path.join(__dirname, 'class', 'Logs.js')),
+		MIA = require(path.join(__dirname, 'class', 'MIA.js'));
 
 // run
 
 	try {
-		new Launcher();
+		
+		new MIA().start()
+			.catch(function (err) { new Logs(__dirname).err(err); });
+			
 	}
 	catch (e) {
-		console.log('Global script failed : ' + ((e.message) ? e.message : e));
+		new Logs(__dirname).err('Global script failed : ' + ((e.message) ? e.message : e));
 	}
 	

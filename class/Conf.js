@@ -16,10 +16,49 @@
 			
 			var
 				that = this,
+				m_clSavingPromise = false,
 				m_sFilePath = path.join(__dirname, '..', 'conf.json'),
 				m_stConf = { };
 				
 		// methodes
+
+			// private
+
+				function _load() {
+
+					var deferred = q.defer();
+					
+						if (!that.initialized()) {
+							deferred.reject("La configuration n'est pas initialisée.");
+						}
+						else {
+
+							fs.readFile(m_sFilePath, { encoding : 'utf8' } , function (err, data) {
+
+								if (err) {
+									deferred.reject('Impossible de lire le fichier de conf : ' + ((err.message) ? err.message : err) + '.');
+								}
+								else {
+
+									try {
+
+										m_stConf = JSON.parse(data);
+										deferred.resolve();
+										
+									}
+									catch (e) {
+										deferred.reject('Impossible de récupérer les données du fichier de conf : ' + ((err.message) ? err.message : err) + '.');
+									}
+
+								}
+
+							});
+
+						}
+
+					return deferred.promise;
+
+				}
 			
 			// public
 
@@ -44,31 +83,24 @@
 
 					var deferred = q.defer();
 
-						if (!that.initialized()) {
-							deferred.reject("La configuration n'est pas initialisée.");
+						if (m_clSavingPromise) {
+
+							m_clSavingPromise
+								.then(function() {
+
+									_load()
+										.then(deferred.resolve)
+										.catch(deferred.reject);
+
+								})
+								.catch(deferred.reject);
+
 						}
 						else {
 
-							fs.readFile(m_sFilePath, { encoding : 'utf8' } , function (err, data) {
-
-								if (err) {
-									deferred.reject('Impossible de lire le fichier de conf : ' + ((err.message) ? err.message : err) + '.');
-								}
-								else {
-
-									try {
-
-										m_stConf = JSON.parse(data);
-										deferred.resolve();
-
-									}
-									catch (e) {
-										deferred.reject('Impossible de récupérer les données du fichier de conf : ' + ((err.message) ? err.message : err) + '.');
-									}
-
-								}
-
-							});
+							_load()
+								.then(deferred.resolve)
+								.catch(deferred.reject);
 
 						}
 
@@ -80,20 +112,50 @@
 
 					var deferred = q.defer();
 
+						m_clSavingPromise = deferred.promise;
+
+						if (m_stConf.clients) {
+							
+							m_stConf.clients.forEach(function (value, key) {
+
+								m_stConf.clients[key] = {
+									token : value.token,
+									name : value.name
+								};
+
+							});
+
+						}
+
+						if (m_stConf.childs) {
+							
+							m_stConf.childs.forEach(function (value, key) {
+
+								m_stConf.childs[key] = {
+									token : value.token,
+									name : value.name
+								};
+
+							});
+
+						}
+
 						JSON.stringify(m_stConf);
 
 						fs.writeFile(m_sFilePath, JSON.stringify(m_stConf), function (err) {
 
 							if (err) {
-								deferred.reject('Impossible de sauver le fichier de conf : ' + ((err.message) ? err.message : err) + '.');
+								deferred.reject('Impossible de sauvegarder le fichier de conf : ' + ((err.message) ? err.message : err) + '.');
 							}
 							else {
 								deferred.resolve();
 							}
 
+							m_clSavingPromise = false;
+
 						});
 
-					return deferred.promise;
+					return m_clSavingPromise;
 
 				};
 
