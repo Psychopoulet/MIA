@@ -3,11 +3,9 @@
 	
 	var
 		path = require('path'),
-		q = require('q'),
 		fs = require('fs'),
-		pem = require('pem'),
-
-		Logs = require(path.join(__dirname, 'Logs.js'));
+		q = require('q'),
+		pem = require('pem');
 		
 // module
 	
@@ -18,8 +16,7 @@
 		// attributes
 			
 			var
-				that = this,
-				m_clLog = new Logs(path.join(__dirname, '..', 'openssl'));
+				that = this;
 				
 		// methodes
 			
@@ -38,8 +35,7 @@
 									fs.readFile(p_sKeyFilePath, { encoding : 'utf8' } , function (err, data) {
 
 										if (err) {
-											m_clLog.err('Impossible to read the security key.');
-											deferred.reject('-- [OpenSSL] : Impossible to read the security key.');
+											deferred.reject('Impossible de lire la clef de sécurité : ' + ((err.message) ? err.message : err) + '.');
 										}
 										else {
 											deferred.resolve({ privateKey : data });
@@ -55,22 +51,17 @@
 								pem.createPrivateKey(2048, function(err, data) {
 
 									if (err) {
-										m_clLog.err('Impossible to create the security key.');
-										deferred.reject('-- [OpenSSL] : Impossible to create the security key.');
+										deferred.reject('Impossible de créer la clef de sécurité : ' + ((err.message) ? err.message : err) + '.');
 									}
 									else {
 
 										fs.writeFile(p_sKeyFilePath, data.key, function (err) {
 
 											if (err) {
-												m_clLog.err('Impossible to create the security key.');
-												deferred.reject('-- [OpenSSL] : Impossible to create the security key.');
+												deferred.reject('Impossible de créer la clef de sécurité : ' + ((err.message) ? err.message : err) + '.');
 											}
 											else {
-
-												m_clLog.success('Security key created.');
 												deferred.resolve({ privateKey : data.key });
-
 											}
 
 										});
@@ -83,8 +74,7 @@
 
 						}
 						catch (e) {
-							m_clLog.err((e.message) ? e.message : e);
-							deferred.reject('-- [OpenSSL] : Impossible to create the security key.');
+							deferred.reject('Impossible de créer la clef de sécurité : ' + ((e.message) ? e.message : e) + '.');
 						}
 						
 					return deferred.promise;
@@ -107,8 +97,7 @@
 											fs.readFile(p_sCSRFilePath, { encoding : 'utf8' } , function (err, CSR) {
 
 												if (err) {
-													m_clLog.err('Impossible to read the signing request certificate.');
-													deferred.reject('-- [OpenSSL] : Impossible to read the signing request certificate.');
+													deferred.reject('Impossible de lire la requète de signature du certificat : ' + ((err.message) ? err.message : err) + '.');
 												}
 												else {
 													deferred.resolve({ privateKey : createPrivateKeyData.privateKey, CSR : CSR });
@@ -124,22 +113,17 @@
 										pem.createCSR({ clientKey : createPrivateKeyData.privateKey, hash : 'sha256' }, function(err, data) {
 
 											if (err) {
-												m_clLog.err('Impossible to create the signing request certificate.');
-												deferred.reject('-- [OpenSSL] : Impossible to create the signing request certificate.');
+												deferred.reject('Impossible de créer la requète de signature du certificat : ' + ((err.message) ? err.message : err) + '.');
 											}
 											else {
 
 												fs.writeFile(p_sCSRFilePath, data.csr, function (err) {
 
 													if (err) {
-														m_clLog.err('Impossible to create the signing request certificate.');
-														deferred.reject('-- [OpenSSL] : Impossible to create the signing request certificate.');
+														deferred.reject('Impossible de créer la requète de signature du certificat : ' + ((err.message) ? err.message : err) + '.');
 													}
 													else {
-
-														m_clLog.success('Signing request certificate created.');
 														deferred.resolve({ privateKey : createPrivateKeyData.privateKey, CSR : data.csr });
-
 													}
 
 												});
@@ -155,8 +139,7 @@
 
 						}
 						catch (e) {
-							m_clLog.err((e.message) ? e.message : e);
-							deferred.reject('-- [OpenSSL] :  Impossible to create the signing request certificate.');
+							deferred.reject('Impossible de créer la requète de signature du certificat : ' + ((e.message) ? e.message : e) + '.');
 						}
 						
 					return deferred.promise;
@@ -179,8 +162,7 @@
 											fs.readFile(p_sCRTFilePath, { encoding : 'utf8' } , function (err, certificate) {
 
 												if (err) {
-													m_clLog.err('Impossible to autosign the certificate.');
-													deferred.reject('-- [OpenSSL] : Impossible to autosign the certificate.');
+													deferred.reject("Impossible d'auto-assigner le certificat : ' + ((err.message) ? err.message : err) + '.");
 												}
 												else {
 													deferred.resolve({ privateKey : createCSRData.privateKey, CSR : createCSRData.CSR, certificate : certificate });
@@ -196,19 +178,16 @@
 										pem.createCertificate({ clientKey : createCSRData.privateKey, csr : createCSRData.CSR, selfSigned : true, days : 365 }, function(err, data) {
 
 											if (err) {
-												m_clLog.err('Impossible to autosign the certificate.');
-												deferred.reject('-- [OpenSSL] : Impossible to autosign the certificate.');
+												deferred.reject("Impossible d'auto-assigner le certificat : ' + ((err.message) ? err.message : err) + '.");
 											}
 											else {
 
 												fs.writeFile(p_sCRTFilePath, data.certificate, function (err) {
 
 													if (err) {
-														m_clLog.err('Impossible to autosign the certificate.');
-														deferred.reject('-- [OpenSSL] : Impossible to autosign the certificate.');
+														deferred.reject("Impossible d'auto-assigner le certificat : ' + ((err.message) ? err.message : err) + '.");
 													}
 													else {
-														m_clLog.success('Certificate autosigned.');
 														deferred.resolve({ privateKey : createCSRData.privateKey, CSR : createCSRData.CSR, certificate :  data.certificate });
 													}
 
@@ -225,8 +204,7 @@
 
 						}
 						catch (e) {
-							m_clLog.err((e.message) ? e.message : e);
-							deferred.reject('-- [OpenSSL] :  Impossible to autosign the certificate.');
+							deferred.reject("Impossible d'auto-assigner le certificat : " + ((e.message) ? e.message : e) + '.');
 						}
 						
 					return deferred.promise;
