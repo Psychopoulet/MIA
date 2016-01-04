@@ -91,7 +91,8 @@
 								<input id="login_password" type="password" placeholder="Mot de passe" class="form-control">
 							</div>
 
-							<button type="submit" class="btn btn-default">Envoyer</button>
+							<button type="submit" class="btn btn-primary col-xs-6">Connexion</button>
+							<button id="login_allow" type="button" class="btn btn-primary col-xs-6">Demander une autorisation</button>
 
 						</div>
 
@@ -104,11 +105,14 @@
 					<div data-ng-controller="ControllerClients">
 						
 						<div 	class="panel"
-								
 								data-ng-class="{ 'panel-success' : client.connected && client.allowed, 'panel-warning' : client.connected && !client.allowed }"
 								data-ng-repeat="client in clients">
 							
-							<div class="panel-heading">{{client.name}}</div>
+							<div class="panel-heading">
+								{{client.name}}
+								<button class="btn glyphicon glyphicon-ok" data-ng-show="!client.allowed" data-ng-click="allow(client);"></button>
+								<button class="btn glyphicon glyphicon-trash" data-ng-click="delete(client);"></button>
+							</div>
 
 						</div>
 						

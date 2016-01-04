@@ -6,11 +6,22 @@ app.service('ModelClients', function() {
 
         var
             that = this,
+            m_tabOnError = [],
             m_tabOnChange = [];
 
     // methods
 
         // public
+
+            this.onError = function (p_fCallback) {
+
+                if ('function' === typeof p_fCallback) {
+                    m_tabOnError.push(p_fCallback);
+                }
+
+                return that;
+
+            };
 
             this.onChange = function (p_fCallback) {
 
@@ -22,9 +33,33 @@ app.service('ModelClients', function() {
 
             };
 
+            this.allow = function (client) {
+                socket.emit('web.clients.allow', client);
+                return that;
+            };
+
+            this.delete = function (client) {
+                socket.emit('web.clients.delete', client);
+                return that;
+            };
+
     // constructor
 
-		socket.on('web.clients', function (clients) {
+		socket.on('web.clients.allow.error', function (p_sMessage) {
+
+            angular.forEach(m_tabOnError, function (p_fCallback) {
+                p_fCallback(p_sMessage);
+            });
+
+        })
+        .on('web.clients.delete.error', function (p_sMessage) {
+
+            angular.forEach(m_tabOnError, function (p_fCallback) {
+                p_fCallback(p_sMessage);
+            });
+
+        })
+        .on('web.clients', function (clients) {
 
 			angular.forEach(m_tabOnChange, function (p_fCallback) {
 	            p_fCallback(clients);
@@ -40,9 +75,13 @@ app.controller('ControllerClients', ['$scope', '$popup', 'ModelClients', functio
 
 	$scope.clients = [];
 
-	ModelClients.onChange(function(p_tabData) {
+	ModelClients.onError($popup.alert)
+    .onChange(function(p_tabData) {
 		$scope.clients = p_tabData;
 		$scope.$apply();
 	});
+
+    $scope.allow = ModelClients.allow;
+    $scope.delete = ModelClients.delete;
 	
 }]);

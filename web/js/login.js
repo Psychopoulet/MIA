@@ -110,7 +110,7 @@ jQuery(document).ready(function() {
 
 	// form
 
-		login_form.submit(function (e) {
+		login_form.submit(function () {
 
 			login_form.find('input, button, select, checkbox').attr('disabled', 'disabled').addClass('disabled');
 
@@ -118,6 +118,16 @@ jQuery(document).ready(function() {
 				login : jQuery('#login_login').val(),
 				password : jQuery('#login_password').val()
 			});
+
+			return false;
+
+		});
+
+		jQuery('#login_allow').click(function () {
+
+			login_form.find('input, button, select, checkbox').attr('disabled', 'disabled').addClass('disabled');
+
+			socket.emit('web.user.login');
 
 			return false;
 

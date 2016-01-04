@@ -145,12 +145,84 @@
 										})
 										.onConnection(function(socket) {
 
+											// childs
+
 											socket.on('web.childs', function () {
 												socket.emit('web.childs', conf.get('childs'));
 											})
+
+											// clients
+
+											.on('web.clients.allow', function (p_stClient) {
+
+												var clients = conf.get('clients');
+
+												if (!that.isClientAllowed(socket.MIA.token)) {
+													socket.emit('web.clients.allow.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+												}
+												else if (!p_stClient || !p_stClient.token) {
+													socket.emit('web.clients.allow.error', 'Les informations sur ce client sont incorrectes.');
+												}
+												else {
+
+													clients.forEach(function(client, key) {
+
+														if (p_stClient.token === client.token) {
+															clients[key].allowed = true;
+															clients[key].name = 'Autorisé';
+														}
+
+													});
+
+													conf.set('clients', clients).save().then(function() {
+														websockets.emit('web.clients', clients);
+													})
+													.catch(function(e) {
+														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
+														socket.emit('web.clients.allow.error', 'Impossible de sauvegarder la configuration.');
+													});
+
+												}
+
+											})
+
+											.on('web.clients.delete', function (p_stClient) {
+
+												var clients = conf.get('clients');
+
+												if (!that.isClientAllowed(socket.MIA.token)) {
+													socket.emit('web.clients.delete.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+												}
+												else if (!p_stClient || !p_stClient.token) {
+													socket.emit('web.clients.delete.error', 'Les informations sur ce client sont incorrectes.');
+												}
+												else {
+
+													clients.forEach(function(client, key) {
+
+														if (p_stClient.token === client.token) {
+															clients.splice(key, 1);
+														}
+
+													});
+
+													conf.set('clients', clients).save().then(function() {
+														websockets.emit('web.clients', clients);
+													})
+													.catch(function(e) {
+														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
+														socket.emit('web.clients.delete.error', 'Impossible de sauvegarder la configuration.');
+													});
+
+												}
+
+											})
+
 											.on('web.clients', function () {
 												socket.emit('web.clients', conf.get('clients'));
 											})
+
+											// user
 
 											.on('web.user.update', function (p_stData) {
 
@@ -186,7 +258,7 @@
 
 												var clients = conf.get('clients'), currentClient = false;
 
-												if (p_stData.token) {
+												if (p_stData && p_stData.token) {
 
 													clients.forEach(function(client, key) {
 
@@ -207,19 +279,17 @@
 
 													if (!currentClient) {
 														socket.emit('web.user.login.error', "Ce client n'existe pas ou n'a pas encore été autorisé.");
-														socket.disconnect();
 													}
 													else {
 
 														conf.set('clients', clients);
-
 														socket.emit('web.user.logged', currentClient);
-														websockets.emit('web.clients', clients);
+														websockets.emit('web.clients', conf.get('clients'));
 
 													}
 
 												}
-												else if (p_stData.login && p_stData.password) {
+												else if (p_stData && p_stData.login && p_stData.password) {
 
 													var user = conf.get('user');
 
@@ -244,7 +314,7 @@
 
 														conf.save().then(function() {
 															socket.emit('web.user.logged', currentClient);
-															websockets.emit('web.clients', clients);
+															websockets.emit('web.clients', conf.get('clients'));
 														})
 														.catch(function(e) {
 															m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
@@ -272,7 +342,7 @@
 
 													conf.save().then(function() {
 														socket.emit('web.user.login.waitvalidation', currentClient);
-														websockets.emit('web.clients', clients);
+														websockets.emit('web.clients', conf.get('clients'));
 													})
 													.catch(function(e) {
 														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
@@ -329,7 +399,6 @@
 
 													if (!currentChild) {
 														socket.emit('child.login.error', "Cet enfant n'existe pas ou n'a pas été autorisé.");
-														socket.disconnect();
 													}
 													else {
 
@@ -343,7 +412,6 @@
 												}
 												else {
 													socket.emit('child.login.error', "Vous n'avez envoyé aucune donnée de connexion valide.");
-													socket.disconnect();
 												}
 
 											});
