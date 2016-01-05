@@ -115,46 +115,16 @@
 
 				this.save = function () {
 
-					var deferred = q.defer(), conf;
+					var deferred = q.defer();
 
 						m_clSavingPromise = deferred.promise;
 
-						conf = m_stConf;
-
-						if (conf.clients) {
-							
-							conf.clients.forEach(function (value, key) {
-
-								conf.clients[key] = {
-									allowed : value.allowed,
-									token : value.token,
-									name : value.name
-								};
-
-							});
-
-						}
-
-						if (conf.childs) {
-							
-							conf.childs.forEach(function (value, key) {
-
-								conf.childs[key] = {
-									allowed : value.allowed,
-									token : value.token,
-									name : value.name
-								};
-
-							});
-
-						}
-						
 						if (m_stConf.debug) {
 							console.log('save');
-							console.log(JSON.stringify(conf));
+							console.log(JSON.stringify(m_stConf));
 						}
 
-						fs.writeFile(m_sFilePath, JSON.stringify(conf), function (err) {
+						fs.writeFile(m_sFilePath, JSON.stringify(m_stConf), function (err) {
 
 							if (err) {
 								deferred.reject('Impossible de sauvegarder le fichier de conf : ' + ((err.message) ? err.message : err) + '.');
@@ -194,6 +164,20 @@
 					}
 
 					m_stConf[p_sKey] = p_vValue;
+					return that;
+
+				};
+				
+				this.addTo = function (p_sKey, p_vValue) {
+
+					if (m_stConf.debug) {
+						
+						console.log('addTo ' + p_sKey);
+						console.log(p_vValue);
+
+					}
+
+					m_stConf[p_sKey].push(p_vValue);
 					return that;
 
 				};

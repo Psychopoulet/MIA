@@ -153,17 +153,5 @@
 					
 				};
 				
-				this.getConnectedChilds = function () {
-
-					var tabResult = [];
-
-						for (var token in m_stSocketsConnected) {
-							tabResult.push(m_stSocketsConnected[token].MIA);
-						}
-
-					return tabResult;
-
-				};
-				
 	};
 	

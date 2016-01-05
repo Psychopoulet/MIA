@@ -82,6 +82,10 @@
 						<div class="panel-body">
 
 							<div class="form-group">
+								(note : vous pouvez aussi attendre une autorisation d'une personne déjà autentifiée)
+							</div>
+
+							<div class="form-group">
 								<label for="login_login">Login</label>
 								<input id="login_login" type="text" placeholder="Login" class="form-control">
 							</div>
@@ -91,8 +95,7 @@
 								<input id="login_password" type="password" placeholder="Mot de passe" class="form-control">
 							</div>
 
-							<button type="submit" class="btn btn-primary col-xs-6">Connexion</button>
-							<button id="login_allow" type="button" class="btn btn-primary col-xs-6">Demander une autorisation</button>
+							<button type="submit" class="btn btn-primary">Connexion</button>
 
 						</div>
 
@@ -108,10 +111,15 @@
 								data-ng-class="{ 'panel-success' : client.connected && client.allowed, 'panel-warning' : client.connected && !client.allowed }"
 								data-ng-repeat="client in clients">
 							
-							<div class="panel-heading">
+							<div class="panel-heading clearfix">
+
 								{{client.name}}
-								<button class="btn glyphicon glyphicon-ok" data-ng-show="!client.allowed" data-ng-click="allow(client);"></button>
-								<button class="btn glyphicon glyphicon-trash" data-ng-click="delete(client);"></button>
+
+								<div class="btn-group pull-right">
+									<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="!client.allowed" data-ng-click="allow(client);"></button>
+									<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(client);"></button>
+								</div>
+
 							</div>
 
 						</div>

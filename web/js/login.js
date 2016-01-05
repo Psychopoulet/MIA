@@ -94,6 +94,16 @@ jQuery(document).ready(function() {
 			login_form.find('input, button, select, checkbox').removeAttr('disabled', 'disabled').removeClass('disabled');
 			alert(err);
 		})
+		.on('web.user.deleted', function (err) {
+
+			if (localStorage) {
+				localStorage.removeItem('token');
+			}
+			else {
+				_createCookie('token', '', -1);
+			}
+			
+		})
 		.on('web.user.logged', function (data) {
 
 			if (localStorage) {

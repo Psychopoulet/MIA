@@ -55,7 +55,7 @@
 								
 							});
 							
-							m_clLog.success('-- [HTTP socket server] started');
+							m_clLog.success('-- [HTTP socket server] started on port ' + Container.get('conf').get('clientsport'));
 
 							deferred.resolve();
 
@@ -107,6 +107,52 @@
 							
 					return that;
 					
+				};
+				
+				this.setTokenToSocketById = function (p_sId, p_sToken) {
+
+					m_clSocketServer.sockets.sockets.forEach(function(socket, key) {
+
+						if (socket.id == p_sId) {
+							m_clSocketServer.sockets.sockets[key].token = p_sToken;
+						}
+
+					});
+		
+					return that;
+					
+				};
+				
+				this.emitTo = function (p_sToken, p_sOrder, p_vData) {
+
+					m_clSocketServer.sockets.sockets.forEach(function(socket, key) {
+
+						if (socket.token && socket.token === p_sToken) {
+							socket.emit(p_sOrder, p_vData);
+						}
+
+					});
+		
+					return that;
+					
+				};
+				
+				this.disconnect = function (p_sToken) {
+
+					m_clSocketServer.sockets.sockets.forEach(function(socket, key) {
+
+						if (socket.token && socket.token === p_sToken) {
+							socket.disconnect();
+						}
+
+					});
+		
+					return that;
+					
+				};
+				
+				this.getSockets = function () {
+					return m_clSocketServer.sockets.sockets;
 				};
 				
 	};
