@@ -126,14 +126,12 @@
 						
 					</div>
 
-					<div data-ng-controller="ControllerChildren">
+					<div data-ng-controller="ControllerChilds">
 						
 						<div 	class="panel"
 								data-ng-class="{ 'panel-success' : child.connected && child.allowed, 'panel-warning' : child.connected && !child.allowed }"
-								data-ng-repeat="child in children">
+								data-ng-repeat="child in childs">
 								
-							<div class="panel-heading">{{child.name}}</div>
-
 							<div class="panel-heading clearfix">
 
 								{{child.name}}

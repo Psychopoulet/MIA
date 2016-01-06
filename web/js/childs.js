@@ -1,4 +1,4 @@
-app.service('ModelChildren', function() {
+app.service('ModelChilds', function() {
 
     "use strict";
 
@@ -33,13 +33,13 @@ app.service('ModelChildren', function() {
 
             };
 
-            this.allow = function (client) {
-                socket.emit('web.client.allow', client);
+            this.allow = function (child) {
+                socket.emit('web.child.allow', child);
                 return that;
             };
 
-            this.delete = function (client) {
-                socket.emit('web.client.delete', client);
+            this.delete = function (child) {
+                socket.emit('web.child.delete', child);
                 return that;
             };
 
@@ -69,19 +69,19 @@ app.service('ModelChildren', function() {
 
 });
 
-app.controller('ControllerChildren', ['$scope', '$popup', 'ModelChildren', function($scope, $popup, ModelChildren) {
+app.controller('ControllerChilds', ['$scope', '$popup', 'ModelChilds', function($scope, $popup, ModelChilds) {
 
     "use strict";
 
 	$scope.childs = [];
 
-	ModelChildren.onError($popup.alert)
+	ModelChilds.onError($popup.alert)
     .onChange(function(p_tabData) {
 		$scope.childs = p_tabData;
 		$scope.$apply();
 	});
 	
-    $scope.allow = ModelChildren.allow;
-    $scope.delete = ModelChildren.delete;
+    $scope.allow = ModelChilds.allow;
+    $scope.delete = ModelChilds.delete;
     
 }]);

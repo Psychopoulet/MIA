@@ -1,4 +1,4 @@
-app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', function($scope, $popup, ModelChildren) {
+app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChilds', function($scope, $popup, ModelChilds) {
 
 	"use strict";
 
@@ -145,7 +145,7 @@ app.controller('ControllerVideosList', ['$scope', '$popup', 'ModelChildren', fun
 
 		// events
 
-			ModelChildren
+			ModelChilds
 				.onChange(function(p_tabData) {
 					$scope.children = p_tabData;
 					$scope.selectedchild = null;

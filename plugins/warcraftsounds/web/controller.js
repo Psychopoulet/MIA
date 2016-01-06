@@ -1,4 +1,4 @@
-app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren', function($scope, $popup, ModelChildren) {
+app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChilds', function($scope, $popup, ModelChilds) {
 
 	"use strict";
 
@@ -166,7 +166,7 @@ app.controller('ControllerWarcraftSounds', ['$scope', '$popup', 'ModelChildren',
 
 		// events
 
-			ModelChildren
+			ModelChilds
 				.onChange(function(p_tabData) {
 					$scope.children = p_tabData;
 					$scope.selectedchild = false;

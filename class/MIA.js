@@ -247,6 +247,7 @@
 
 											socket.token = socket.id;
 											websockets.setTokenToSocketById(socket.id, socket.id);
+
 											websockets.emit('web.clients', _getClients());
 											
 											// clients
@@ -457,6 +458,7 @@
 
 															conf.set('clients', clients);
 															socket.emit('web.client.logged', currentClient);
+															socket.emit('web.childs', _getChilds());
 															websockets.emit('web.clients', _getClients());
 
 														}
@@ -482,6 +484,7 @@
 																socket.token = currentClient.token;
 
 																socket.emit('web.client.logged', currentClient);
+																socket.emit('web.childs', _getChilds());
 																websockets.emit('web.clients', _getClients());
 
 															})
@@ -580,50 +583,51 @@
 										
 										// childs
 
-											socket.on('child.child.login', function (p_stData) {
+										socket.on('child.child.login', function (p_stData) {
 
-												try {
+											try {
 
-													if (p_stData && p_stData.token) {
+												if (p_stData && p_stData.token) {
 
-														var childs = conf.get('childs'), currentChild = false;
+													var childs = conf.get('childs'), currentChild = false;
 
-														for (var i = 0; i < childs.length; ++i) {
+													for (var i = 0; i < childs.length; ++i) {
 
-															if (p_stData.token === childs[i].token) {
-																currentChild = childs[i];
-																break;
-															}
-
+														if (p_stData.token === childs[i].token) {
+															currentChild = childs[i];
+															break;
 														}
 
-														if (!currentChild) {
-															socket.emit('child.child.login.error', "Cet enfat n'existe pas ou n'a pas encore été autorisé.");
-														}
-														else {
+													}
 
-															socket.token = currentChild.token;
-
-															conf.set('childs', childs);
-															socket.emit('child.child.logged', currentChild);
-															websockets.emit('web.childs', _getChilds());
-
-														}
-
+													if (!currentChild) {
+														socket.emit('child.child.login.error', "Cet enfat n'existe pas ou n'a pas encore été autorisé.");
 													}
 													else {
 
-														socket.emit('child.child.login.error', "Vous n'avez fourni aucune donnée d'autorisation valide.");
-														
+														socket.token = currentChild.token;
+
+														conf.set('childs', childs);
+														socket.emit('child.child.logged', currentChild);
+														websockets.emit('web.childs', _getChilds());
+
 													}
 
 												}
-												catch (e) {
-													m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
-													socket.emit('child.child.login.error', "Impossible de vous connecter.");
+												else {
+
+													socket.emit('child.child.login.error', "Vous n'avez fourni aucune donnée d'autorisation valide.");
+													
 												}
 
-											});
+											}
+											catch (e) {
+												m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
+												socket.emit('child.child.login.error', "Impossible de vous connecter.");
+											}
+
+										});
+
 									});
 
 									// run
