@@ -73,9 +73,7 @@
 					var deferred = q.defer();
 
 						try {
-
 							deferred.resolve();
-
 						}
 						catch (e) {
 							deferred.reject((e.message) ? e.message : e);

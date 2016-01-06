@@ -2,7 +2,6 @@
 // dépendances
 	
 	var
-		path = require('path'),
 		fs = require('fs'),
 		q = require('q');
 		
@@ -17,7 +16,7 @@
 			var
 				that = this,
 				m_clSavingPromise = false,
-				m_sFilePath = path.join(__dirname, '..', 'conf.json'),
+				m_sFilePath = require('path').join(__dirname, '..', 'conf.json'),
 				m_stConf = { };
 				
 		// methodes

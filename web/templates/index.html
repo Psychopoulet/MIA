@@ -134,18 +134,16 @@
 								
 							<div class="panel-heading">{{child.name}}</div>
 
-							<table class="table table-bordered">
-								<tbody>
-									<tr>
-										<td>token</td>
-										<td>{{child.token}}</td>
-									</tr>
-									<tr>
-										<td>temperature</td>
-										<td>{{child.temperature}}°C</td>
-									</tr>
-								</tbody>
-							</table>
+							<div class="panel-heading clearfix">
+
+								{{child.name}}
+
+								<div class="btn-group pull-right">
+									<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="!child.allowed" data-ng-click="allow(child);"></button>
+									<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(child);"></button>
+								</div>
+
+							</div>
 
 						</div>
 					
