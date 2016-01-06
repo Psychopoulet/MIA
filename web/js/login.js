@@ -72,7 +72,7 @@ jQuery(document).ready(function() {
 
 					login_form.find('input, button, select, checkbox').attr('disabled', 'disabled').addClass('disabled');
 
-					socket.emit('web.user.login', {
+					socket.emit('web.client.login', {
 						token : token
 					});
 
@@ -90,11 +90,11 @@ jQuery(document).ready(function() {
 
 		// login
 
-		.on('web.user.login.error', function (err) {
+		.on('web.client.login.error', function (err) {
 			login_form.find('input, button, select, checkbox').removeAttr('disabled', 'disabled').removeClass('disabled');
 			alert(err);
 		})
-		.on('web.user.deleted', function (err) {
+		.on('web.client.deleted', function (err) {
 
 			if (localStorage) {
 				localStorage.removeItem('token');
@@ -104,7 +104,7 @@ jQuery(document).ready(function() {
 			}
 			
 		})
-		.on('web.user.logged', function (data) {
+		.on('web.client.logged', function (data) {
 
 			if (localStorage) {
 				localStorage.setItem('token', data.token);
@@ -124,7 +124,7 @@ jQuery(document).ready(function() {
 
 			login_form.find('input, button, select, checkbox').attr('disabled', 'disabled').addClass('disabled');
 
-			socket.emit('web.user.login', {
+			socket.emit('web.client.login', {
 				login : jQuery('#login_login').val(),
 				password : jQuery('#login_password').val()
 			});
@@ -137,7 +137,7 @@ jQuery(document).ready(function() {
 
 			login_form.find('input, button, select, checkbox').attr('disabled', 'disabled').addClass('disabled');
 
-			socket.emit('web.user.login');
+			socket.emit('web.client.login');
 
 			return false;
 

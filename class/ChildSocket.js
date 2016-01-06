@@ -5,6 +5,7 @@
 		path = require('path'),
 		q = require('q'),
 		
+		Container = require(path.join(__dirname, 'Container.js')),
 		Logs = require(path.join(__dirname, 'Logs.js'));
 		
 // module
@@ -19,7 +20,6 @@
 				that = this,
 				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'childsocket')),
 				m_clSocketServer,
-				m_stSocketsConnected = {},
 				m_tabOnConnection = [],
 				m_tabOnDisconnect = [];
 				
@@ -29,7 +29,7 @@
 				
 				this.start = function () {
 					
-					var deferred = q.defer(), nChildrenPort = require(path.join(__dirname, 'Container.js')).get('conf').get('childrenport');
+					var deferred = q.defer(), nChildrenPort = Container.get('conf').get('childrenport');
 
 						try {
 
@@ -37,59 +37,21 @@
 
 							m_clSocketServer.sockets.on('connection', function (socket) {
 
-								socket.MIA = {};
-
 								m_clLog.success('-- [child socket client] ' + socket.id + ' connected');
 								
 								socket.on('disconnect', function () {
 									
 									m_clLog.info('-- [child socket client] ' + socket.id + ' disconnected');
 									
-									socket.removeAllListeners('child.token.get');
-									socket.removeAllListeners('child.token.empty');
-									socket.removeAllListeners('child.token.error');
-
 									m_tabOnDisconnect.forEach(function (fOnDisconnect) {
 										fOnDisconnect(socket);
 									});
 
-									delete m_stSocketsConnected[socket.MIA.token];
-
 								});
 
-								socket
-									.on('child.token.get', function (sToken) {
-										
-										socket.MIA.token = sToken;
-										socket.MIA.name = sToken;
-
-										m_stSocketsConnected[sToken] = socket;
-
-										m_clLog.success('-- [child socket client] get token \'' + sToken + '\'');
-
-										m_tabOnConnection.forEach(function (fOnConnection) {
-											fOnConnection(socket);
-										});
-										
-									})
-									.on('child.token.empty', function () {
-										
-										var sAlpha = 'abcdefghijklmnopqrstuvwxyz0123456789', sToken = '';
-										
-										for (var i = 0; i < 10; ++i) {
-											var al = Math.floor(Math.random() * sAlpha.length);
-												al = (al < 0) ? 0 : (al >= sAlpha.length) ? sAlpha.length - 1 : al;
-											sToken += sAlpha.substring(al, al+1);
-										}
-										
-										socket.emit('child.token.set', sToken);
-										
-									})
-									.on('child.token.error', function (err) {
-										m_clLog.err(err);
-									});
-									
-								socket.emit('child.token.get');
+								m_tabOnConnection.forEach(function (fOnConnection) {
+									fOnConnection(socket);
+								});
 								
 							});
 
@@ -111,7 +73,9 @@
 					var deferred = q.defer();
 
 						try {
+
 							deferred.resolve();
+
 						}
 						catch (e) {
 							deferred.reject((e.message) ? e.message : e);
@@ -127,31 +91,74 @@
 				
 				this.emitTo = function (p_sToken, p_sOrder, p_vData) {
 
-					if (m_stSocketsConnected[p_sToken]) {
-						m_stSocketsConnected[p_sToken].emit(p_sOrder, p_vData);
+					for (var i = 0; i < m_clSocketServer.sockets.sockets.length; ++i) {
+
+						if (m_clSocketServer.sockets.sockets[i].token && m_clSocketServer.sockets.sockets[i].token === p_sToken) {
+							m_clSocketServer.sockets.sockets[i].emit(p_sOrder, p_vData);
+							break;
+						}
+
 					}
 
-				};
-				
-				this.onConnection = function (p_fCallback) {
-
-					if ('function' === typeof p_fCallback) {
-						m_tabOnConnection.push(p_fCallback);
-					}
-					
 					return that;
 					
 				};
 				
-				this.onDisconnect = function (p_fCallback) {
+				this.setTokenToSocketById = function (p_sId, p_sToken) {
 
-					if ('function' === typeof p_fCallback) {
-						m_tabOnDisconnect.push(p_fCallback);
+					for (var i = 0; i < m_clSocketServer.sockets.sockets.length; ++i) {
+
+						if (m_clSocketServer.sockets.sockets[i].id === p_sId) {
+							m_clSocketServer.sockets.sockets[i].token = p_sToken;
+							break;
+						}
+
 					}
-							
+
 					return that;
 					
 				};
 				
+				this.disconnect = function (p_sToken) {
+
+					for (var i = 0; i < m_clSocketServer.sockets.sockets.length; ++i) {
+
+						if (m_clSocketServer.sockets.sockets[i].token && m_clSocketServer.sockets.sockets[i].token === p_sToken) {
+							m_clSocketServer.sockets.sockets[i].disconnect();
+							break;
+						}
+
+					}
+
+					return that;
+					
+				};
+				
+				this.getSockets = function () {
+					return m_clSocketServer.sockets.sockets;
+				};
+				
+				// callbacks
+					
+					this.onConnection = function (p_fCallback) {
+
+						if ('function' === typeof p_fCallback) {
+							m_tabOnConnection.push(p_fCallback);
+						}
+						
+						return that;
+						
+					};
+					
+					this.onDisconnect = function (p_fCallback) {
+
+						if ('function' === typeof p_fCallback) {
+							m_tabOnDisconnect.push(p_fCallback);
+						}
+								
+						return that;
+						
+					};
+					
 	};
 	

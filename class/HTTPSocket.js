@@ -55,7 +55,7 @@
 								
 							});
 							
-							m_clLog.success('-- [HTTP socket server] started on port ' + Container.get('conf').get('clientsport'));
+							m_clLog.success('-- [HTTP socket server] started on port ' + Container.get('conf').get('webport'));
 
 							deferred.resolve();
 
@@ -89,64 +89,47 @@
 					m_clSocketServer.sockets.emit(p_sOrder, p_vData);
 				};
 				
-				this.onConnection = function (p_fCallback) {
-
-					if ('function' === typeof p_fCallback) {
-						m_tabOnConnection.push(p_fCallback);
-					}
-					
-					return that;
-					
-				};
-				
-				this.onDisconnect = function (p_fCallback) {
-
-					if ('function' === typeof p_fCallback) {
-						m_tabOnDisconnect.push(p_fCallback);
-					}
-							
-					return that;
-					
-				};
-				
-				this.setTokenToSocketById = function (p_sId, p_sToken) {
-
-					m_clSocketServer.sockets.sockets.forEach(function(socket, key) {
-
-						if (socket.id == p_sId) {
-							m_clSocketServer.sockets.sockets[key].token = p_sToken;
-						}
-
-					});
-		
-					return that;
-					
-				};
-				
 				this.emitTo = function (p_sToken, p_sOrder, p_vData) {
 
-					m_clSocketServer.sockets.sockets.forEach(function(socket, key) {
+					for (var i = 0; i < m_clSocketServer.sockets.sockets.length; ++i) {
 
-						if (socket.token && socket.token === p_sToken) {
-							socket.emit(p_sOrder, p_vData);
+						if (m_clSocketServer.sockets.sockets[i].token && m_clSocketServer.sockets.sockets[i].token === p_sToken) {
+							m_clSocketServer.sockets.sockets[i].emit(p_sOrder, p_vData);
+							break;
 						}
 
-					});
-		
+					}
+
+					return that;
+					
+				};
+
+				this.setTokenToSocketById = function (p_sId, p_sToken) {
+
+					for (var i = 0; i < m_clSocketServer.sockets.sockets.length; ++i) {
+
+						if (m_clSocketServer.sockets.sockets[i].id === p_sId) {
+							m_clSocketServer.sockets.sockets[i].token = p_sToken;
+							break;
+						}
+
+					}
+
 					return that;
 					
 				};
 				
 				this.disconnect = function (p_sToken) {
 
-					m_clSocketServer.sockets.sockets.forEach(function(socket, key) {
+					for (var i = 0; i < m_clSocketServer.sockets.sockets.length; ++i) {
 
-						if (socket.token && socket.token === p_sToken) {
-							socket.disconnect();
+						if (m_clSocketServer.sockets.sockets[i].token && m_clSocketServer.sockets.sockets[i].token === p_sToken) {
+							m_clSocketServer.sockets.sockets[i].disconnect();
+							break;
 						}
 
-					});
-		
+					}
+
 					return that;
 					
 				};
@@ -155,5 +138,27 @@
 					return m_clSocketServer.sockets.sockets;
 				};
 				
+				// callbacks
+					
+					this.onConnection = function (p_fCallback) {
+
+						if ('function' === typeof p_fCallback) {
+							m_tabOnConnection.push(p_fCallback);
+						}
+						
+						return that;
+						
+					};
+					
+					this.onDisconnect = function (p_fCallback) {
+
+						if ('function' === typeof p_fCallback) {
+							m_tabOnDisconnect.push(p_fCallback);
+						}
+								
+						return that;
+						
+					};
+					
 	};
 	
