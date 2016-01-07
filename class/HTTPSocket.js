@@ -17,7 +17,7 @@
 		// attributes
 			
 			var
-				m_clThis = this,
+				that = this,
 				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'httpsocket')),
 				m_clSocketServer,
 				m_tabOnConnection = [],
@@ -27,13 +27,13 @@
 
 			// public
 				
-				this.start = function (p_clHTTPServer) {
+				this.start = function () {
 
 					var deferred = q.defer();
 
 						try {
 
-							m_clSocketServer = require('socket.io').listen(p_clHTTPServer);
+							m_clSocketServer = require('socket.io').listen(Container.get('server.http').getServer());
 
 							m_clSocketServer.sockets.on('connection', function (socket) {
 
@@ -55,7 +55,7 @@
 								
 							});
 							
-							m_clLog.success('-- [HTTP socket server] started');
+							m_clLog.success('-- [HTTP socket server] started on port ' + Container.get('conf').get('webport'));
 
 							deferred.resolve();
 
@@ -73,9 +73,7 @@
 					var deferred = q.defer();
 
 						try {
-
 							deferred.resolve();
-					
 						}
 						catch (e) {
 							deferred.reject((e.message) ? e.message : e);
@@ -89,25 +87,76 @@
 					m_clSocketServer.sockets.emit(p_sOrder, p_vData);
 				};
 				
-				this.onConnection = function (p_fCallback) {
+				this.emitTo = function (p_sToken, p_sOrder, p_vData) {
 
-					if ('function' === typeof p_fCallback) {
-						m_tabOnConnection.push(p_fCallback);
+					for (var i = 0; i < m_clSocketServer.sockets.sockets.length; ++i) {
+
+						if (m_clSocketServer.sockets.sockets[i].token && m_clSocketServer.sockets.sockets[i].token === p_sToken) {
+							m_clSocketServer.sockets.sockets[i].emit(p_sOrder, p_vData);
+							break;
+						}
+
 					}
+
+					return that;
 					
-					return m_clThis;
+				};
+
+				this.setTokenToSocketById = function (p_sId, p_sToken) {
+
+					for (var i = 0; i < m_clSocketServer.sockets.sockets.length; ++i) {
+
+						if (m_clSocketServer.sockets.sockets[i].id === p_sId) {
+							m_clSocketServer.sockets.sockets[i].token = p_sToken;
+							break;
+						}
+
+					}
+
+					return that;
 					
 				};
 				
-				this.onDisconnect = function (p_fCallback) {
+				this.disconnect = function (p_sToken) {
 
-					if ('function' === typeof p_fCallback) {
-						m_tabOnDisconnect.push(p_fCallback);
+					for (var i = 0; i < m_clSocketServer.sockets.sockets.length; ++i) {
+
+						if (m_clSocketServer.sockets.sockets[i].token && m_clSocketServer.sockets.sockets[i].token === p_sToken) {
+							m_clSocketServer.sockets.sockets[i].disconnect();
+							break;
+						}
+
 					}
-							
-					return m_clThis;
+
+					return that;
 					
 				};
 				
+				this.getSockets = function () {
+					return m_clSocketServer.sockets.sockets;
+				};
+				
+				// callbacks
+					
+					this.onConnection = function (p_fCallback) {
+
+						if ('function' === typeof p_fCallback) {
+							m_tabOnConnection.push(p_fCallback);
+						}
+						
+						return that;
+						
+					};
+					
+					this.onDisconnect = function (p_fCallback) {
+
+						if ('function' === typeof p_fCallback) {
+							m_tabOnDisconnect.push(p_fCallback);
+						}
+								
+						return that;
+						
+					};
+					
 	};
 	

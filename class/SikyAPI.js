@@ -2,7 +2,7 @@
 // dépendances
 	
 	var
-		https = require('https'),
+		http = require('http'),
 		q = require('q');
 		
 // modules
@@ -57,9 +57,9 @@
 								}
 								
 								stOptions = {
-									protocol: 'https:',
-									hostname: 'www.siky.fr',
-									port: 443,
+									protocol: 'http:',
+									hostname: 'localhost',
+									port: 80,
 									path: p_sUrl,
 									method: p_sMethod,
 									headers: {
@@ -72,11 +72,11 @@
 									stOptions.headers.Cookie = m_sCookieSession;
 								}
 
-								https.request(stOptions, function(response) {
+								http.request(stOptions, function(response) {
 
 									var sStatusCode = '', sResponse = '';
 
-									if ('' == m_sCookieSession) {
+									if ('' == m_sCookieSession && response.headers['set-cookie'] && 0 < response.headers['set-cookie'].length) {
 										
 										m_sCookieSession = response.headers['set-cookie'][0].split(';');
 										m_sCookieSession = m_sCookieSession[0];
@@ -104,7 +104,7 @@
 
 									}
 									else {
-										deferred.reject('error on [' + p_sMethod + '] https://siky.fr' + p_sUrl + ' : status code = ' + sStatusCode);
+										deferred.reject('error on [' + p_sMethod + '] http://localhost' + p_sUrl + ' : status code = ' + sStatusCode);
 									}
 									
 								})

@@ -1,0 +1,1 @@
+start /b chrome "http://localhost:1337" && exit

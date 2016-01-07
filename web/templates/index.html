@@ -49,15 +49,10 @@
 
 					<div class="collapse navbar-collapse bs-example-js-navbar-collapse">
 
-						<ul class="nav navbar-nav only-logged hidden">
-							<li><a id="menuVideos" href="#">Vidéos</a></li>
-							<li><a id="menuWarcraft" href="#">Warcraft</a></li>
-						</ul>
-
 						<div class="navbar-form navbar-right">
-							<span class="label label-danger only-disconnected">diconnected</span>
-							<span class="label label-warning only-connected hidden">connected</span>
-							<span class="label label-success only-logged hidden">logged</span>
+							<span class="label label-danger only-disconnected">déconnecté</span>
+							<span class="label label-warning only-connected hidden">connecté</span>
+							<span class="label label-success only-logged hidden">enregistré</span>
 						</div>
 
 					</div>
@@ -87,16 +82,20 @@
 						<div class="panel-body">
 
 							<div class="form-group">
-								<label for="login_email">Email</label>
-								<input id="login_email" type="email" placeholder="Login" class="form-control">
+								(note : vous pouvez aussi attendre une autorisation d'une personne déjà autentifiée)
 							</div>
 
 							<div class="form-group">
-								<label for="login_password">Password</label>
-								<input id="login_password" type="password" placeholder="Password" class="form-control">
+								<label for="login_login">Login</label>
+								<input id="login_login" type="text" placeholder="Login" class="form-control">
 							</div>
 
-							<button type="submit" class="btn btn-default">Submit</button>
+							<div class="form-group">
+								<label for="login_password">Mot de passe</label>
+								<input id="login_password" type="password" placeholder="Mot de passe" class="form-control">
+							</div>
+
+							<button type="submit" class="btn btn-primary">Connexion</button>
 
 						</div>
 
@@ -104,38 +103,125 @@
 
 				</div>
 
-				<div data-ng-controller="ControllerChildren" class="col-xs-12 only-logged hidden">
+				<div class="col-xs-12 col-md-2 only-logged hidden">
 
-					<div class="row">
+					<div data-ng-controller="ControllerClients">
 						
-						<div data-ng-repeat="child in children" class="col-xs-12 col-md-6 col-lg-3">
+						<div class="panel panel-default">
 
-							<div class="panel" data-ng-class="{ 'panel-default' : child.connected, 'panel-danger' : !child.connected }">
-								
-								<div class="panel-heading">{{child.name}}</div>
-
-								<table class="table table-bordered">
-									<tbody>
-										<tr>
-											<td>token</td>
-											<td>{{child.token}}</td>
-										</tr>
-										<tr>
-											<td>temperature</td>
-											<td>{{child.temperature}}°C</td>
-										</tr>
-									</tbody>
-								</table>
-
+							<div class="panel-heading">
+								<h4 class="panel-title">Clients</h4>
 							</div>
-						
-						</div>
 
+							<ul class="list-group">
+
+								<li class="list-group-item"
+									data-ng-repeat="client in clients"
+									data-ng-class="{ 'list-group-item-success' : client.connected && client.allowed, 'list-group-item-warning' : client.connected && !client.allowed }">
+
+									<div class="clearfix">
+
+										{{client.name}}
+
+										<div class="btn-group pull-right">
+											<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="!client.allowed" data-ng-click="allow(client);"></button>
+											<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(client);"></button>
+										</div>
+
+									</div>
+
+								</li>
+
+							</ul>
+							
+						</div>
+						
+					</div>
+
+					<div data-ng-controller="ControllerChilds">
+						
+						<div class="panel panel-default">
+
+							<div class="panel-heading">
+								<h4 class="panel-title">Enfants</h4>
+							</div>
+
+							<ul class="list-group">
+
+								<li class="list-group-item"
+									data-ng-repeat="child in childs"
+									data-ng-class="{ 'list-group-item-success' : child.connected && child.allowed, 'list-group-item-warning' : child.connected && !child.allowed }">
+
+									<div class="clearfix">
+
+										{{child.name}}
+
+										<div class="btn-group pull-right">
+											<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="!child.allowed" data-ng-click="allow(child);"></button>
+											<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(child);"></button>
+										</div>
+
+									</div>
+
+								</li>
+
+							</ul>
+							
+						</div>
+					
 					</div>
 
 				</div>
 
-				{{pages}}
+				<div class="col-xs-12 col-md-10 col-lg-8 only-logged hidden">
+
+					<div class="panel panel-default">
+						
+						<div class="panel-heading">
+							<h4 class="panel-title">Widgets plugins</h4>
+						</div>
+
+						<div class="panel-body">
+							
+							<div class="row">
+
+								{{widgets}}
+								
+							</div>
+
+						</div>
+						
+					</div>
+
+				</div>
+
+				<div class="col-xs-2 hidden-xs hidden-sm hidden-md only-logged hidden" data-ng-controller="ControllerEvents">
+
+					<div class="panel panel-default">
+						
+						<div class="panel-heading">
+							<h4 class="panel-title">Evènements</h4>
+						</div>
+
+						<ul class="list-group">
+
+							<li class="list-group-item"
+								data-ng-repeat="event in events">
+
+								<div class="clearfix">
+
+									<u>event.app</u><br />
+									event.text
+
+								</div>
+
+							</li>
+
+						</ul>
+						
+					</div>
+
+				</div>
 
 			</div>
 			
