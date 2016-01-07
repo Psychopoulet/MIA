@@ -6,12 +6,14 @@
   "author": "Sébastien VIDAL",
   "license": "ISC",
   "web" : {
-    "widgetcontroller" : "ControllerVideosList",
+    "widgetcontroller" : "ControllerWidget",
     "templates" : {
       "widget" : "web/template.html"
     },
   	"javascripts" : [
-  		"web/controller.js"
+      "web/ModelCategories.js",
+      "web/ModelVideos.js",
+  		"web/ControllerWidget.js"
   	]
   }
 }

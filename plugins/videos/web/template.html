@@ -1,41 +1,61 @@
 
-<div class="row">
+<div class="form-group">
 
-	<div class="col-xs-3">
-		
-		<div class="list-group">
+	<label>Catégories ({{categories.length}})</label>
 
-			<button type="button" class="list-group-item active"
-					data-ng-disabled="loading" data-ng-class="{'disabled' : loading }"
+	<div class="input-group">
+
+		<select class="form-control"
+				data-ng-disabled="!categories.length" data-ng-class="{'disabled' : !categories.length }"
+				data-ng-options="category.name for category in categories"
+				data-ng-model="selectedcategory"
+				data-ng-change="selectCategory(selectedcategory);">
+			<option value="">-- NC --</option>
+		</select>
+
+		<span class="input-group-btn">
+
+			<button type="button" class="btn btn-primary"
 					data-ng-click="addCategory();">
-				<span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp; Ajouter
+				<span class="glyphicon glyphicon-plus"></span>
 			</button>
 
-			<a href="#" class="list-group-item" data-ng-show="loadingCategories">
-				Loading...
-			</a>
+			<button type="button" class="btn btn-primary"
+					data-ng-disabled="!selectedcategory" data-ng-class="{'disabled' : !selectedcategory  }"
+					data-ng-click="editCategory(selectedcategory);">
+					<span class="glyphicon glyphicon-pencil"></span>
+		  	</button>
 
-			<a href="#" class="list-group-item" data-ng-hide="loadingCategories"
-				data-ng-class="{ 'list-group-item-info' : selectedcategory.id && selectedcategory.id == category.id }"
-				data-ng-repeat="category in categories" data-ng-click="selectCategory(category);">
-				{{category.name}} 
-			</a>
+			<button type="button" class="btn btn-primary"
+					data-ng-disabled="!selectedcategory" data-ng-class="{'disabled' : !selectedcategory  }"
+					data-ng-click="deleteCategory(selectedcategory);">
+					<span class="glyphicon glyphicon-trash"></span>
+		  	</button>
 
-		</div>
-
-		<button type="button" class="btn btn-primary btn-block"
-				data-ng-disabled="loading || !selectedcategory.id" data-ng-class="{'disabled' : loading || !selectedcategory.id  }"
-				data-ng-click="editCategory(selectedcategory);">
-				<span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp; Modifier
-	  	</button>
-
-		<button type="button" class="btn btn-primary btn-block"
-				data-ng-disabled="loading || !selectedcategory.id" data-ng-class="{'disabled' : loading || !selectedcategory.id  }"
-				data-ng-click="deleteCategory(selectedcategory);">
-				<span class="glyphicon glyphicon-trash"></span>&nbsp;&nbsp; Supprimer
-	  	</button>
+		</span>
 
 	</div>
+
+</div>
+
+<div data-ng-show="selectedcategory">
+
+	<div class="form-group" data-ng-show="children.length">
+
+		<label>Enfants ({{children.length}})</label>
+
+		<select class="form-control"
+				data-ng-options="child.name for child in childs"
+				data-ng-model="selectedchild">
+			<option value="">-- NC --</option>
+		</select>
+
+	</div>
+
+</div>
+
+
+<!--<div class="row">
 
 	<div class="col-xs-9">
 		
@@ -168,3 +188,4 @@
 
 </div>
 
+-->
