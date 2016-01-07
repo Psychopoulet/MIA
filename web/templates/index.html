@@ -107,42 +107,66 @@
 
 					<div data-ng-controller="ControllerClients">
 						
-						<div 	class="panel"
-								data-ng-class="{ 'panel-success' : client.connected && client.allowed, 'panel-warning' : client.connected && !client.allowed }"
-								data-ng-repeat="client in clients">
-							
-							<div class="panel-heading clearfix">
+						<div class="panel panel-default">
 
-								{{client.name}}
-
-								<div class="btn-group pull-right">
-									<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="!client.allowed" data-ng-click="allow(client);"></button>
-									<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(client);"></button>
-								</div>
-
+							<div class="panel-heading">
+								<h4 class="panel-title">Clients</h4>
 							</div>
 
+							<ul class="list-group">
+
+								<li class="list-group-item"
+									data-ng-repeat="client in clients"
+									data-ng-class="{ 'list-group-item-success' : client.connected && client.allowed, 'list-group-item-warning' : client.connected && !client.allowed }">
+
+									<div class="clearfix">
+
+										{{client.name}}
+
+										<div class="btn-group pull-right">
+											<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="!client.allowed" data-ng-click="allow(client);"></button>
+											<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(client);"></button>
+										</div>
+
+									</div>
+
+								</li>
+
+							</ul>
+							
 						</div>
 						
 					</div>
 
 					<div data-ng-controller="ControllerChilds">
 						
-						<div 	class="panel"
-								data-ng-class="{ 'panel-success' : child.connected && child.allowed, 'panel-warning' : child.connected && !child.allowed }"
-								data-ng-repeat="child in childs">
-								
-							<div class="panel-heading clearfix">
+						<div class="panel panel-default">
 
-								{{child.name}}
-
-								<div class="btn-group pull-right">
-									<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="!child.allowed" data-ng-click="allow(child);"></button>
-									<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(child);"></button>
-								</div>
-
+							<div class="panel-heading">
+								<h4 class="panel-title">Enfants</h4>
 							</div>
 
+							<ul class="list-group">
+
+								<li class="list-group-item"
+									data-ng-repeat="child in childs"
+									data-ng-class="{ 'list-group-item-success' : child.connected && child.allowed, 'list-group-item-warning' : child.connected && !child.allowed }">
+
+									<div class="clearfix">
+
+										{{child.name}}
+
+										<div class="btn-group pull-right">
+											<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="!child.allowed" data-ng-click="allow(child);"></button>
+											<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(child);"></button>
+										</div>
+
+									</div>
+
+								</li>
+
+							</ul>
+							
 						</div>
 					
 					</div>
@@ -151,9 +175,21 @@
 
 				<div class="col-xs-12 col-md-10 col-lg-8 only-logged hidden">
 
-					<div class="row">
+					<div class="panel panel-default">
+						
+						<div class="panel-heading">
+							<h4 class="panel-title">Widgets plugins</h4>
+						</div>
 
-						{{widgets}}
+						<div class="panel-body">
+							
+							<div class="row">
+
+								{{widgets}}
+								
+							</div>
+
+						</div>
 						
 					</div>
 
@@ -167,23 +203,22 @@
 							<h4 class="panel-title">Evènements</h4>
 						</div>
 
-						<table class="table table-bordered">
+						<ul class="list-group">
 
-							<tbody>
-								
-								<tr data-ng-repeat="event in events">
-									<td>
-										
-										<u>event.app</u><br />
-										event.text
+							<li class="list-group-item"
+								data-ng-repeat="event in events">
 
-									</td>
-								</tr>
+								<div class="clearfix">
 
-							</tbody>
-							
-						</table>
+									<u>event.app</u><br />
+									event.text
 
+								</div>
+
+							</li>
+
+						</ul>
+						
 					</div>
 
 				</div>

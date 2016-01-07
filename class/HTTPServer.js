@@ -170,21 +170,25 @@ q
 								}
 								else {
 
+									try {
+										if (fs.lstatSync(m_sPluginsWidgetsBufferFile).isFile()) {
+											fs.unlinkSync(m_sPluginsWidgetsBufferFile);
+										}
+									}
+									catch(e) {}
+
+									fs.appendFileSync(m_sPluginsWidgetsBufferFile, '', 'utf8');
+
+									try {
+										if (fs.lstatSync(m_sPluginsJavascriptsBufferFile).isFile()) {
+											fs.unlinkSync(m_sPluginsJavascriptsBufferFile);
+										}
+									}
+									catch(e) {}
+
+									fs.appendFileSync(m_sPluginsJavascriptsBufferFile, '', 'utf8');
+
 									m_clPlugins.getData().then(function (p_tabData) {
-
-										try {
-											if (fs.lstatSync(m_sPluginsWidgetsBufferFile).isFile()) {
-												fs.unlinkSync(m_sPluginsWidgetsBufferFile);
-											}
-										}
-										catch(e) {}
-
-										try {
-											if (fs.lstatSync(m_sPluginsJavascriptsBufferFile).isFile()) {
-												fs.unlinkSync(m_sPluginsJavascriptsBufferFile);
-											}
-										}
-										catch(e) {}
 
 										p_tabData.forEach(function(plugin) {
 
