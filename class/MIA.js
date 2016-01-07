@@ -246,9 +246,9 @@
 										try {
 
 											socket.token = socket.id;
-											websockets.setTokenToSocketById(socket.id, socket.id);
 
-											websockets.emit('web.clients', _getClients());
+											websockets	.setTokenToSocketById(socket.id, socket.id)
+														.emit('web.clients', _getClients());
 											
 											// clients
 
@@ -272,8 +272,8 @@
 
 														conf.addTo('clients', currentClient).save().then(function() {
 
-															websockets.emitTo(p_stClient.token, 'web.client.logged', currentClient);
-															websockets.emit('web.clients', _getClients());
+															websockets	.emitTo(p_stClient.token, 'web.client.logged', currentClient)
+																		.emit('web.clients', _getClients());
 
 														})
 														.catch(function(e) {
@@ -323,8 +323,10 @@
 														}
 
 														conf.set('clients', clients).save().then(function() {
-															websockets.emitTo(p_stClient.token, 'web.client.deleted');
-															websockets.disconnect(p_stClient.token);
+
+															websockets	.emitTo(p_stClient.token, 'web.client.deleted')
+																		.disconnect(p_stClient.token);
+
 														})
 														.catch(function(e) {
 															m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
@@ -414,8 +416,12 @@
 														}
 
 														conf.set('childs', childs).save().then(function() {
-															childssockets.emitTo(p_stChild.token, 'child.child.deleted');
-															childssockets.disconnect(p_stChild.token);
+
+															childssockets	.emitTo(p_stChild.token, 'child.child.deleted')
+																			.disconnect(p_stChild.token);
+
+															websockets.emit('web.childs', _getChilds());
+
 														})
 														.catch(function(e) {
 															m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
