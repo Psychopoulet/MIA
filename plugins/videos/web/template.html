@@ -24,13 +24,13 @@
 					data-ng-disabled="!selectedcategory" data-ng-class="{'disabled' : !selectedcategory  }"
 					data-ng-click="editCategory(selectedcategory);">
 					<span class="glyphicon glyphicon-pencil"></span>
-		  	</button>
+			</button>
 
 			<button type="button" class="btn btn-primary"
 					data-ng-disabled="!selectedcategory" data-ng-class="{'disabled' : !selectedcategory  }"
 					data-ng-click="deleteCategory(selectedcategory);">
 					<span class="glyphicon glyphicon-trash"></span>
-		  	</button>
+			</button>
 
 		</span>
 
@@ -40,110 +40,89 @@
 
 <div data-ng-show="selectedcategory">
 
-	<div class="form-group" data-ng-show="children.length">
+	<div class="form-group">
 
-		<label>Enfants ({{children.length}})</label>
+		<label>Vidéos ({{videos.length}})</label>
 
-		<select class="form-control"
-				data-ng-options="child.name for child in childs"
-				data-ng-model="selectedchild">
-			<option value="">-- NC --</option>
-		</select>
+		<div class="input-group">
 
-	</div>
+			<select class="form-control"
+					data-ng-disabled="!videos.length" data-ng-class="{'disabled' : !videos.length }"
+					data-ng-options="video.name for video in videos"
+					data-ng-model="selectedvideo">
+				<option value="">-- NC --</option>
+			</select>
 
-</div>
+			<span class="input-group-btn">
 
+				<button type="button" class="btn btn-primary"
+						data-ng-click="addVideo(selectedcategory, selectedvideo);">
+					<span class="glyphicon glyphicon-plus"></span>
+				</button>
 
-<!--<div class="row">
+				<button type="button" class="btn btn-primary"
+						data-ng-disabled="!selectedvideo" data-ng-class="{'disabled' : !selectedvideo  }"
+						data-ng-click="editVideo(selectedcategory, selectedvideo);">
+						<span class="glyphicon glyphicon-pencil"></span>
+				</button>
 
-	<div class="col-xs-9">
-		
-		<div data-ng-show="selectedcategory.id && loadingVideos">Loading...</div>
-		
-		<div data-ng-show="selectedcategory.id && !loadingVideos">
+				<button type="button" class="btn btn-primary"
+						data-ng-disabled="!selectedvideo" data-ng-class="{'disabled' : !selectedvideo  }"
+						data-ng-click="deleteCategory(selectedcategory, selectedvideo);">
+						<span class="glyphicon glyphicon-trash"></span>
+				</button>
 
-			<div class="panel panel-default">
-				
-				<div class="panel-heading"><h4 class="panel-title">Vidéos</h4></div>
+				<button type="button" class="btn btn-primary"
+						data-ng-disabled="!selectedvideo" data-ng-class="{'disabled' : !selectedvideo  }"
+						data-ng-click="preview(selectedvideo);">
+						<span class="glyphicon glyphicon-play-circle"></span>
+				</button>
 
-				<div class="panel-body">
-
-					<div class="btn-group">
-						
-						<button type="button" class="btn btn-primary"
-								data-ng-disabled="loading" data-ng-class="{'disabled' : loading }"
-								data-ng-click="openModalFormVideo();">
-							<span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp; Ajouter
-						</button>
-
-					  	<button type="button" class="btn btn-primary"
-								data-ng-disabled="loading || !selectedvideo.id" data-ng-class="{'disabled' : loading || !selectedvideo.id }"
-								data-ng-click="openModalFormVideo(selectedvideo);">
-							<span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp; Modifier
-					  	</button>
-
-					  	<button type="button" class="btn btn-primary"
-								data-ng-disabled="loading || !selectedvideo.id" data-ng-class="{'disabled' : loading || !selectedvideo.id }"
-								data-ng-click="deleteVideo(selectedvideo);">
-					  		<span class="glyphicon glyphicon-trash"></span>&nbsp;&nbsp; Supprimer
-					  	</button>
-
-					</div>
-
-				  	<button type="button" class="btn btn-primary pull-right"
-							data-ng-disabled="loading || !selectedvideo.id" data-ng-class="{'disabled' : loading || !selectedvideo.id  }"
-							data-ng-click="preview(selectedvideo);">
-				  		<span class="glyphicon glyphicon-play"></span>&nbsp;&nbsp; Lire
-				  	</button>
-
-				</div>
-
-				<table class="table table-bordered table-hover text-center">
-
-					<tbody>
-
-						<tr class="pointer" data-ng-class="{ 'info' : selectedvideo.id && video.id == selectedvideo.id }"
-							data-ng-repeat="video in videos" data-ng-click="selectVideo(video);">
-							<td>{{video.name}}</td>
-						</tr>
-
-					</tbody>
-
-				</table>
-
-				<div class="panel-body">
-
-					<div class="input-group">
-					
-						<select class="form-control"
-								data-ng-disabled="loading || !selectedvideo || 0 >= children" data-ng-class="{'disabled' : loading || !selectedvideo || 0 >= children }"
-								data-ng-options="child.name for child in children"
-								data-ng-model="selectedchild">
-							<option value="">-- NC --</option>
-						</select>
-
-						<span class="input-group-btn">
-
-						  	<button type="button" class="btn btn-primary"
-									data-ng-disabled="loading || !selectedchild" data-ng-class="{'disabled' : loading || !selectedchild  }"
-									data-ng-click="play(selectedvideo);">
-						  		<span class="glyphicon glyphicon-cloud-upload"></span>&nbsp;&nbsp; Envoyer
-						  	</button>
-
-					  	</span>
-
-					</div>
-					
-				</div>
-
-			</div>
+			</span>
 
 		</div>
 
 	</div>
 
+	<div data-ng-show="selectedvideo">
+
+		<div class="form-group" data-ng-show="childs.length">
+
+			<label>Enfants ({{childs.length}})</label>
+
+			<div class="input-group">
+
+				<select class="form-control"
+						data-ng-options="child.name for child in childs"
+						data-ng-model="selectedchild">
+					<option value="">-- NC --</option>
+				</select>
+
+				<span class="input-group-btn">
+
+					<button type="button" class="btn btn-primary"
+							data-ng-disabled="!selectedchild || !selectedvideo " data-ng-class="{'disabled' : !selectedchild || !selectedvideo  }"
+							data-ng-click="playSound(selectedchild, selectedvideo);">
+							<span class="glyphicon glyphicon-music"></span>
+					</button>
+
+					<button type="button" class="btn btn-primary"
+							data-ng-disabled="!selectedchild || !selectedvideo " data-ng-class="{'disabled' : !selectedchild || !selectedvideo   }"
+							data-ng-click="playVideo(selectedchild, selectedvideo);">
+							<span class="glyphicon glyphicon-facetime-video"></span>
+					</button>
+
+				</span>
+
+			</div>
+
+		</div>
+	
+	</div>
+
 </div>
+
+<!--
 
 <div id="modalFormVideo" class="modal fade only-logged hidden">
 

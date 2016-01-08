@@ -38,7 +38,20 @@
 				// SIKY
 
 					function _loadCategories() {
-						Container.get('server.socket.web').emit('plugins.videos.categories', m_tabCategories);
+
+						var tabCategories = [];
+
+							m_tabCategories.forEach(function(category) {
+
+								tabCategories.push({
+									code : category.code,
+									name : category.name
+								});
+
+							});
+
+						Container.get('server.socket.web').emit('plugins.videos.categories', tabCategories);
+						
 					}
 
 					function _loadVideosByCategory(p_stCategory) {
@@ -53,12 +66,7 @@
 
 							});
 
-						if (0 < tabVideos.length) {
-							Container.get('server.socket.web').emit('plugins.videos.videos', tabVideos);
-						}
-						else {
-							Container.get('server.socket.web').emit('plugins.videos.videos.error', 'Impossible de trouver cette catégorie.');
-						}
+						Container.get('server.socket.web').emit('plugins.videos.videos', tabVideos);
 
 					}
 
@@ -75,6 +83,8 @@
 						socket.removeAllListeners('plugins.videos.category.delete');
 
 					// videos
+
+						socket.removeAllListeners('plugins.videos.videos');
 
 						socket.removeAllListeners('plugins.videos.video.add');
 						socket.removeAllListeners('plugins.videos.video.edit');
@@ -95,20 +105,35 @@
 								m_clLog.log('plugins.videos.category.add');
 							}
 
-							data = {
-								code : data.name,
-								name : data.name,
-								videos : []
-							};
+							var bFound = false;
 
-							m_tabCategories.push(data);
+								m_tabCategories.forEach(function(category) {
 
-							_loadCategories();
-							
-							Container.get('server.socket.web').emit('plugins.videos.category.added', {
-								code : data.name,
-								name : data.name
-							});
+									if (category.code === data.code) {
+										bFound = true;
+									}
+
+								});
+
+							if (bFound) {
+								Container.get('server.socket.web').emit('plugins.videos.videos.error', 'Cette catégorie existe déjà.');
+							}
+							else {
+								
+								data = {
+									code : data.name,
+									name : data.name,
+									videos : []
+								};
+
+								m_tabCategories.push(data);
+
+								Container.get('server.socket.web').emit('plugins.videos.category.added', {
+									code : data.name,
+									name : data.name
+								});
+
+							}
 
 						})
 						.on('plugins.videos.category.edit', function (data) {
@@ -122,6 +147,7 @@
 								m_tabCategories.forEach(function(category, key) {
 
 									if (category.code === data.code) {
+										bFound = true;
 										m_tabCategories[key].name = data.name;
 									}
 
@@ -129,10 +155,8 @@
 
 							if (bFound) {
 
-								_loadCategories();
-
-								Container.get('server.socket.web').emit('plugins.videos.category.added', {
-									code : data.name,
+								Container.get('server.socket.web').emit('plugins.videos.category.edited', {
+									code : data.code,
 									name : data.name
 								});
 
@@ -153,6 +177,7 @@
 								m_tabCategories.forEach(function(category, key) {
 
 									if (category.code === data.code) {
+										bFound = true;
 										m_tabCategories.splice(key, 1);
 									}
 
@@ -160,7 +185,6 @@
 
 							if (bFound) {
 								_loadCategories();
-								Container.get('server.socket.web').emit('plugins.videos.category.deleted');
 							}
 							else {
 								Container.get('server.socket.web').emit('plugins.videos.videos.error', 'Impossible de trouver cette catégorie.');
@@ -169,6 +193,8 @@
 						});
 
 					// videos
+
+						socket.on('plugins.videos.videos', _loadVideosByCategory)
 
 						socket.on('plugins.videos.video.add', function (p_stData) {
 

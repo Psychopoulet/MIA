@@ -11,8 +11,6 @@
       "widget" : "web/template.html"
     },
   	"javascripts" : [
-      "web/ModelCategories.js",
-      "web/ModelVideos.js",
   		"web/ControllerWidget.js"
   	]
   }

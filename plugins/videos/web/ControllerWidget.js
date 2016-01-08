@@ -1,6 +1,6 @@
 app.controller('ControllerWidget',
-	['$scope', '$popup', 'ModelChilds', 'ModelCategories', 'ModelVideos',
-	function($scope, $popup, ModelChilds, ModelCategories, ModelVideos) {
+	['$scope', '$popup', 'ModelChilds',
+	function($scope, $popup, ModelChilds) {
 
 	"use strict";
 
@@ -19,53 +19,51 @@ app.controller('ControllerWidget',
 
 		// public
 
-			$scope.selectCategory = function (selected) {
+			$scope.selectCategory = function (category) {
 
-				if (selected) {
-
-					if (!$scope.selectedcategory || $scope.selectedcategory.id != selected.id) {
-						$scope.selectedcategory = selected;
-						ModelVideos.getAllByCategory(selected);
-					}
-
+				if (category) {
+					$scope.selectedcategory = category;
+					socket.emit('plugins.videos.videos', category);
 				}
 				else {
 					$scope.selectedcategory = null;
+					$scope.videos = [];
 				}
 
 			};
 
-			// model
+			// models
+
+				// categories
 
 				$scope.addCategory = function () {
 
 					$popup.prompt('Nouvelle catégorie', '', function(name) {
-						ModelCategories.add({ name : name });
+						socket.emit('plugins.videos.category.add', { name : name });
+					});
+
+				};
+				$scope.editCategory = function (category) {
+
+					$popup.prompt('', category.name, function(name) {
+						category.name = name;
+						socket.emit('plugins.videos.category.edit', category);
+					});
+
+				};
+				$scope.deleteCategory = function (category) {
+
+					$popup.confirm('Voulez-vous vraiment supprimer "' + category.name + '" ?', 'Confirmation', function() {
+						socket.emit('plugins.videos.category.delete', category);
 					});
 
 				};
 
-				$scope.editCategory = function (p_stCategory) {
+				// videos
 
-					$popup.prompt('', p_stCategory.name, function(name) {
-						p_stCategory.name = name;
-						ModelCategories.edit(p_stCategory);
-					});
+				$scope.addVideo = function (category, video) {
 
-				};
-
-				$scope.deleteCategory = function (p_stCategory) {
-
-					$popup.confirm('Voulez-vous vraiment supprimer "' + p_stCategory.name + '" ?', 'Confirmation', function() {
-						ModelCategories.delete(p_stCategory);
-					});
-
-				};
-
-
-				$scope.openModalFormVideo = function (video) {
-
-					$scope.formVideo = (video) ? video : {};
+					$scope.formVideo = {};
 
 					jQuery('#modalFormVideo').on('shown.bs.modal', function () {
 
@@ -79,39 +77,61 @@ app.controller('ControllerWidget',
 					.modal('show');
 
 				};
+				$scope.editVideo = function (category, video) {
+
+					$scope.formVideo = video;
+
+					jQuery('#modalFormVideo').on('shown.bs.modal', function () {
+
+						var tabInputs = jQuery(this).find('form input');
+
+						if (0 < tabInputs.length) {
+							jQuery(tabInputs[0]).focus();
+						}
+
+					})
+					.modal('show');
+
+				};
+				$scope.deleteVideo = function (category, video) {
+
+					$popup.confirm('Voulez-vous vraiment supprimer "' + video.name + '" ?', 'Confirmation', function() {
+						
+						socket.emit('plugins.videos.video.delete', {
+		                    child : child, video : video
+		                });
+
+					});
+
+				};
+
+			// interface
 
 				$scope.closeModalFormVideo = function () {
 					jQuery('#modalFormVideo').modal('hide');
 				};
 
-				$scope.sendVideo = function (video) {
+				// play
 
-					if (video.code && '' != video.code) {
-						ModelVideos.edit(video);
-						socket.emit('web.videos.videos.edit', video);
-					}
-					else {
-						video.category = $scope.selectedcategory;
-						ModelVideos.add(video);
-					}
+					$scope.preview = function (video) {
+						$popup.iframe(video.urlembeded + '?autoplay=1');
+					};
 
-				};
+					$scope.playSound = function (child, video) {
 
-				$scope.deleteVideo = function (video) {
+						socket.emit('plugins.videos.video.playsound', {
+		                    child : child, video : video
+		                });
 
-					$popup.confirm('Voulez-vous vraiment supprimer "' + video.name + '" ?', 'Confirmation', function() {
-						ModelVideos.delete(video);
-					});
+					};
 
-				};
+					$scope.playVideo = function (child, video) {
 
-			// play
+						socket.emit('plugins.videos.video.playvideo', {
+		                    child : child, video : video
+		                });
 
-				$scope.preview = function (video) {
-					$popup.iframe(video.urlembeded + '?autoplay=1');
-				};
-
-				$scope.play = ModelVideos.play;
+					};
 
 	// constructor
 
@@ -129,45 +149,92 @@ app.controller('ControllerWidget',
 					
 		// events
 
-			ModelChilds.onChange(function(data) {
-				$scope.childs = data;
-				
-				$scope.selectedchild = null;
-			});
+			// childs
 
-			ModelCategories.onError($popup.alert)
+			ModelChilds.onError($popup.alert)
+			.onChange(function(data) {
 
-				.onChange(function(data) {
-					console.log(data);
-					$scope.categories = data;
-					$scope.selectCategory(null);
-				})
+				$scope.childs = [];
+				angular.forEach(data, function(child) {
 
-				.onAdded(function(category) {
-					console.log(category);
-					$scope.selectCategory(category);
-				})
-				.onEdited(function(category) {
-					console.log(category);
-					$scope.selectCategory(category);
+					if (child.connected && child.allowed) {
+						$scope.childs.push(child);
+					}
+
 				});
 
-			ModelVideos.onError($popup.alert)
+				$scope.selectedchild = null;
+				$scope.$apply();
 
-				.onChange(function(data) {
-					$scope.videos = data;
-					$scope.selectedvideo = null;
-				})
+			});
 
-				.onAdded(function(video) {
-					$scope.selectedvideo = video;
-					$scope.closeModalFormVideo();
-				})
-				.onEdited(function(category) {
-					$scope.selectedvideo = video;
-					$scope.closeModalFormVideo();
-				})
-				.onDeleted($scope.closeModalFormVideo);
+			// categories
+
+			socket.on('plugins.videos.categories.error', $popup.alert)
+
+			.on('plugins.videos.categories', function (data) {
+				$scope.categories = data;
+				$scope.$apply();
+			})
+
+			.on('plugins.videos.category.added', function (category) {
+
+				$scope.categories.push(category);
+				$scope.selectCategory(category);
+
+				$scope.$apply();
+
+			})
+			.on('plugins.videos.category.edited', function (category) {
+
+				angular.forEach($scope.categories, function(cat, key) {
+
+					if (category.code == cat.code) {
+						$scope.categories[key] = category;
+					}
+
+				});
+
+				$scope.selectCategory(category);
+
+				$scope.$apply();
+
+			});
+
+			// videos
+
+			socket.on('plugins.videos.videos.error', $popup.alert)
+
+			.on('plugins.videos.videos', function (data) {
+				$scope.videos = data;
+				$scope.$apply();
+			})
+
+			.on('plugins.videos.video.added', function (video) {
+				
+				$scope.videos.push(video);
+				$scope.selectedvideo = video;
+
+				$scope.closeModalFormVideo();
+				$scope.$apply();
+
+			})
+			.on('plugins.videos.video.edited', function (video) {
+				
+				angular.forEach($scope.videos, function(vid, key) {
+
+					if (video.code == vid.code) {
+						$scope.videos[key] = video;
+					}
+
+				});
+
+				$scope.selectedvideo = video;
+				$scope.closeModalFormVideo();
+
+				$scope.$apply();
+
+			});
 
 			// interface
 
