@@ -6,14 +6,20 @@ app.controller('ControllerWidget',
 
 	// attributes
 
-		$scope.categories = [];
-		$scope.selectedcategory = null;
+		// private
 
-		$scope.videos = [];
-		$scope.selectedvideo = null;
+			var clModalForm = jQuery('#modalFormVideo');
 
-		$scope.childs = [];
-		$scope.selectedchild = null;
+		// public
+
+			$scope.categories = [];
+			$scope.selectedcategory = null;
+
+			$scope.videos = [];
+			$scope.selectedvideo = null;
+
+			$scope.childs = [];
+			$scope.selectedchild = null;
 
 	// methods
 
@@ -61,36 +67,22 @@ app.controller('ControllerWidget',
 
 				// videos
 
-				$scope.addVideo = function (category, video) {
-
-					$scope.formVideo = {};
-
-					jQuery('#modalFormVideo').on('shown.bs.modal', function () {
-
-						var tabInputs = jQuery(this).find('form input');
-
-						if (0 < tabInputs.length) {
-							jQuery(tabInputs[0]).focus();
-						}
-
-					})
-					.modal('show');
-
+				$scope.openWindowVideo = function(category, video) {
+					$scope.selectedvideo = (video) ? video : {};
+					clModalForm.modal('show');
 				};
-				$scope.editVideo = function (category, video) {
 
-					$scope.formVideo = video;
+				$scope.writeVideo = function (category, video) {
 
-					jQuery('#modalFormVideo').on('shown.bs.modal', function () {
+					console.log(category);
+					console.log(video);
 
-						var tabInputs = jQuery(this).find('form input');
-
-						if (0 < tabInputs.length) {
-							jQuery(tabInputs[0]).focus();
-						}
-
-					})
-					.modal('show');
+					if (!video.code) {
+						socket.emit('plugins.videos.video.add', video);
+					}
+					else {
+						socket.emit('plugins.videos.video.edit', video);
+					}
 
 				};
 				$scope.deleteVideo = function (category, video) {
@@ -108,7 +100,7 @@ app.controller('ControllerWidget',
 			// interface
 
 				$scope.closeModalFormVideo = function () {
-					jQuery('#modalFormVideo').modal('hide');
+					clModalForm.modal('hide');
 				};
 
 				// play
@@ -135,18 +127,6 @@ app.controller('ControllerWidget',
 
 	// constructor
 
-		jQuery('#modalVideos').modal({
-			backdrop : 'static',
-			keyboard: false,
-			show : false
-		});
-		
-		jQuery('#modalFormVideo').modal({
-			backdrop : 'static',
-			keyboard: false,
-			show : false
-		});
-					
 		// events
 
 			// childs
@@ -236,11 +216,15 @@ app.controller('ControllerWidget',
 
 			});
 
-			// interface
+		// interface
 
-				jQuery('#menuVideos').click(function(e) {
-					e.preventDefault();
-					jQuery('#modalVideos').modal('show');
-				});
-				
+			clModalForm.modal({
+				backdrop : 'static',
+				keyboard: false,
+				show : false
+			})
+			.on('shown.bs.modal', function () {
+				jQuery(clModalForm.find('input')[0]).focus();
+			});
+		
 }]);

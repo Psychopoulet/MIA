@@ -1,5 +1,5 @@
 
-<div class="form-group">
+<div data-ng-hide="selectedcategory" class="form-group">
 
 	<label>Catégories ({{categories.length}})</label>
 
@@ -46,6 +46,15 @@
 
 		<div class="input-group">
 
+			<span class="input-group-btn">
+
+				<button type="button" class="btn btn-primary form-control"
+						data-ng-click="selectCategory(null);">
+					<span class="glyphicon glyphicon-arrow-left"></span>
+				</button>
+
+			</span>
+
 			<select class="form-control"
 					data-ng-disabled="!videos.length" data-ng-class="{'disabled' : !videos.length }"
 					data-ng-options="video.name for video in videos"
@@ -56,13 +65,13 @@
 			<span class="input-group-btn">
 
 				<button type="button" class="btn btn-primary"
-						data-ng-click="addVideo(selectedcategory, selectedvideo);">
+						data-ng-click="openWindowVideo(selectedcategory);">
 					<span class="glyphicon glyphicon-plus"></span>
 				</button>
 
 				<button type="button" class="btn btn-primary"
 						data-ng-disabled="!selectedvideo" data-ng-class="{'disabled' : !selectedvideo  }"
-						data-ng-click="editVideo(selectedcategory, selectedvideo);">
+						data-ng-click="openWindowVideo(selectedcategory, selectedvideo);">
 						<span class="glyphicon glyphicon-pencil"></span>
 				</button>
 
@@ -84,7 +93,7 @@
 
 	</div>
 
-	<div data-ng-show="selectedvideo">
+	<div data-ng-show="selectedvideo.code">
 
 		<div class="form-group" data-ng-show="childs.length">
 
@@ -101,13 +110,13 @@
 				<span class="input-group-btn">
 
 					<button type="button" class="btn btn-primary"
-							data-ng-disabled="!selectedchild || !selectedvideo " data-ng-class="{'disabled' : !selectedchild || !selectedvideo  }"
+							data-ng-disabled="!selectedchild || !selectedvideo.code" data-ng-class="{'disabled' : !selectedchild || !selectedvideo.code }"
 							data-ng-click="playSound(selectedchild, selectedvideo);">
 							<span class="glyphicon glyphicon-music"></span>
 					</button>
 
 					<button type="button" class="btn btn-primary"
-							data-ng-disabled="!selectedchild || !selectedvideo " data-ng-class="{'disabled' : !selectedchild || !selectedvideo   }"
+							data-ng-disabled="!selectedchild || !selectedvideo.code" data-ng-class="{'disabled' : !selectedchild || !selectedvideo.code }"
 							data-ng-click="playVideo(selectedchild, selectedvideo);">
 							<span class="glyphicon glyphicon-facetime-video"></span>
 					</button>
@@ -120,51 +129,47 @@
 	
 	</div>
 
-</div>
+	<form id="modalFormVideo" class="modal fade only-logged hidden">
 
-<!--
+		<div class="modal-dialog">
 
-<div id="modalFormVideo" class="modal fade only-logged hidden">
+			<div class="modal-content">
 
-	<div class="modal-dialog">
-
-		<div class="modal-content">
-
-			<div class="modal-header">
-				<h4 class="modal-title">Vidéo</h4>
-			</div>
-
-			<form class="modal-body">
-
-				<div class="form-group">
-					<label for="formVideoName">Nom</label>
-					<input id="formVideoName" type="text" class="form-control" data-ng-model="formVideo.name" />
+				<div class="modal-header">
+					<h4 class="modal-title">Vidéo</h4>
 				</div>
 
-				<div class="form-group">
-					<label for="formVideoUrl">Url</label>
-					<input id="formVideoUrl" type="url" class="form-control" data-ng-model="formVideo.url" />
+				<div class="modal-body">
+
+					<div class="form-group">
+						<label for="formVideoName">Nom</label>
+						<input id="formVideoName" type="text" class="form-control" data-ng-model="selectedvideo.name" />
+					</div>
+
+					<div class="form-group">
+						<label for="formVideoUrl">Url</label>
+						<input id="formVideoUrl" type="url" class="form-control" data-ng-model="selectedvideo.url" />
+					</div>
+
 				</div>
 
-			</form>
+				<div class="modal-footer">
 
-			<div class="modal-footer">
+					<button type="button" class="btn btn-primary"
+							data-ng-disabled="loading" data-ng-class="{'disabled' : loading }"
+							data-ng-click="writeVideo(selectedcategory, selectedvideo);">
+						<span data-ng-show="!selectedvideo.code">Ajouter</span>
+						<span data-ng-show="selectedvideo.code">Modifier</span>
+					</button>
 
-				<button type="button" class="btn btn-primary"
-						data-ng-disabled="loading" data-ng-class="{'disabled' : loading }"
-						data-ng-click="sendVideo(formVideo);">
-					<span data-ng-show="!formVideo.id">Ajouter</span>
-					<span data-ng-show="formVideo.id && 0 < formVideo.id">Modifier</span>
-				</button>
+					<button type="button" class="btn btn-default" data-ng-click="closeModalFormVideo();">Fermer</button>
 
-				<button type="button" class="btn btn-default" data-ng-click="closeModalFormVideo();">Fermer</button>
+				</div>
 
 			</div>
 
 		</div>
 
-	</div>
+	</form>
 
 </div>
-
--->

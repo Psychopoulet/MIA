@@ -172,23 +172,15 @@
 								m_clLog.log('plugins.videos.category.delete');
 							}
 
-							var bFound = false;
+							m_tabCategories.forEach(function(category, key) {
 
-								m_tabCategories.forEach(function(category, key) {
+								if (category.code === data.code) {
+									m_tabCategories.splice(key, 1);
+								}
 
-									if (category.code === data.code) {
-										bFound = true;
-										m_tabCategories.splice(key, 1);
-									}
+							});
 
-								});
-
-							if (bFound) {
-								_loadCategories();
-							}
-							else {
-								Container.get('server.socket.web').emit('plugins.videos.videos.error', 'Impossible de trouver cette catégorie.');
-							}
+							_loadCategories();
 
 						});
 
@@ -198,11 +190,33 @@
 
 						socket.on('plugins.videos.video.add', function (p_stData) {
 
-							if (Container.get('conf').get('debug')) {
-								m_clLog.log('plugins.videos.video.add');
-							}
+							var bFound = false;
 
-							_loadVideosByCategory(p_stData.category);
+								m_tabCategories.forEach(function(category) {
+
+									if (category.code === p_stData.category.code) {
+										bFound = true;
+										m_tabCategories.videos.push(p_stData.video);
+									}
+
+								});
+
+							if (bFound) {
+								
+								if (Container.get('conf').get('debug')) {
+									m_clLog.log('plugins.videos.video.add');
+								}
+
+								Container.get('server.socket.web').emit('plugins.videos.video.added', {
+									code : p_stData.video.name,
+									name : p_stData.video.name,
+									url : p_stData.video.url
+								});
+
+							}
+							else {
+								Container.get('server.socket.web').emit('plugins.videos.videos.error', 'Impossible de trouver cette catégorie.');
+							}
 
 						})
 						.on('plugins.videos.video.edit', function (p_stData) {
