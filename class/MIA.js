@@ -581,8 +581,20 @@
 
 											// listeners
 
-											socket.removeAllListeners('child.child.login');
-											
+												// login
+
+												socket.removeAllListeners('child.child.login');
+
+												// media
+
+												socket.removeAllListeners('media.sound.error');
+												socket.removeAllListeners('media.sound.played');
+												socket.removeAllListeners('media.sound.downloaded');
+
+												socket.removeAllListeners('media.video.error');
+												socket.removeAllListeners('media.video.played');
+												socket.removeAllListeners('media.video.downloaded');
+
 										}
 										catch (e) {
 											m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
@@ -642,6 +654,35 @@
 												socket.emit('child.child.login.error', "Impossible de vous connecter.");
 											}
 
+										});
+
+									})
+									.onLog(function(socket) {
+
+										socket.on('media.sound.error', function (error) {
+											m_clLog.err('play sound - ' + error);
+											Container.get('server.socket.web').emit('media.sound.error', error);
+										})
+										.on('media.sound.played', function (data) {
+											m_clLog.log('media.sound.played');
+											Container.get('server.socket.child').emit('media.sound.played', data);
+										})
+										.on('media.sound.downloaded', function (data) {
+											m_clLog.log('media.sound.downloaded');
+											Container.get('server.socket.child').emit('media.sound.downloaded', data);
+										})
+
+										.on('media.video.error', function (error) {
+											m_clLog.err('play video - ' + error);
+											Container.get('server.socket.child').emit('media.video.error', error);
+										})
+										.on('media.video.played', function (data) {
+											m_clLog.log('child.video.played');
+											Container.get('server.socket.child').emit('media.video.played', data);
+										})
+										.on('media.video.downloaded', function (data) {
+											m_clLog.log('media.video.downloaded');
+											Container.get('server.socket.child').emit('media.video.downloaded', data);
 										});
 
 									});
