@@ -20,11 +20,9 @@
 						videos : [
 							{
 								code : 'test1',
-								name : 'Test 1'
-							},
-							{
-								code : 'test2',
-								name : 'Test 2'
+								name : 'Comment est fabriquée la mauvaise foi ?',
+								url : 'https://www.youtube.com/watch?v=uhoDKW3F0aE',
+								urlembeded : 'https://www.youtube.com/embed/uhoDKW3F0aE'
 							}
 						]
 					}
@@ -93,7 +91,7 @@
 						socket.removeAllListeners('plugins.videos.video.play');
 
 				})
-				.onConnection(function(socket) {
+				.onLog(function(socket) {
 
 					_loadCategories();
 
@@ -153,16 +151,16 @@
 
 								});
 
-							if (bFound) {
+							if (!bFound) {
+								Container.get('server.socket.web').emit('plugins.videos.videos.error', 'Impossible de trouver cette catégorie.');
+							}
+							else {
 
 								Container.get('server.socket.web').emit('plugins.videos.category.edited', {
 									code : data.code,
 									name : data.name
 								});
 
-							}
-							else {
-								Container.get('server.socket.web').emit('plugins.videos.videos.error', 'Impossible de trouver cette catégorie.');
 							}
 
 						})
@@ -188,62 +186,127 @@
 
 						socket.on('plugins.videos.videos', _loadVideosByCategory)
 
-						socket.on('plugins.videos.video.add', function (p_stData) {
+						socket.on('plugins.videos.video.add', function (data) {
+
+							if (Container.get('conf').get('debug')) {
+								m_clLog.log('plugins.videos.video.add');
+							}
 
 							var bFound = false;
 
-								m_tabCategories.forEach(function(category) {
+								m_tabCategories.forEach(function(category, key) {
 
-									if (category.code === p_stData.category.code) {
+									if (category.code === data.category.code) {
 										bFound = true;
-										m_tabCategories.videos.push(p_stData.video);
+										data.video.code = data.video.name;
+										m_tabCategories[key].videos.push(data.video);
 									}
 
 								});
 
-							if (bFound) {
+							if (!bFound) {
+								Container.get('server.socket.web').emit('plugins.videos.videos.error', 'Impossible de trouver cette catégorie.');
+							}
+							else {
 								
-								if (Container.get('conf').get('debug')) {
-									m_clLog.log('plugins.videos.video.add');
-								}
-
 								Container.get('server.socket.web').emit('plugins.videos.video.added', {
-									code : p_stData.video.name,
-									name : p_stData.video.name,
-									url : p_stData.video.url
+									code : data.video.name,
+									name : data.video.name,
+									url : data.video.url
 								});
 
 							}
-							else {
-								Container.get('server.socket.web').emit('plugins.videos.videos.error', 'Impossible de trouver cette catégorie.');
-							}
 
 						})
-						.on('plugins.videos.video.edit', function (p_stData) {
+						.on('plugins.videos.video.edit', function (data) {
 
 							if (Container.get('conf').get('debug')) {
 								m_clLog.log('plugins.videos.video.edit');
 							}
 
-							_loadVideosByCategory(p_stData.category);
+							var bCategoryFound = false, bVideoFound = false;
+
+								m_tabCategories.forEach(function(category, catkey) {
+
+									if (category.code === data.category.code) {
+
+										bCategoryFound = true;
+
+										category.videos.forEach(function(video, vidkey) {
+
+											if (video.code === data.video.code) {
+												bVideoFound = true;
+												m_tabCategories[catkey].videos[vidkey] = video;
+											}
+
+										});
+
+									}
+
+								});
+
+							if (!bCategoryFound) {
+								Container.get('server.socket.web').emit('plugins.videos.videos.error', 'Impossible de trouver cette catégorie.');
+							}
+							else if (!bVideoFound) {
+								Container.get('server.socket.web').emit('plugins.videos.videos.error', 'Impossible de trouver cette vidéo.');
+							}
+							else {
+
+								Container.get('server.socket.web').emit('plugins.videos.video.edited', {
+									code : data.video.name,
+									name : data.video.name,
+									url : data.video.url
+								});
+
+							}
 
 						})
-						.on('plugins.videos.video.delete', function (p_stData) {
+						.on('plugins.videos.video.delete', function (data) {
 
 							if (Container.get('conf').get('debug')) {
 								m_clLog.log('plugins.videos.video.delete');
 							}
 
-							_loadVideosByCategory(p_stData.category);
+							var bCategoryFound = false, bVideoFound = false;
+
+								m_tabCategories.forEach(function(category, catkey) {
+
+									if (category.code === data.category.code) {
+
+										bCategoryFound = true;
+
+										category.videos.forEach(function(video, vidkey) {
+
+											if (video.code === data.video.code) {
+												bVideoFound = true;
+												m_tabCategories[catkey].videos.splice(vidkey, 1);
+											}
+
+										});
+
+									}
+
+								});
+
+							if (!bCategoryFound) {
+								Container.get('server.socket.web').emit('plugins.videos.videos.error', 'Impossible de trouver cette catégorie.');
+							}
+							else if (!bVideoFound) {
+								Container.get('server.socket.web').emit('plugins.videos.videos.error', 'Impossible de trouver cette vidéo.');
+							}
+							else {
+								_loadVideosByCategory(data.category);
+							}
 
 						});
 
 						// action
 
-							socket.on('plugins.videos.video.play', function (data) {
+							socket.on('plugins.videos.video.playsound', function (data) {
 
 								if (Container.get('conf').get('debug')) {
-									m_clLog.log('plugins.videos.video.play');
+									m_clLog.log('plugins.videos.video.playsound');
 								}
 
 								if (!data) {
@@ -259,7 +322,31 @@
 									socket.emit('plugins.videos.videos.error', 'Aucune vidéo choisie');
 								}
 								else {
-									Container.get('server.socket.child').emitTo(data.child.token, 'plugins.videos.video.play', data.video);
+									Container.get('server.socket.child').emitTo(data.child.token, 'media.sound.play', data.video);
+								}
+
+							});
+
+							socket.on('plugins.videos.video.playvideo', function (data) {
+
+								if (Container.get('conf').get('debug')) {
+									m_clLog.log('plugins.videos.video.playvideo');
+								}
+
+								if (!data) {
+									m_clLog.err('play video - données manquantes');
+									socket.emit('plugins.videos.videos.error', 'Données manquantes');
+								}
+								else if (!data.child) {
+									m_clLog.err('play video - aucun enfant choisi');
+									socket.emit('plugins.videos.videos.error', 'Aucun enfant choisi');
+								}
+								else if (!data.video) {
+									m_clLog.err('play video - aucune vidéo choisie');
+									socket.emit('plugins.videos.videos.error', 'Aucune vidéo choisie');
+								}
+								else {
+									Container.get('server.socket.child').emitTo(data.child.token, 'media.video.play', data.video);
 								}
 
 							});
@@ -275,7 +362,7 @@
 					Container.get('server.socket.web').emit('child.disconnected', socket.MIA);
 
 				})
-				.onConnection(function(socket) {
+				.onLog(function(socket) {
 
 					socket
 						.on('child.videos.error', function (error) {

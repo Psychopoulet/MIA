@@ -34,7 +34,7 @@
 						socket.removeAllListeners('web.warcraftsounds.warning.play');
 
 					})
-					.onConnection(function(socket) {
+					.onLog(function(socket) {
 
 						socket
 
@@ -206,7 +206,7 @@
 						socket.removeAllListeners('child.sounds.error');
 						socket.removeAllListeners('child.sounds.played');
 					})
-					.onConnection(function(socket) {
+					.onLog(function(socket) {
 
 						socket
 

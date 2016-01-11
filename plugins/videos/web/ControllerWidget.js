@@ -74,25 +74,18 @@ app.controller('ControllerWidget',
 
 				$scope.writeVideo = function (category, video) {
 
-					console.log(category);
-					console.log(video);
-
 					if (!video.code) {
-						socket.emit('plugins.videos.video.add', video);
+						socket.emit('plugins.videos.video.add', { category : category, video : video });
 					}
 					else {
-						socket.emit('plugins.videos.video.edit', video);
+						socket.emit('plugins.videos.video.edit', { category : category, video : video });
 					}
 
 				};
 				$scope.deleteVideo = function (category, video) {
 
 					$popup.confirm('Voulez-vous vraiment supprimer "' + video.name + '" ?', 'Confirmation', function() {
-						
-						socket.emit('plugins.videos.video.delete', {
-		                    child : child, video : video
-		                });
-
+						socket.emit('plugins.videos.video.delete', { category : category, video : video });
 					});
 
 				};
@@ -111,6 +104,9 @@ app.controller('ControllerWidget',
 
 					$scope.playSound = function (child, video) {
 
+						console.log(child);
+						console.log(video);
+
 						socket.emit('plugins.videos.video.playsound', {
 		                    child : child, video : video
 		                });
@@ -118,6 +114,9 @@ app.controller('ControllerWidget',
 					};
 
 					$scope.playVideo = function (child, video) {
+
+						console.log(child);
+						console.log(video);
 
 						socket.emit('plugins.videos.video.playvideo', {
 		                    child : child, video : video
@@ -154,6 +153,7 @@ app.controller('ControllerWidget',
 
 			.on('plugins.videos.categories', function (data) {
 				$scope.categories = data;
+				$scope.selectCategory(null);
 				$scope.$apply();
 			})
 
@@ -187,6 +187,7 @@ app.controller('ControllerWidget',
 
 			.on('plugins.videos.videos', function (data) {
 				$scope.videos = data;
+				$scope.selectedvideo = null;
 				$scope.$apply();
 			})
 
