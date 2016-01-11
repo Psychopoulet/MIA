@@ -203,7 +203,7 @@
 									try {
 
 										process.kill(nPreviousPID);
-										m_clLog.log('[END ' + nPreviousPID + ']');
+										m_clLog.success('[END PROCESS ' + nPreviousPID + ']');
 
 									}
 									catch (e) { }
@@ -212,7 +212,7 @@
 
 								conf.set('pid', process.pid).save().then(function() {
 
-									m_clLog.log('[START ' + process.pid + ']');
+									m_clLog.success('[START PROCESS ' + process.pid + ']');
 
 									// events
 
@@ -271,6 +271,8 @@
 														};
 
 														conf.addTo('clients', currentClient).save().then(function() {
+
+															websockets.fireLogin(websockets.getSocket(p_stClient.token), currentClient);
 
 															websockets	.emitTo(p_stClient.token, 'web.client.logged', currentClient)
 																		.emit('web.clients', _getClients());
@@ -364,6 +366,8 @@
 														};
 
 														conf.addTo('childs', currentChild).save().then(function() {
+
+															childssockets.fireLogin(childssockets.getSocket(p_stClient.token), currentChild);
 
 															childssockets.emitTo(p_stChild.token, 'child.child.logged', currentChild);
 															websockets.emit('web.childs', _getChilds());
@@ -462,6 +466,8 @@
 
 															socket.token = currentClient.token;
 
+															websockets.fireLogin(socket, currentClient);
+
 															conf.set('clients', clients);
 															socket.emit('web.client.logged', currentClient);
 															socket.emit('web.childs', _getChilds());
@@ -488,6 +494,8 @@
 															conf.addTo('clients', currentClient).save().then(function() {
 
 																socket.token = currentClient.token;
+
+																websockets.fireLogin(socket, currentClient);
 
 																socket.emit('web.client.logged', currentClient);
 																socket.emit('web.childs', _getChilds());
@@ -612,6 +620,8 @@
 													else {
 
 														socket.token = currentChild.token;
+
+														childssockets.fireLogin(socket, currentChild);
 
 														conf.set('childs', childs);
 														socket.emit('child.child.logged', currentChild);
