@@ -68,7 +68,7 @@ app.controller('ControllerWidget',
 				// videos
 
 				$scope.openWindowVideo = function(category, video) {
-					$scope.selectedvideo = (video) ? video : {};
+					$scope.formvideo = (video) ? angular.copy(video) : {};
 					clModalForm.modal('show');
 				};
 
@@ -104,9 +104,6 @@ app.controller('ControllerWidget',
 
 					$scope.playSound = function (child, video) {
 
-						console.log(child);
-						console.log(video);
-
 						socket.emit('plugins.videos.video.playsound', {
 		                    child : child, video : video
 		                });
@@ -114,9 +111,6 @@ app.controller('ControllerWidget',
 					};
 
 					$scope.playVideo = function (child, video) {
-
-						console.log(child);
-						console.log(video);
 
 						socket.emit('plugins.videos.video.playvideo', {
 		                    child : child, video : video
@@ -147,9 +141,9 @@ app.controller('ControllerWidget',
 
 			});
 
-			// categories
+			socket.on('plugins.videos.error', $popup.alert)
 
-			socket.on('plugins.videos.categories.error', $popup.alert)
+			// categories
 
 			.on('plugins.videos.categories', function (data) {
 				$scope.categories = data;
@@ -167,25 +161,23 @@ app.controller('ControllerWidget',
 			})
 			.on('plugins.videos.category.edited', function (category) {
 
-				angular.forEach($scope.categories, function(cat, key) {
+				for (var i = 0; i < $scope.categories.length; ++i) {
 
-					if (category.code == cat.code) {
-						$scope.categories[key] = category;
+					if (category.code == $scope.categories[i].code) {
+						$scope.categories[i] = category;
+						$scope.selectCategory(category);
+						break;
 					}
 
-				});
-
-				$scope.selectCategory(category);
-
+				}
+				
 				$scope.$apply();
 
 			});
 
 			// videos
 
-			socket.on('plugins.videos.videos.error', $popup.alert)
-
-			.on('plugins.videos.videos', function (data) {
+			socket.on('plugins.videos.videos', function (data) {
 				$scope.videos = data;
 				$scope.selectedvideo = null;
 				$scope.$apply();
@@ -201,18 +193,18 @@ app.controller('ControllerWidget',
 
 			})
 			.on('plugins.videos.video.edited', function (video) {
-				
-				angular.forEach($scope.videos, function(vid, key) {
 
-					if (video.code == vid.code) {
-						$scope.videos[key] = video;
+				for (var i = 0; i < $scope.videos.length; ++i) {
+
+					if (video.code == $scope.videos[i].code) {
+						$scope.videos[i] = video;
+						$scope.selectedvideo = video;
+						break;
 					}
 
-				});
-
-				$scope.selectedvideo = video;
+				}
+				
 				$scope.closeModalFormVideo();
-
 				$scope.$apply();
 
 			});

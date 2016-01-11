@@ -46,15 +46,6 @@
 
 		<div class="input-group">
 
-			<span class="input-group-btn">
-
-				<button type="button" class="btn btn-primary form-control"
-						data-ng-click="selectCategory(null);">
-					<span class="glyphicon glyphicon-arrow-left"></span>
-				</button>
-
-			</span>
-
 			<select class="form-control"
 					data-ng-disabled="!videos.length" data-ng-class="{'disabled' : !videos.length }"
 					data-ng-options="video.name for video in videos"
@@ -143,12 +134,12 @@
 
 					<div class="form-group">
 						<label for="formVideoName">Nom</label>
-						<input id="formVideoName" type="text" class="form-control" data-ng-model="selectedvideo.name" />
+						<input id="formVideoName" type="text" class="form-control" data-ng-model="formvideo.name" />
 					</div>
 
 					<div class="form-group">
 						<label for="formVideoUrl">Url</label>
-						<input id="formVideoUrl" type="url" class="form-control" data-ng-model="selectedvideo.url" />
+						<input id="formVideoUrl" type="url" class="form-control" data-ng-model="formvideo.url" />
 					</div>
 
 				</div>
@@ -157,9 +148,9 @@
 
 					<button type="button" class="btn btn-primary"
 							data-ng-disabled="loading" data-ng-class="{'disabled' : loading }"
-							data-ng-click="writeVideo(selectedcategory, selectedvideo);">
-						<span data-ng-show="!selectedvideo.code">Ajouter</span>
-						<span data-ng-show="selectedvideo.code">Modifier</span>
+							data-ng-click="writeVideo(selectedcategory, formvideo);">
+						<span data-ng-show="!formvideo.code">Ajouter</span>
+						<span data-ng-show="formvideo.code">Modifier</span>
 					</button>
 
 					<button type="button" class="btn btn-default" data-ng-click="closeModalFormVideo();">Fermer</button>
