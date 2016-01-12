@@ -21,6 +21,7 @@
 				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'httpsocket')),
 				m_clSocketServer,
 				m_tabOnConnection = [],
+				m_tabOnLog = [],
 				m_tabOnDisconnect = [];
 				
 		// methodes
@@ -136,12 +137,49 @@
 					return m_clSocketServer.sockets.sockets;
 				};
 				
+				this.getSocket = function (p_sToken) {
+
+					var result = null;
+
+						for (var i = 0; i < m_clSocketServer.sockets.sockets.length; ++i) {
+
+							if (m_clSocketServer.sockets.sockets[i].token && m_clSocketServer.sockets.sockets[i].token === p_sToken) {
+								result = m_clSocketServer.sockets.sockets[i];
+								break;
+							}
+
+						}
+
+					return result;
+					
+				};
+				
 				// callbacks
+					
+					this.fireLogin = function (socket, client) {
+
+						m_tabOnLog.forEach(function(callback) {
+							callback(socket, client);
+						});
+
+						return that;
+						
+					};
 					
 					this.onConnection = function (p_fCallback) {
 
 						if ('function' === typeof p_fCallback) {
 							m_tabOnConnection.push(p_fCallback);
+						}
+						
+						return that;
+						
+					};
+					
+					this.onLog = function (p_fCallback) {
+
+						if ('function' === typeof p_fCallback) {
+							m_tabOnLog.push(p_fCallback);
 						}
 						
 						return that;

@@ -34,32 +34,32 @@ app.service('ModelClients', function() {
             };
 
             this.allow = function (client) {
-                socket.emit('web.client.allow', client);
+                socket.emit('client.allow', client);
                 return that;
             };
 
             this.delete = function (client) {
-                socket.emit('web.client.delete', client);
+                socket.emit('client.delete', client);
                 return that;
             };
 
     // constructor
 
-		socket.on('web.client.allow.error', function (p_sMessage) {
+		socket.on('client.allow.error', function (p_sMessage) {
 
             angular.forEach(m_tabOnError, function (p_fCallback) {
                 p_fCallback(p_sMessage);
             });
 
         })
-        .on('web.client.delete.error', function (p_sMessage) {
+        .on('client.delete.error', function (p_sMessage) {
 
             angular.forEach(m_tabOnError, function (p_fCallback) {
                 p_fCallback(p_sMessage);
             });
 
         })
-        .on('web.clients', function (clients) {
+        .on('clients', function (clients) {
 
 			angular.forEach(m_tabOnChange, function (p_fCallback) {
 	            p_fCallback(clients);

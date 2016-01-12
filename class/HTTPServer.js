@@ -2,6 +2,8 @@
 // dépendances
 
 	var
+		os = require('os'),
+		dns = require('dns'),
 		path = require('path'),
 		fs = require('fs'),
 		q = require('q'),
@@ -329,19 +331,31 @@ q
 
 									_readFile(path.join(m_sDirWeb, 'templates', 'index.html')).then(function (index) {
 
-										_createBuffers().then(function() {
+										
+										dns.lookup(os.hostname(), function (err, ip, fam) {
 
-											_readFile(m_sPluginsWidgetsBufferFile).then(function(sHTML) {
-												_sendHTMLResponse(res, 200, index.replace('{{widgets}}', sHTML));
-											})
-											.catch(function (err) {
-												_500(res, index.replace('{{widgets}}', err));
-											});
+											if (err) {
+												_500(res, index.replace('{{widgets}}', err).replace('{{ip}}', '0.0.0.0'));
+											}
+											else {
+											
+												_createBuffers().then(function() {
 
-										})
-										.catch(function(err) {
-											_500(res, index.replace('{{widgets}}', err));
-										});	
+													_readFile(m_sPluginsWidgetsBufferFile).then(function(sHTML) {
+														_sendHTMLResponse(res, 200, index.replace('{{widgets}}', sHTML).replace('{{ip}}', ip));
+													})
+													.catch(function (err) {
+														_500(res, index.replace('{{widgets}}', err).replace('{{ip}}', ip));
+													});
+
+												})
+												.catch(function(err) {
+													_500(res, index.replace('{{widgets}}', err).replace('{{ip}}', ip));
+												});
+
+											}
+
+										});
 
 									})
 									.catch(function (err) {
