@@ -17,10 +17,10 @@
 				
 		// constructor
 
-			/*var job = new cronjob('* 00 * * * * *', function() {
-			  	console.log(new Date());
-			}, function () {
-		    	console.log('done');
-			}, true);*/
+			var job = new cronjob('00 00 16 * * 1-5', function() {
+
+				Container.get('server.socket.child').emit('media.video.play', {"name":"test","url":"https://www.youtube.com/watch?v=zIA0kaGFIhQ","urlembeded":"https://www.youtube.com/embed/zIA0kaGFIhQ","code":"hLcJuWVd6hw"});
+			  	
+			}, null, true);
 
 	};
