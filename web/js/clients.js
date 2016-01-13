@@ -38,6 +38,11 @@ app.service('ModelClients', function() {
                 return that;
             };
 
+            this.rename = function (client) {
+                socket.emit('client.rename', client);
+                return that;
+            };
+
             this.delete = function (client) {
                 socket.emit('client.delete', client);
                 return that;
@@ -82,6 +87,18 @@ app.controller('ControllerClients', ['$scope', '$popup', 'ModelClients', functio
 	});
 
     $scope.allow = ModelClients.allow;
+    
+    $scope.rename = function (client) {
+
+        $popup.prompt('Nouveau nom', client.name, function(name) {
+
+            client.name = name;
+            ModelClients.rename(client);
+
+        });
+
+    }
+
     $scope.delete = ModelClients.delete;
 	
 }]);

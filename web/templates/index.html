@@ -129,6 +129,7 @@
 
 										<div class="btn-group pull-right">
 											<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="!client.allowed" data-ng-click="allow(client);"></button>
+											<button type="button" class="btn glyphicon glyphicon-edit" data-ng-show="client.allowed" data-ng-click="rename(client);"></button>
 											<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(client);"></button>
 										</div>
 
@@ -162,6 +163,7 @@
 
 										<div class="btn-group pull-right">
 											<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="!child.allowed" data-ng-click="allow(child);"></button>
+											<button type="button" class="btn glyphicon glyphicon-edit" data-ng-show="child.allowed" data-ng-click="rename(child);"></button>
 											<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(child);"></button>
 										</div>
 
