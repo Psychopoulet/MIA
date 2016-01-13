@@ -135,8 +135,8 @@ app.controller('ControllerWidget',
 					}
 
 				});
-
-				$scope.selectedchild = null;
+				
+				$scope.selectedchild = (1 == $scope.childs.length) ? $scope.childs[0] : null;
 				$scope.$apply();
 
 			});
