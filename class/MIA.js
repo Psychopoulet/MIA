@@ -4,14 +4,11 @@
 	var
 
 		path = require('path'),
-		q = require('q'),
-
-		Container = require(path.join(__dirname, 'Container.js')),
-		Logs = require(path.join(__dirname, 'Logs.js'));
+		q = require('q');
 		
 // module
 	
-	module.exports = function () {
+	module.exports = function (Container) {
 		
 		"use strict";
 		
@@ -20,9 +17,10 @@
 			var
 				that = this,
 				conf = Container.get('conf'),
-				websockets = Container.get('server.socket.web'),
-				childssockets = Container.get('server.socket.child'),
-				m_clLog = new Logs(path.join(__dirname, '..', 'logs'));
+				logs = Container.get('logs'),
+				m_clLog = new logs(path.join(__dirname, '..', 'mia')),
+				childssockets = Container.get('childssockets'),
+				websockets = Container.get('websockets');
 				
 		// methodes
 
@@ -718,28 +716,28 @@
 
 										socket.on('media.sound.error', function (error) {
 											m_clLog.err('play sound - ' + error);
-											Container.get('server.socket.web').emit('media.sound.error', error);
+											websockets.emit('media.sound.error', error);
 										})
 										.on('media.sound.played', function (data) {
 											m_clLog.log('media.sound.played');
-											Container.get('server.socket.child').emit('media.sound.played', data);
+											childssockets.emit('media.sound.played', data);
 										})
 										.on('media.sound.downloaded', function (data) {
 											m_clLog.log('media.sound.downloaded');
-											Container.get('server.socket.child').emit('media.sound.downloaded', data);
+											childssockets.emit('media.sound.downloaded', data);
 										})
 
 										.on('media.video.error', function (error) {
 											m_clLog.err('play video - ' + error);
-											Container.get('server.socket.child').emit('media.video.error', error);
+											childssockets.emit('media.video.error', error);
 										})
 										.on('media.video.played', function (data) {
 											m_clLog.log('media.video.played');
-											Container.get('server.socket.child').emit('media.video.played', data);
+											childssockets.emit('media.video.played', data);
 										})
 										.on('media.video.downloaded', function (data) {
 											m_clLog.log('media.video.downloaded');
-											Container.get('server.socket.child').emit('media.video.downloaded', data);
+											childssockets.emit('media.video.downloaded', data);
 										});
 
 									});
@@ -748,7 +746,7 @@
 
 										// server http
 
-										Container.get('server.http').start().then(function() {
+										Container.get('webserver').start().then(function() {
 
 											// server http socket
 

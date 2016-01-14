@@ -7,14 +7,11 @@
 		path = require('path'),
 		fs = require('fs'),
 		q = require('q'),
-		express = require('express')(),
-
-		Container = require(path.join(__dirname, 'Container.js')),
-		Logs = require(path.join(__dirname, 'Logs.js'));
+		express = require('express')();
 		
 // module
 	
-	module.exports = function () {
+	module.exports = function (Container) {
 	
 		"use strict";
 		
@@ -25,7 +22,8 @@
 				m_sDirSSL = path.join(__dirname, '..', 'ssl'),
 				m_clServer = false,
 				m_clPlugins = Container.get('plugins'),
-				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'httpserver')),
+				logs = Container.get('logs'),
+				m_clLog = new logs(path.join(__dirname, '..', 'logs', 'httpserver')),
 
 				m_bPluginsBuffersCreated = false,
 				m_sPluginsBuffersPath = path.join(__dirname, '..', 'web', 'buffers'),

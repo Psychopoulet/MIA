@@ -3,14 +3,11 @@
 	
 	var
 		path = require('path'),
-		q = require('q'),
-		
-		Container = require(path.join(__dirname, 'Container.js')),
-		Logs = require(path.join(__dirname, 'Logs.js'));
+		q = require('q');
 
 // module
 	
-	module.exports = function () {
+	module.exports = function (Container) {
 	
 		"use strict";
 		
@@ -18,7 +15,8 @@
 			
 			var
 				that = this,
-				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'httpsocket')),
+				logs = Container.get('logs'),
+				m_clLog = new logs(path.join(__dirname, '..', 'logs', 'httpsocket')),
 				m_clSocketServer,
 				m_tabOnConnection = [],
 				m_tabOnLog = [],
@@ -34,7 +32,7 @@
 
 						try {
 
-							m_clSocketServer = require('socket.io').listen(Container.get('server.http').getServer());
+							m_clSocketServer = require('socket.io').listen(Container.get('webserver').getServer());
 
 							m_clSocketServer.sockets.on('connection', function (socket) {
 
@@ -90,10 +88,10 @@
 				
 				this.emitTo = function (p_sToken, p_sOrder, p_vData) {
 
-					for (var i = 0; i < m_clSocketServer.sockets.sockets.length; ++i) {
+					for (var key in m_clSocketServer.sockets.sockets) {
 
-						if (m_clSocketServer.sockets.sockets[i].token && m_clSocketServer.sockets.sockets[i].token === p_sToken) {
-							m_clSocketServer.sockets.sockets[i].emit(p_sOrder, p_vData);
+						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === p_sToken) {
+							m_clSocketServer.sockets.sockets[key].emit(p_sOrder, p_vData);
 							break;
 						}
 
@@ -105,10 +103,10 @@
 
 				this.setTokenToSocketById = function (p_sId, p_sToken) {
 
-					for (var i = 0; i < m_clSocketServer.sockets.sockets.length; ++i) {
+					for (var key in m_clSocketServer.sockets.sockets) {
 
-						if (m_clSocketServer.sockets.sockets[i].id === p_sId) {
-							m_clSocketServer.sockets.sockets[i].token = p_sToken;
+						if (m_clSocketServer.sockets.sockets[key].id === p_sId) {
+							m_clSocketServer.sockets.sockets[key].token = p_sToken;
 							break;
 						}
 
@@ -120,10 +118,10 @@
 				
 				this.disconnect = function (p_sToken) {
 
-					for (var i = 0; i < m_clSocketServer.sockets.sockets.length; ++i) {
+					for (var key in m_clSocketServer.sockets.sockets) {
 
-						if (m_clSocketServer.sockets.sockets[i].token && m_clSocketServer.sockets.sockets[i].token === p_sToken) {
-							m_clSocketServer.sockets.sockets[i].disconnect();
+						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === p_sToken) {
+							m_clSocketServer.sockets.sockets[key].disconnect();
 							break;
 						}
 
@@ -134,17 +132,25 @@
 				};
 				
 				this.getSockets = function () {
-					return m_clSocketServer.sockets.sockets;
+
+					var tabResult = [];
+
+						for (var key in m_clSocketServer.sockets.sockets) {
+							tabResult.push(m_clSocketServer.sockets.sockets[key]);
+						}
+
+					return tabResult;
+
 				};
 				
 				this.getSocket = function (p_sToken) {
 
 					var result = null;
 
-						for (var i = 0; i < m_clSocketServer.sockets.sockets.length; ++i) {
+						for (var key in m_clSocketServer.sockets.sockets) {
 
-							if (m_clSocketServer.sockets.sockets[i].token && m_clSocketServer.sockets.sockets[i].token === p_sToken) {
-								result = m_clSocketServer.sockets.sockets[i];
+							if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === p_sToken) {
+								result = m_clSocketServer.sockets.sockets[key];
 								break;
 							}
 

@@ -3,8 +3,7 @@
 	
 	var
 		path = require('path'),
-		fs = require('fs'),
-		Logs = require(path.join(__dirname, '..', '..', 'class', 'Logs.js'));
+		fs = require('fs');
 
 // module
 	
@@ -14,13 +13,14 @@
 			
 			var
 				m_sLocalFile = path.join(__dirname, 'backup.json'),
-				m_clLog = new Logs(path.join(__dirname, '..', 'logs', 'plugins', 'warcraftsounds'));
+				logs = Container.get('logs'),
+				m_clLog = new logs(path.join(__dirname, '..', 'logs', 'plugins', 'warcraftsounds'));
 
 		// constructor
 
 			// events
 
-				Container.get('server.socket.web')
+				Container.get('websockets')
 					.onDisconnect(function(socket) {
 
 						socket.removeAllListeners('web.warcraftsounds.races.get');
@@ -42,25 +42,25 @@
 
 								Container.get('sikyapi').query('warcraftsounds', '/races', 'GET')
 									.then(function (p_tabData) {
-										Container.get('server.socket.web').emit('web.warcraftsounds.races.get', p_tabData);
+										Container.get('websockets').emit('web.warcraftsounds.races.get', p_tabData);
 									})
 									.catch(function (err){
 										m_clLog.err(err);
-										Container.get('server.socket.web').emit('web.warcraftsounds.error', err);
+										Container.get('websockets').emit('web.warcraftsounds.error', err);
 									});
 
 							})
 								.on('web.warcraftsounds.characters.get', function (p_stData) {
 
 									if (!p_stData.race || !p_stData.race.code) {
-										Container.get('server.socket.web').emit('web.warcraftsounds.error', 'Missing race code.');
+										Container.get('websockets').emit('web.warcraftsounds.error', 'Missing race code.');
 									}
 									else {
 
 										Container.get('sikyapi').query('warcraftsounds', '/races/' + p_stData.race.code + '/characters', 'GET')
 											.then(function (p_tabData) {
 
-												Container.get('server.socket.web').emit('web.warcraftsounds.characters.get', {
+												Container.get('websockets').emit('web.warcraftsounds.characters.get', {
 													race : p_stData.race,
 													characters : p_tabData
 												});
@@ -68,7 +68,7 @@
 											})
 											.catch(function (err){
 												m_clLog.err(err);
-												Container.get('server.socket.web').emit('web.warcraftsounds.error', err);
+												Container.get('websockets').emit('web.warcraftsounds.error', err);
 											});
 
 									}
@@ -77,17 +77,17 @@
 									.on('web.warcraftsounds.actions.get', function (p_stData) {
 
 										if (!p_stData.race || !p_stData.race.code) {
-											Container.get('server.socket.web').emit('web.warcraftsounds.error', 'Missing race code.');
+											Container.get('websockets').emit('web.warcraftsounds.error', 'Missing race code.');
 										}
 										else if (!p_stData.character || !p_stData.character.code) {
-											Container.get('server.socket.web').emit('web.warcraftsounds.error', 'Missing character code.');
+											Container.get('websockets').emit('web.warcraftsounds.error', 'Missing character code.');
 										}
 										else {
 
 											Container.get('sikyapi').query('warcraftsounds', '/races/' + p_stData.race.code + '/characters/' + p_stData.character.code + '/actions', 'GET')
 												.then(function (p_tabData) {
 
-													Container.get('server.socket.web').emit('web.warcraftsounds.actions.get', {
+													Container.get('websockets').emit('web.warcraftsounds.actions.get', {
 														race : p_stData.race,
 														character : p_stData.character,
 														actions : p_tabData
@@ -96,7 +96,7 @@
 												})
 												.catch(function (err){
 													m_clLog.err(err);
-													Container.get('server.socket.web').emit('web.warcraftsounds.error', err);
+													Container.get('websockets').emit('web.warcraftsounds.error', err);
 												});
 
 										}
@@ -105,14 +105,14 @@
 								.on('web.warcraftsounds.musics.get', function (p_stData) {
 
 									if (!p_stData.race || !p_stData.race.code) {
-										Container.get('server.socket.web').emit('web.warcraftsounds.error', 'Missing race code.');
+										Container.get('websockets').emit('web.warcraftsounds.error', 'Missing race code.');
 									}
 									else {
 
 										Container.get('sikyapi').query('warcraftsounds', '/races/' + p_stData.race.code + '/musics', 'GET')
 											.then(function (p_tabData) {
 
-												Container.get('server.socket.web').emit('web.warcraftsounds.musics.get', {
+												Container.get('websockets').emit('web.warcraftsounds.musics.get', {
 													race : p_stData.race,
 													musics : p_tabData
 												});
@@ -120,7 +120,7 @@
 											})
 											.catch(function (err){
 												m_clLog.err(err);
-												Container.get('server.socket.web').emit('web.warcraftsounds.error', err);
+												Container.get('websockets').emit('web.warcraftsounds.error', err);
 											});
 
 									}
@@ -129,14 +129,14 @@
 								.on('web.warcraftsounds.warnings.get', function (p_stData) {
 
 									if (!p_stData.race || !p_stData.race.code) {
-										Container.get('server.socket.web').emit('web.warcraftsounds.error', 'Missing race code.');
+										Container.get('websockets').emit('web.warcraftsounds.error', 'Missing race code.');
 									}
 									else {
 
 										Container.get('sikyapi').query('warcraftsounds', '/races/' + p_stData.race.code + '/warnings', 'GET')
 											.then(function (p_tabData) {
 												
-												Container.get('server.socket.web').emit('web.warcraftsounds.warnings.get', {
+												Container.get('websockets').emit('web.warcraftsounds.warnings.get', {
 													race : p_stData.race,
 													warnings : p_tabData
 												});
@@ -144,7 +144,7 @@
 											})
 											.catch(function (err){
 												m_clLog.err(err);
-												Container.get('server.socket.web').emit('web.warcraftsounds.error', err);
+												Container.get('websockets').emit('web.warcraftsounds.error', err);
 											});
 
 									}
@@ -162,7 +162,7 @@
 									socket.emit('web.warcraftsounds.error', 'Missing \'action.url\' data');
 								}
 								else {
-									Container.get('server.socket.child').emitTo(p_stData.child.token, 'child.sounds.play', p_stData.action);
+									Container.get('childssockets').emitTo(p_stData.child.token, 'child.sounds.play', p_stData.action);
 								}
 									
 							})
@@ -178,7 +178,7 @@
 								}
 								else {
 									m_clLog.log('web.warcraftsounds.music.play : ' + p_stData.music.name);
-									Container.get('server.socket.child').emitTo(p_stData.child.token, 'child.sounds.play', p_stData.music);
+									Container.get('childssockets').emitTo(p_stData.child.token, 'child.sounds.play', p_stData.music);
 								}
 
 							})
@@ -194,14 +194,14 @@
 								}
 								else {
 									m_clLog.log('web.warcraftsounds.warning.play : ' + p_stData.warning.name);
-									Container.get('server.socket.child').emitTo(p_stData.child.token, 'child.sounds.play', p_stData.warning);
+									Container.get('childssockets').emitTo(p_stData.child.token, 'child.sounds.play', p_stData.warning);
 								}
 
 							});
 
 					});
 
-				Container.get('server.socket.child')
+				Container.get('childssockets')
 					.onDisconnect(function(socket) {
 						socket.removeAllListeners('child.sounds.error');
 						socket.removeAllListeners('child.sounds.played');
@@ -212,10 +212,10 @@
 
 							.on('child.sounds.error', function (error) {
 								m_clLog.err(error);
-								Container.get('server.socket.web').emit('child.sounds.error', error);
+								Container.get('websockets').emit('child.sounds.error', error);
 							})
 							.on('child.sounds.played', function (p_stData) {
-								Container.get('server.socket.web').emit('child.sounds.played', p_stData);
+								Container.get('websockets').emit('child.sounds.played', p_stData);
 							})
 
 							.emit('child.sounds.play', {
