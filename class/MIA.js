@@ -4,14 +4,11 @@
 	var
 
 		path = require('path'),
-		q = require('q'),
-
-		Container = require(path.join(__dirname, 'Container.js')),
-		Logs = require(path.join(__dirname, 'Logs.js'));
+		q = require('q');
 		
 // module
 	
-	module.exports = function () {
+	module.exports = function (Container) {
 		
 		"use strict";
 		
@@ -20,9 +17,10 @@
 			var
 				that = this,
 				conf = Container.get('conf'),
-				websockets = Container.get('server.socket.web'),
-				childssockets = Container.get('server.socket.child'),
-				m_clLog = new Logs(path.join(__dirname, '..', 'logs'));
+				logs = Container.get('logs'),
+				m_clLog = new logs(path.join(__dirname, '..', 'mia')),
+				childssockets = Container.get('childssockets'),
+				websockets = Container.get('websockets');
 				
 		// methodes
 
@@ -374,7 +372,46 @@
 											}
 
 										})
+										.on('client.rename', function (p_stClient) {
 
+											try {
+
+												if (!that.isSocketClientAllowed(socket)) {
+													socket.emit('client.rename.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+												}
+												else if (!p_stClient || !p_stClient.token || !p_stClient.name) {
+													socket.emit('client.rename.error', 'Les informations sur ce client sont incorrectes.');
+												}
+												else {
+
+													var clients = conf.get('clients');
+
+													for (var i = 0; i < clients.length; ++i) {
+
+														if (p_stClient.token === clients[i].token) {
+															clients[i].name = p_stClient.name;
+															break;
+														}
+
+													}
+
+													conf.set('clients', clients).save().then(function() {
+														websockets.emit('clients', _getClients());
+													})
+													.catch(function(e) {
+														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
+														socket.emit('client.rename.error', 'Impossible de sauvegarder la configuration.');
+													});
+
+												}
+
+											}
+											catch (e) {
+												m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
+												socket.emit('client.rename.error', "Impossible d'autoriser le client'.");
+											}
+
+										})
 										.on('client.delete', function (p_stClient) {
 
 											try {
@@ -388,14 +425,6 @@
 												else {
 
 													var clients = conf.get('clients');
-
-													clients.forEach(function(client, key) {
-
-														if (p_stClient.token === client.token) {
-															clients.splice(key, 1);
-														}
-
-													});
 
 													for (var i = 0; i < clients.length; ++i) {
 
@@ -469,7 +498,46 @@
 											}
 
 										})
+										.on('child.rename', function (p_stChild) {
 
+											try {
+
+												if (!that.isSocketClientAllowed(socket)) {
+													socket.emit('child.rename.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+												}
+												else if (!p_stChild || !p_stChild.token || !p_stChild.name) {
+													socket.emit('child.rename.error', 'Les informations sur cet enfant sont incorrectes.');
+												}
+												else {
+
+													var childs = conf.get('childs');
+
+													for (var i = 0; i < childs.length; ++i) {
+
+														if (p_stChild.token === childs[i].token) {
+															childs[i].name = p_stChild.name;
+															break;
+														}
+
+													}
+
+													conf.set('childs', childs).save().then(function() {
+														websockets.emit('childs', _getChilds());
+													})
+													.catch(function(e) {
+														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
+														socket.emit('child.rename.error', 'Impossible de sauvegarder la configuration.');
+													});
+
+												}
+
+											}
+											catch (e) {
+												m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
+												socket.emit('child.rename.error', "Impossible d'autoriser l'enfant.");
+											}
+
+										})
 										.on('child.delete', function (p_stChild) {
 
 											try {
@@ -483,14 +551,6 @@
 												else {
 
 													var childs = conf.get('childs');
-
-													childs.forEach(function(child, key) {
-
-														if (p_stChild.token === child.token) {
-															childs.splice(key, 1);
-														}
-
-													});
 
 													for (var i = 0; i < childs.length; ++i) {
 
@@ -656,28 +716,28 @@
 
 										socket.on('media.sound.error', function (error) {
 											m_clLog.err('play sound - ' + error);
-											Container.get('server.socket.web').emit('media.sound.error', error);
+											websockets.emit('media.sound.error', error);
 										})
 										.on('media.sound.played', function (data) {
 											m_clLog.log('media.sound.played');
-											Container.get('server.socket.child').emit('media.sound.played', data);
+											childssockets.emit('media.sound.played', data);
 										})
 										.on('media.sound.downloaded', function (data) {
 											m_clLog.log('media.sound.downloaded');
-											Container.get('server.socket.child').emit('media.sound.downloaded', data);
+											childssockets.emit('media.sound.downloaded', data);
 										})
 
 										.on('media.video.error', function (error) {
 											m_clLog.err('play video - ' + error);
-											Container.get('server.socket.child').emit('media.video.error', error);
+											childssockets.emit('media.video.error', error);
 										})
 										.on('media.video.played', function (data) {
 											m_clLog.log('media.video.played');
-											Container.get('server.socket.child').emit('media.video.played', data);
+											childssockets.emit('media.video.played', data);
 										})
 										.on('media.video.downloaded', function (data) {
 											m_clLog.log('media.video.downloaded');
-											Container.get('server.socket.child').emit('media.video.downloaded', data);
+											childssockets.emit('media.video.downloaded', data);
 										});
 
 									});
@@ -686,7 +746,7 @@
 
 										// server http
 
-										Container.get('server.http').start().then(function() {
+										Container.get('webserver').start().then(function() {
 
 											// server http socket
 

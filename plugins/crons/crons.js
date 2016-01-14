@@ -17,10 +17,26 @@
 				
 		// constructor
 
-			var job = new cronjob('00 00 16 * * 1-5', function() {
+			new cronjob('00 00 16 * * 1-5', function() {
 
-				Container.get('server.socket.child').emit('media.video.play', {"name":"test","url":"https://www.youtube.com/watch?v=zIA0kaGFIhQ","urlembeded":"https://www.youtube.com/embed/zIA0kaGFIhQ","code":"hLcJuWVd6hw"});
-			  	
+				Container.get('childssockets').emit('media.video.play', {
+					"name":"Café !",
+					"url":"https://www.youtube.com/watch?v=JFjUOBP6vaI",
+					"urlembeded":"https://www.youtube.com/embed/JFjUOBP6vaI",
+					"code":"JFjUOBP6vaI"
+				});
+
+			}, null, true);
+
+			new cronjob('00 00 12 * * 1-5', function() {
+
+				Container.get('childssockets').emit('media.video.play', {
+					"url":"https://www.youtube.com/watch?v=ATy8bM8eeVQ",
+					"name":"Manger !",
+					"urlembeded":"https://www.youtube.com/embed/ATy8bM8eeVQ",
+					"code":"ATy8bM8eeVQ"
+				});
+
 			}, null, true);
 
 	};

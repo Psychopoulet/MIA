@@ -92,9 +92,16 @@
 
 			<div class="input-group">
 
+				<div class="form-group" data-ng-show="1 == childs.length">
+					<div class="form-control">
+						{{selectedchild.name}}
+					</div>
+				</div>
+
 				<select class="form-control"
 						data-ng-options="child.name for child in childs"
-						data-ng-model="selectedchild">
+						data-ng-model="selectedchild"
+						data-ng-show="1 < childs.length">
 					<option value="">-- NC --</option>
 				</select>
 

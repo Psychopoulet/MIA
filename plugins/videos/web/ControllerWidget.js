@@ -74,7 +74,13 @@ app.controller('ControllerWidget',
 
 				$scope.writeVideo = function (category, video) {
 
-					if (!video.code) {
+					if (!video.name) {
+						$popup.alert("La vidéo n'a pas de nom.");
+					}
+					else if (!video.url) {
+						$popup.alert("La vidéo n'a pas d'url.");
+					}
+					else if (!video.code) {
 						socket.emit('plugins.videos.video.add', { category : category, video : video });
 					}
 					else {
@@ -135,8 +141,8 @@ app.controller('ControllerWidget',
 					}
 
 				});
-
-				$scope.selectedchild = null;
+				
+				$scope.selectedchild = (1 == $scope.childs.length) ? $scope.childs[0] : null;
 				$scope.$apply();
 
 			});
