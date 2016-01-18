@@ -161,7 +161,7 @@ angular.module('ngBootstrapPopup', [])
 
 			// public
 
-				this.alert = function (p_sMessage, p_sTitle) {
+				this.alert = function (p_sMessage, p_sTitle, p_fOnClose) {
 
 					return _create({
 						title : (p_sTitle && '' != p_sTitle) ? p_sTitle : that.lng.titles.alert,
@@ -169,7 +169,7 @@ angular.module('ngBootstrapPopup', [])
 						buttons : [
 							{
 								text : that.lng.buttons.ok,
-								click : 'close'
+								click : ('function' === typeof p_fOnClose) ? [ p_fOnClose, 'close' ] : 'close'
 							}
 						]
 					},
@@ -313,6 +313,7 @@ angular.module('ngBootstrapPopup', [])
 
 				this.closeAll = function () {
 					jQuery('.modal').modal('hide');
+					jQuery('.modal-backdrop').remove();
 				};
 
 	})
