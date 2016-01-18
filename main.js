@@ -5,9 +5,9 @@
 	var
 		path = require('path'),
 		simplecontainer = require('simplecontainer'),
+		simpleconfig = require('simpleconfig'),
 		
 		ChildsSocket = require(path.join(__dirname, 'class', 'ChildsSocket.js')),
-		Conf = require(path.join(__dirname, 'class', 'Conf.js')),
 		HTTPServer = require(path.join(__dirname, 'class', 'HTTPServer.js')),
 		HTTPSocket = require(path.join(__dirname, 'class', 'HTTPSocket.js')),
 		Logs = require(path.join(__dirname, 'class', 'Logs.js')),
@@ -21,7 +21,7 @@
 		
 		var Container = new simplecontainer();
 
-		Container	.set('conf', new Conf())
+		Container	.set('conf', new simpleconfig(path.join(__dirname, 'conf.json')))
 					.set('openssl', new OpenSSL())
 					.set('plugins', new Plugins())
 					.set('logs', Logs)

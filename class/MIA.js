@@ -16,7 +16,6 @@
 			
 			var
 				that = this,
-				conf = Container.get('conf'),
 				logs = Container.get('logs'),
 				m_clLog = new logs(path.join(__dirname, '..', 'mia')),
 				childssockets = Container.get('childssockets'),
@@ -28,7 +27,7 @@
 
 				function _getClients() {
 
-					var tabResult = conf.get('clients').slice();
+					var tabResult = Container.get('conf').get('clients').slice();
 
 						try {
 
@@ -74,7 +73,7 @@
 
 				function _getChilds() {
 
-					var tabResult = conf.get('childs').slice();
+					var tabResult = Container.get('conf').get('childs').slice();
 
 						try {
 
@@ -126,7 +125,7 @@
 
 						try {
 
-							for (var i = 0, clients = conf.get('clients'); i < clients.length; ++i) {
+							for (var i = 0, clients = Container.get('conf').get('clients'); i < clients.length; ++i) {
 
 								if (socketClient.token == clients[i].token) {
 									bResult = clients[i].allowed;
@@ -150,7 +149,7 @@
 
 						try {
 
-							for (var i = 0, childs = conf.get('childs'); i < childs.length; ++i) {
+							for (var i = 0, childs = Container.get('conf').get('childs'); i < childs.length; ++i) {
 
 								if (socketChild.token == childs[i].token) {
 									bResult = childs[i].allowed;
@@ -174,27 +173,30 @@
 
 						try {
 
-							if (!conf.initialized()) {
+							if (!Container.get('conf').fileExists()) {
 
-								conf.set('webport', 1337)
-									.set('childrenport', 1338)
-									.set('debug', false)
-									.set('ssl', false)
-									.set('user', {
-										login : 'rasp',
-										password : 'password'
-									})
-									.set('pid', -1)
-									.set('clients', [])
-									.set('childs', [])
+								Container.get('conf')	.set('webport', 1337)
+														.set('childrenport', 1338)
+														.set('debug', false)
+														.set('ssl', false)
+														.set('user', {
+															login : 'rasp',
+															password : 'password'
+														})
+														.set('pid', -1)
+														.set('clients', [])
+														.set('childs', [])
 
-									.save();
+														.save()
+														.catch(function(e) {
+															m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
+														});;
 
 							}
 
-							conf.load().then(function() {
+							Container.get('conf').load().then(function() {
 
-								var nPreviousPID = conf.get('pid');
+								var nPreviousPID = Container.get('conf').get('pid');
 
 								if (-1 < nPreviousPID) {
 
@@ -208,7 +210,7 @@
 
 								}
 
-								conf.set('pid', process.pid).save().then(function() {
+								Container.get('conf').set('pid', process.pid).save().then(function() {
 
 									m_clLog.success('[START PROCESS ' + process.pid + ']');
 
@@ -231,7 +233,7 @@
 											socket.removeAllListeners('child.allow');
 											socket.removeAllListeners('child.delete');
 
-											// socket.removeAllListeners('web.user.update');
+											socket.removeAllListeners('user.update');
 
 										}
 										catch (e) {
@@ -252,7 +254,7 @@
 
 												if (p_stData && p_stData.token) {
 
-													var clients = conf.get('clients'), currentClient = false;
+													var clients = Container.get('conf').get('clients'), currentClient = false;
 
 													for (var i = 0; i < clients.length; ++i) {
 
@@ -272,7 +274,7 @@
 
 														websockets.fireLogin(socket, currentClient);
 
-														conf.set('clients', clients);
+														Container.get('conf').set('clients', clients);
 														socket.emit('logged', currentClient);
 														socket.emit('childs', _getChilds());
 														websockets.emit('clients', _getClients());
@@ -282,10 +284,10 @@
 												}
 												else if (p_stData && p_stData.login && p_stData.password) {
 
-													var user = conf.get('user'), currentClient = false;
+													var user = Container.get('conf').get('user'), clients, currentClient = false;
 
-													if (user.login === p_stData.login && user.password === p_stData.password) {
-														socket.emit('web.user.login.error', 'Le login ou le mot de passe est incorrect.');
+													if (user.login !== p_stData.login || user.password !== p_stData.password) {
+														socket.emit('login.error', 'Le login ou le mot de passe est incorrect.');
 													}
 													else {
 
@@ -295,7 +297,10 @@
 															name : 'Nouveau client'
 														};
 
-														conf.addTo('clients', currentClient).save().then(function() {
+														clients = Container.get('conf').get('clients');
+														clients.push(currentClient);
+
+														Container.get('conf').set('clients', clients).save().then(function() {
 
 															socket.token = currentClient.token;
 
@@ -315,9 +320,7 @@
 
 												}
 												else {
-
 													socket.emit('login.error', "Vous n'avez fourni aucune donnée d'autorisation valide.");
-													
 												}
 
 											}
@@ -348,9 +351,12 @@
 														allowed : true,
 														token : p_stClient.token,
 														name : 'Nouveau client'
-													};
+													},
+													clients = Container.get('conf').get('clients');
 
-													conf.addTo('clients', currentClient).save().then(function() {
+													clients.push(currentClient);
+
+													Container.get('conf').set('clients', clients).save().then(function() {
 
 														websockets.fireLogin(websockets.getSocket(p_stClient.token), currentClient);
 
@@ -384,7 +390,7 @@
 												}
 												else {
 
-													var clients = conf.get('clients');
+													var clients = Container.get('conf').get('clients');
 
 													for (var i = 0; i < clients.length; ++i) {
 
@@ -395,7 +401,7 @@
 
 													}
 
-													conf.set('clients', clients).save().then(function() {
+													Container.get('conf').set('clients', clients).save().then(function() {
 														websockets.emit('clients', _getClients());
 													})
 													.catch(function(e) {
@@ -424,7 +430,7 @@
 												}
 												else {
 
-													var clients = conf.get('clients');
+													var clients = Container.get('conf').get('clients');
 
 													for (var i = 0; i < clients.length; ++i) {
 
@@ -435,7 +441,7 @@
 
 													}
 
-													conf.set('clients', clients).save().then(function() {
+													Container.get('conf').set('clients', clients).save().then(function() {
 
 														websockets	.emitTo(p_stClient.token, 'client.deleted')
 																	.disconnect(p_stClient.token);
@@ -476,7 +482,10 @@
 														name : 'Nouvel enfant'
 													};
 
-													conf.addTo('childs', currentChild).save().then(function() {
+													var childs = Container.get('conf').get('childs');
+													childs.push(currentChild);
+
+													Container.get('conf').set('childs', childs).save().then(function() {
 
 														childssockets.fireLogin(childssockets.getSocket(p_stChild.token), currentChild);
 
@@ -510,7 +519,7 @@
 												}
 												else {
 
-													var childs = conf.get('childs');
+													var childs = Container.get('conf').get('childs');
 
 													for (var i = 0; i < childs.length; ++i) {
 
@@ -521,7 +530,7 @@
 
 													}
 
-													conf.set('childs', childs).save().then(function() {
+													Container.get('conf').set('childs', childs).save().then(function() {
 														websockets.emit('childs', _getChilds());
 													})
 													.catch(function(e) {
@@ -550,7 +559,7 @@
 												}
 												else {
 
-													var childs = conf.get('childs');
+													var childs = Container.get('conf').get('childs');
 
 													for (var i = 0; i < childs.length; ++i) {
 
@@ -561,7 +570,7 @@
 
 													}
 
-													conf.set('childs', childs).save().then(function() {
+													Container.get('conf').set('childs', childs).save().then(function() {
 
 														childssockets	.emitTo(p_stChild.token, 'child.deleted')
 																		.disconnect(p_stChild.token);
@@ -586,32 +595,32 @@
 
 										/*// user
 
-										.on('web.user.update', function (p_stData) {
+										.on('user.update', function (p_stData) {
 
 											try {
 
 												if (!that.isSocketClientAllowed(socket)) {
-													socket.emit('web.user.update.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+													socket.emit('user.update.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
 												}
 												else if (!p_stData.login) {
-													socket.emit('web.user.update.error', 'Login manquant.');
+													socket.emit('user.update.error', 'Login manquant.');
 												}
 												else if (!p_stData.password) {
-													socket.emit('web.user.update.error', 'Mot de passe manquant.');
+													socket.emit('user.update.error', 'Mot de passe manquant.');
 												}
 												else {
 
-													conf.set('user', {
+													Container.get('conf').set('user', {
 														login : p_stData.login,
 														password : p_stData.password
 													});
 
-													conf.save().then(function() {
-														websockets.emit('web.user.updated');
+													Container.get('conf').save().then(function() {
+														websockets.emit('user.updated');
 													})
 													.catch(function(e) {
 														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
-														socket.emit('web.user.update.error', 'Impossible de sauvegarder la configuration.');
+														socket.emit('user.update.error', 'Impossible de sauvegarder la configuration.');
 													});
 
 												}
@@ -619,7 +628,7 @@
 											}
 											catch (e) {
 												m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
-												socket.emit('web.user.update.error', "Impossible de mettre à jour l'utilisateur.");
+												socket.emit('user.update.error', "Impossible de mettre à jour l'utilisateur.");
 											}
 
 										})*/;
@@ -670,7 +679,7 @@
 
 												if (p_stData && p_stData.token) {
 
-													var childs = conf.get('childs'), currentChild = false;
+													var childs = Container.get('conf').get('childs'), currentChild = false;
 
 													for (var i = 0; i < childs.length; ++i) {
 
@@ -690,7 +699,7 @@
 
 														childssockets.fireLogin(socket, currentChild);
 
-														conf.set('childs', childs);
+														Container.get('conf').set('childs', childs);
 														socket.emit('logged', currentChild);
 														websockets.emit('childs', _getChilds());
 

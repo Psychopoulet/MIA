@@ -16,7 +16,8 @@
     "pem": "^1.8.1",
     "q": "^1.4.1",
     "socket.io": "^1.3.7",
-    "simplecontainer": "^0.0.1"
+    "simplecontainer": "^1.0.1",
+    "simpleconfig": "^1.0.0"
   },
   "devDependencies": {},
   "author": "Sébastien VIDAL",
