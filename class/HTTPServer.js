@@ -7,6 +7,7 @@
 		path = require('path'),
 		fs = require('fs'),
 		q = require('q'),
+		mkdirp = require('mkdirp'),
 		express = require('express')();
 		
 // module
@@ -170,85 +171,96 @@ q
 								}
 								else {
 
-									try {
-										if (fs.lstatSync(m_sPluginsWidgetsBufferFile).isFile()) {
-											fs.unlinkSync(m_sPluginsWidgetsBufferFile);
+									mkdirp(path.dirname(m_sPluginsWidgetsBufferFile), function (err) {
+
+										if (err) {
+										deferred.reject(err);
 										}
-									}
-									catch(e) {}
+										else {
 
-									fs.appendFileSync(m_sPluginsWidgetsBufferFile, '', 'utf8');
-
-									try {
-										if (fs.lstatSync(m_sPluginsJavascriptsBufferFile).isFile()) {
-											fs.unlinkSync(m_sPluginsJavascriptsBufferFile);
-										}
-									}
-									catch(e) {}
-
-									fs.appendFileSync(m_sPluginsJavascriptsBufferFile, '', 'utf8');
-
-									m_clPlugins.getData().then(function (p_tabData) {
-
-										p_tabData.forEach(function(plugin) {
-
-											if (plugin.web) {
-
-												if (plugin.web.templates && plugin.web.templates.widget && plugin.web.widgetcontroller) {
-
-													fs.appendFileSync(
-														m_sPluginsWidgetsBufferFile,
-
-														'<div class="col-xs-12 col-md-6">' +
-
-															'<div class="panel panel-default" data-ng-controller="' + plugin.web.widgetcontroller + '">' +
-
-																'<div class="panel-heading">' +
-																	'<h4 class="panel-title">' + plugin.name + '</h4>' +
-																'</div>' +
-
-																'<div class="panel-body">' +
-
-																	fs.readFileSync(plugin.web.templates.widget, 'utf8')
-																		.replace('{{plugin.name}}', plugin.name)
-																		.replace('{{plugin.description}}', plugin.description)
-																		.replace('{{plugin.version}}', plugin.version) +
-
-																'</div>' +
-
-															'</div>' +
-
-														'</div>',
-
-														'utf8'
-													);
-													
+											try {
+												if (fs.lstatSync(m_sPluginsWidgetsBufferFile).isFile()) {
+													fs.unlinkSync(m_sPluginsWidgetsBufferFile);
 												}
-
-												if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
-
-													plugin.web.javascripts.forEach(function(javascript) {
-
-														fs.appendFileSync(
-															m_sPluginsJavascriptsBufferFile,
-															fs.readFileSync(javascript, 'utf8'),
-															'utf8'
-														);
-
-													});
-
-												}
-
 											}
+											catch(e) {}
 
-										});
+											fs.writeFileSync(m_sPluginsWidgetsBufferFile, '', 'utf8');
 
-										m_bPluginsBuffersCreated = true;
+											try {
+												if (fs.lstatSync(m_sPluginsJavascriptsBufferFile).isFile()) {
+													fs.unlinkSync(m_sPluginsJavascriptsBufferFile);
+												}
+											}
+											catch(e) {}
 
-										deferred.resolve();
+											fs.writeFileSync(m_sPluginsJavascriptsBufferFile, '', 'utf8');
 
-									})
-									.catch(deferred.reject);
+											m_clPlugins.getData().then(function (p_tabData) {
+
+												p_tabData.forEach(function(plugin) {
+
+													if (plugin.web) {
+
+														if (plugin.web.templates && plugin.web.templates.widget && plugin.web.widgetcontroller) {
+
+															fs.appendFileSync(
+																m_sPluginsWidgetsBufferFile,
+
+																'<div class="col-xs-12 col-md-6">' +
+
+																	'<div class="panel panel-default" data-ng-controller="' + plugin.web.widgetcontroller + '">' +
+
+																		'<div class="panel-heading">' +
+																			'<h4 class="panel-title">' + plugin.name + '</h4>' +
+																		'</div>' +
+
+																		'<div class="panel-body">' +
+
+																			fs.readFileSync(plugin.web.templates.widget, 'utf8')
+																				.replace('{{plugin.name}}', plugin.name)
+																				.replace('{{plugin.description}}', plugin.description)
+																				.replace('{{plugin.version}}', plugin.version) +
+
+																		'</div>' +
+
+																	'</div>' +
+
+																'</div>',
+
+																'utf8'
+															);
+															
+														}
+
+														if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
+
+															plugin.web.javascripts.forEach(function(javascript) {
+
+																fs.appendFileSync(
+																	m_sPluginsJavascriptsBufferFile,
+																	fs.readFileSync(javascript, 'utf8'),
+																	'utf8'
+																);
+
+															});
+
+														}
+
+													}
+
+												});
+
+												m_bPluginsBuffersCreated = true;
+
+												deferred.resolve();
+
+											})
+											.catch(deferred.reject);
+
+										}
+									
+									});
 
 								}
 
