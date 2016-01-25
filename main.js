@@ -2,18 +2,17 @@
 
 // dépendances
 
-	var
-		path = require('path'),
-		simplecontainer = require('simplecontainer'),
-		simpleconfig = require('simpleconfig'),
-		
-		ChildsSocket = require(path.join(__dirname, 'class', 'ChildsSocket.js')),
-		HTTPServer = require(path.join(__dirname, 'class', 'HTTPServer.js')),
-		HTTPSocket = require(path.join(__dirname, 'class', 'HTTPSocket.js')),
-		Logs = require(path.join(__dirname, 'class', 'Logs.js')),
-		OpenSSL = require(path.join(__dirname, 'class', 'OpenSSL.js')),
-		Plugins = require(path.join(__dirname, 'class', 'Plugins.js')),
-		MIA = require(path.join(__dirname, 'class', 'MIA.js'));
+	const 	path = require('path'),
+			simplecontainer = require('simplecontainer'),
+			simpleconfig = require('simpleconfig'),
+			
+			ChildsSocket = require(path.join(__dirname, 'class', 'ChildsSocket.js')),
+			HTTPServer = require(path.join(__dirname, 'class', 'HTTPServer.js')),
+			HTTPSocket = require(path.join(__dirname, 'class', 'HTTPSocket.js')),
+			Logs = require(path.join(__dirname, 'class', 'Logs.js')),
+			OpenSSL = require(path.join(__dirname, 'class', 'OpenSSL.js')),
+			Plugins = require(path.join(__dirname, 'class', 'Plugins.js')),
+			MIA = require(path.join(__dirname, 'class', 'MIA.js'));
 
 // run
 
@@ -22,6 +21,8 @@
 		var Container = new simplecontainer();
 
 		Container	.set('conf', new simpleconfig(path.join(__dirname, 'conf.json')))
+					.set('http', null)
+					.set('express', null)
 					.set('openssl', new OpenSSL())
 					.set('plugins', new Plugins())
 					.set('logs', Logs)

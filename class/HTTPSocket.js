@@ -1,9 +1,8 @@
 
 // dépendances
 	
-	var
-		path = require('path'),
-		q = require('q');
+	const 	path = require('path'),
+			q = require('q');
 
 // module
 	
@@ -32,7 +31,7 @@
 
 						try {
 
-							m_clSocketServer = require('socket.io').listen(Container.get('webserver').getServer());
+							m_clSocketServer = require('socket.io').listen(Container.get('http'));
 
 							m_clSocketServer.sockets.on('connection', function (socket) {
 

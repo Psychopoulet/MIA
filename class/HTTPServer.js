@@ -1,14 +1,13 @@
 
 // dépendances
 
-	var
-		os = require('os'),
-		dns = require('dns'),
-		path = require('path'),
-		fs = require('fs'),
-		q = require('q'),
-		mkdirp = require('mkdirp'),
-		express = require('express')();
+	const 	os = require('os'),
+			dns = require('dns'),
+			path = require('path'),
+			fs = require('fs'),
+			q = require('q'),
+			mkdirp = require('mkdirp'),
+			express = require('express')();
 		
 // module
 	
@@ -21,7 +20,6 @@
 			var
 				m_sDirWeb = path.join(__dirname, '..', 'web'),
 				m_sDirSSL = path.join(__dirname, '..', 'ssl'),
-				m_clServer = false,
 				m_clPlugins = Container.get('plugins'),
 				logs = Container.get('logs'),
 				m_clLog = new logs(path.join(__dirname, '..', 'logs', 'httpserver')),
@@ -323,25 +321,22 @@ q
 					
 			// public
 
-				this.getServer = function () {
-					return m_clServer;
-				};
-				
 				this.start = function () {
 
 					var deferred = q.defer(), nWebPort = Container.get('conf').get('webport');
 
 						try {
 
+							Container.set('express', express);
+
 							_initServer().then(function (p_clServer) {
 
-								m_clServer = p_clServer;
+								Container.set('http', p_clServer);
 
 								express.get('/', function (req, res) {
 
 									_readFile(path.join(m_sDirWeb, 'templates', 'index.html')).then(function (index) {
 
-										
 										dns.lookup(os.hostname(), function (err, ip, fam) {
 
 											if (err) {
@@ -481,7 +476,7 @@ q
 										_404(req, res);
 									});
 
-								m_clServer.listen(nWebPort, function () {
+								p_clServer.listen(nWebPort, function () {
 									m_clLog.success('-- [HTTP server] started on port ' + nWebPort);
 								});
 

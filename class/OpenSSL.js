@@ -1,10 +1,9 @@
 
 // dépendances
 	
-	var
-		fs = require('fs'),
-		q = require('q'),
-		pem = require('pem');
+	const 	fs = require('fs'),
+			q = require('q'),
+			pem = require('pem');
 		
 // module
 	

@@ -31,8 +31,8 @@
 			new cronjob('00 00 12 * * 1-5', function() {
 
 				Container.get('childssockets').emit('media.video.play', {
-					"url":"https://www.youtube.com/watch?v=ATy8bM8eeVQ",
 					"name":"Manger !",
+					"url":"https://www.youtube.com/watch?v=ATy8bM8eeVQ",
 					"urlembeded":"https://www.youtube.com/embed/ATy8bM8eeVQ",
 					"code":"ATy8bM8eeVQ"
 				});

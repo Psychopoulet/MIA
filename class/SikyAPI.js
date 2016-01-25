@@ -1,9 +1,8 @@
 
 // dépendances
 	
-	var
-		http = require('http'),
-		q = require('q');
+	const 	http = require('http'),
+			q = require('q');
 		
 // modules
 	
