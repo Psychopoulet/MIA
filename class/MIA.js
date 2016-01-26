@@ -14,8 +14,6 @@
 			
 			var
 				that = this,
-				logs = Container.get('logs'),
-				m_clLog = new logs(path.join(__dirname, '..', 'mia')),
 				childssockets = Container.get('childssockets'),
 				websockets = Container.get('websockets');
 				
@@ -62,7 +60,7 @@
 
 						}
 						catch (e) {
-							m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
+							Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
 						}
 
 					return tabResult;
@@ -108,7 +106,7 @@
 
 						}
 						catch (e) {
-							m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
+							Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
 						}
 
 					return tabResult;
@@ -134,7 +132,7 @@
 
 						}
 						catch (e) {
-							m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
+							Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
 						}
 
 					return bResult;
@@ -158,7 +156,7 @@
 
 						}
 						catch (e) {
-							m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
+							Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
 						}
 
 					return bResult;
@@ -171,632 +169,604 @@
 
 						try {
 
-							if (!Container.get('conf').fileExists()) {
+							var nPreviousPID = Container.get('conf').get('pid');
 
-								Container.get('conf')	.set('webport', 1337)
-														.set('childrenport', 1338)
-														.set('debug', false)
-														.set('ssl', false)
-														.set('user', {
-															login : 'rasp',
-															password : 'password'
-														})
-														.set('pid', -1)
-														.set('clients', [])
-														.set('childs', [])
+							if (-1 < nPreviousPID) {
 
-														.save()
-														.catch(function(e) {
-															m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
-														});;
+								try {
+
+									process.kill(nPreviousPID);
+									Container.get('logs').success('[END PROCESS ' + nPreviousPID + ']');
+
+								}
+								catch (e) { }
 
 							}
 
-							Container.get('conf').load().then(function() {
+							Container.get('conf').set('pid', process.pid).save().then(function() {
 
-								var nPreviousPID = Container.get('conf').get('pid');
+								Container.get('logs').success('[START PROCESS ' + process.pid + ']');
 
-								if (-1 < nPreviousPID) {
+								// events
+
+								websockets.onDisconnect(function(socket) {
 
 									try {
 
-										process.kill(nPreviousPID);
-										m_clLog.success('[END PROCESS ' + nPreviousPID + ']');
+										// conf
+
+										websockets.emit('clients', _getClients());
+
+										// listeners
+
+										socket.removeAllListeners('client.allow');
+										socket.removeAllListeners('client.delete');
+										socket.removeAllListeners('login');
+										
+										socket.removeAllListeners('child.allow');
+										socket.removeAllListeners('child.delete');
+
+										socket.removeAllListeners('user.update');
 
 									}
-									catch (e) { }
+									catch (e) {
+										Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+									}
 
-								}
+								})
+								.onConnection(function(socket) {
 
-								Container.get('conf').set('pid', process.pid).save().then(function() {
+									socket.token = socket.id;
 
-									m_clLog.success('[START PROCESS ' + process.pid + ']');
-
-									// events
-
-									websockets.onDisconnect(function(socket) {
+									websockets	.setTokenToSocketById(socket.id, socket.id)
+												.emit('clients', _getClients());
+									
+									socket.on('login', function (p_stData) {
 
 										try {
 
-											// conf
+											if (p_stData && p_stData.token) {
 
-											websockets.emit('clients', _getClients());
+												var clients = Container.get('conf').get('clients'), currentClient = false;
 
-											// listeners
+												for (var i = 0; i < clients.length; ++i) {
 
-											socket.removeAllListeners('client.allow');
-											socket.removeAllListeners('client.delete');
-											socket.removeAllListeners('login');
-											
-											socket.removeAllListeners('child.allow');
-											socket.removeAllListeners('child.delete');
-
-											socket.removeAllListeners('user.update');
-
-										}
-										catch (e) {
-											m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
-										}
-
-									})
-									.onConnection(function(socket) {
-
-										socket.token = socket.id;
-
-										websockets	.setTokenToSocketById(socket.id, socket.id)
-													.emit('clients', _getClients());
-										
-										socket.on('login', function (p_stData) {
-
-											try {
-
-												if (p_stData && p_stData.token) {
-
-													var clients = Container.get('conf').get('clients'), currentClient = false;
-
-													for (var i = 0; i < clients.length; ++i) {
-
-														if (p_stData.token === clients[i].token) {
-															currentClient = clients[i];
-															break;
-														}
-
+													if (p_stData.token === clients[i].token) {
+														currentClient = clients[i];
+														break;
 													}
 
-													if (!currentClient) {
-														socket.emit('login.error', "Ce client n'existe pas ou n'a pas encore été autorisé.");
-													}
-													else {
+												}
+
+												if (!currentClient) {
+													socket.emit('login.error', "Ce client n'existe pas ou n'a pas encore été autorisé.");
+												}
+												else {
+
+													socket.token = currentClient.token;
+
+													websockets.fireLogin(socket, currentClient);
+
+													Container.get('conf').set('clients', clients);
+													socket.emit('logged', currentClient);
+													socket.emit('childs', _getChilds());
+													websockets.emit('clients', _getClients());
+
+												}
+
+											}
+											else if (p_stData && p_stData.login && p_stData.password) {
+
+												var user = Container.get('conf').get('user'), clients, currentClient = false;
+
+												if (user.login !== p_stData.login || user.password !== p_stData.password) {
+													socket.emit('login.error', 'Le login ou le mot de passe est incorrect.');
+												}
+												else {
+
+													currentClient = {
+														allowed : true,
+														token : socket.token,
+														name : 'Nouveau client'
+													};
+
+													clients = Container.get('conf').get('clients');
+													clients.push(currentClient);
+
+													Container.get('conf').set('clients', clients).save().then(function() {
 
 														socket.token = currentClient.token;
 
 														websockets.fireLogin(socket, currentClient);
 
-														Container.get('conf').set('clients', clients);
 														socket.emit('logged', currentClient);
 														socket.emit('childs', _getChilds());
 														websockets.emit('clients', _getClients());
 
-													}
-
-												}
-												else if (p_stData && p_stData.login && p_stData.password) {
-
-													var user = Container.get('conf').get('user'), clients, currentClient = false;
-
-													if (user.login !== p_stData.login || user.password !== p_stData.password) {
-														socket.emit('login.error', 'Le login ou le mot de passe est incorrect.');
-													}
-													else {
-
-														currentClient = {
-															allowed : true,
-															token : socket.token,
-															name : 'Nouveau client'
-														};
-
-														clients = Container.get('conf').get('clients');
-														clients.push(currentClient);
-
-														Container.get('conf').set('clients', clients).save().then(function() {
-
-															socket.token = currentClient.token;
-
-															websockets.fireLogin(socket, currentClient);
-
-															socket.emit('logged', currentClient);
-															socket.emit('childs', _getChilds());
-															websockets.emit('clients', _getClients());
-
-														})
-														.catch(function(e) {
-															m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
-															socket.emit('login.error', 'Impossible de sauvegarder la configuration.');
-														});
-
-													}
-
-												}
-												else {
-													socket.emit('login.error', "Vous n'avez fourni aucune donnée d'autorisation valide.");
-												}
-
-											}
-											catch (e) {
-												m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
-												socket.emit('login.error', "Impossible de vous connecter.");
-											}
-
-										})
-
-									})
-
-									.onLog(function(socket) {
-
-										socket.on('client.allow', function (p_stClient) {
-
-											try {
-
-												if (!that.isSocketClientAllowed(socket)) {
-													socket.emit('client.allow.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
-												}
-												else if (!p_stClient || !p_stClient.token) {
-													socket.emit('client.allow.error', 'Les informations sur ce client sont incorrectes.');
-												}
-												else {
-
-													var currentClient = {
-														allowed : true,
-														token : p_stClient.token,
-														name : 'Nouveau client'
-													},
-													clients = Container.get('conf').get('clients');
-
-													clients.push(currentClient);
-
-													Container.get('conf').set('clients', clients).save().then(function() {
-
-														websockets.fireLogin(websockets.getSocket(p_stClient.token), currentClient);
-
-														websockets	.emitTo(p_stClient.token, 'logged', currentClient)
-																	.emit('clients', _getClients());
-
 													})
 													.catch(function(e) {
-														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
-														socket.emit('client.allow.error', 'Impossible de sauvegarder la configuration.');
+														Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+														socket.emit('login.error', 'Impossible de sauvegarder la configuration.');
 													});
 
 												}
 
 											}
-											catch (e) {
-												m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
-												socket.emit('client.allow.error', "Impossible d'autoriser le client'.");
+											else {
+												socket.emit('login.error', "Vous n'avez fourni aucune donnée d'autorisation valide.");
 											}
-
-										})
-										.on('client.rename', function (p_stClient) {
-
-											try {
-
-												if (!that.isSocketClientAllowed(socket)) {
-													socket.emit('client.rename.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
-												}
-												else if (!p_stClient || !p_stClient.token || !p_stClient.name) {
-													socket.emit('client.rename.error', 'Les informations sur ce client sont incorrectes.');
-												}
-												else {
-
-													var clients = Container.get('conf').get('clients');
-
-													for (var i = 0; i < clients.length; ++i) {
-
-														if (p_stClient.token === clients[i].token) {
-															clients[i].name = p_stClient.name;
-															break;
-														}
-
-													}
-
-													Container.get('conf').set('clients', clients).save().then(function() {
-														websockets.emit('clients', _getClients());
-													})
-													.catch(function(e) {
-														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
-														socket.emit('client.rename.error', 'Impossible de sauvegarder la configuration.');
-													});
-
-												}
-
-											}
-											catch (e) {
-												m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
-												socket.emit('client.rename.error', "Impossible d'autoriser le client'.");
-											}
-
-										})
-										.on('client.delete', function (p_stClient) {
-
-											try {
-
-												if (!that.isSocketClientAllowed(socket)) {
-													socket.emit('client.delete.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
-												}
-												else if (!p_stClient || !p_stClient.token) {
-													socket.emit('client.delete.error', 'Les informations sur ce client sont incorrectes.');
-												}
-												else {
-
-													var clients = Container.get('conf').get('clients');
-
-													for (var i = 0; i < clients.length; ++i) {
-
-														if (p_stClient.token === clients[i].token) {
-															clients.splice(i, 1);
-															break;
-														}
-
-													}
-
-													Container.get('conf').set('clients', clients).save().then(function() {
-
-														websockets	.emitTo(p_stClient.token, 'client.deleted')
-																	.disconnect(p_stClient.token);
-
-													})
-													.catch(function(e) {
-														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
-														socket.emit('client.delete.error', 'Impossible de sauvegarder la configuration.');
-													});
-
-												}
-
-											}
-											catch (e) {
-												m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
-												socket.emit('client.delete.error', "Impossible de suppprimer le client.");
-											}
-
-										})
-
-										// childs
-
-										.on('child.allow', function (p_stChild) {
-
-											try {
-
-												if (!that.isSocketClientAllowed(socket)) {
-													socket.emit('child.allow.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
-												}
-												else if (!p_stChild || !p_stChild.token) {
-													socket.emit('child.allow.error', 'Les informations sur cet enfant sont incorrectes.');
-												}
-												else {
-
-													var currentChild = {
-														allowed : true,
-														token : p_stChild.token,
-														name : 'Nouvel enfant'
-													};
-
-													var childs = Container.get('conf').get('childs');
-													childs.push(currentChild);
-
-													Container.get('conf').set('childs', childs).save().then(function() {
-
-														childssockets.fireLogin(childssockets.getSocket(p_stChild.token), currentChild);
-
-														childssockets.emitTo(p_stChild.token, 'logged', currentChild);
-														websockets.emit('childs', _getChilds());
-
-													})
-													.catch(function(e) {
-														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
-														socket.emit('child.allow.error', 'Impossible de sauvegarder la configuration.');
-													});
-
-												}
-
-											}
-											catch (e) {
-												m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
-												socket.emit('child.allow.error', "Impossible d'autoriser l'enfant.");
-											}
-
-										})
-										.on('child.rename', function (p_stChild) {
-
-											try {
-
-												if (!that.isSocketClientAllowed(socket)) {
-													socket.emit('child.rename.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
-												}
-												else if (!p_stChild || !p_stChild.token || !p_stChild.name) {
-													socket.emit('child.rename.error', 'Les informations sur cet enfant sont incorrectes.');
-												}
-												else {
-
-													var childs = Container.get('conf').get('childs');
-
-													for (var i = 0; i < childs.length; ++i) {
-
-														if (p_stChild.token === childs[i].token) {
-															childs[i].name = p_stChild.name;
-															break;
-														}
-
-													}
-
-													Container.get('conf').set('childs', childs).save().then(function() {
-														websockets.emit('childs', _getChilds());
-													})
-													.catch(function(e) {
-														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
-														socket.emit('child.rename.error', 'Impossible de sauvegarder la configuration.');
-													});
-
-												}
-
-											}
-											catch (e) {
-												m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
-												socket.emit('child.rename.error', "Impossible d'autoriser l'enfant.");
-											}
-
-										})
-										.on('child.delete', function (p_stChild) {
-
-											try {
-
-												if (!that.isSocketClientAllowed(socket)) {
-													socket.emit('child.delete.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
-												}
-												else if (!p_stChild || !p_stChild.token) {
-													socket.emit('child.delete.error', 'Les informations sur cet enfant sont incorrectes.');
-												}
-												else {
-
-													var childs = Container.get('conf').get('childs');
-
-													for (var i = 0; i < childs.length; ++i) {
-
-														if (p_stChild.token === childs[i].token) {
-															childs.splice(i, 1);
-															break;
-														}
-
-													}
-
-													Container.get('conf').set('childs', childs).save().then(function() {
-
-														childssockets	.emitTo(p_stChild.token, 'child.deleted')
-																		.disconnect(p_stChild.token);
-
-														websockets.emit('childs', _getChilds());
-
-													})
-													.catch(function(e) {
-														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
-														socket.emit('child.delete.error', 'Impossible de sauvegarder la configuration.');
-													});
-
-												}
-
-											}
-											catch (e) {
-												m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
-												socket.emit('child.delete.error', "Impossible de suppprimer l'enfant.");
-											}
-
-										})
-
-										/*// user
-
-										.on('user.update', function (p_stData) {
-
-											try {
-
-												if (!that.isSocketClientAllowed(socket)) {
-													socket.emit('user.update.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
-												}
-												else if (!p_stData.login) {
-													socket.emit('user.update.error', 'Login manquant.');
-												}
-												else if (!p_stData.password) {
-													socket.emit('user.update.error', 'Mot de passe manquant.');
-												}
-												else {
-
-													Container.get('conf').set('user', {
-														login : p_stData.login,
-														password : p_stData.password
-													});
-
-													Container.get('conf').save().then(function() {
-														websockets.emit('user.updated');
-													})
-													.catch(function(e) {
-														m_clLog.err('-- [conf] ' + ((e.message) ? e.message : e));
-														socket.emit('user.update.error', 'Impossible de sauvegarder la configuration.');
-													});
-
-												}
-
-											}
-											catch (e) {
-												m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
-												socket.emit('user.update.error', "Impossible de mettre à jour l'utilisateur.");
-											}
-
-										})*/;
-
-									});
-
-									childssockets.onDisconnect(function(socket) {
-
-										try {
-
-											// conf
-
-											websockets.emit('childs', _getChilds());
-
-											// listeners
-
-												// login
-
-												socket.removeAllListeners('login');
-
-												// media
-
-												socket.removeAllListeners('media.sound.error');
-												socket.removeAllListeners('media.sound.played');
-												socket.removeAllListeners('media.sound.downloaded');
-
-												socket.removeAllListeners('media.video.error');
-												socket.removeAllListeners('media.video.played');
-												socket.removeAllListeners('media.video.downloaded');
 
 										}
 										catch (e) {
-											m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
+											Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+											socket.emit('login.error', "Impossible de vous connecter.");
 										}
 
 									})
-									.onConnection(function(socket) {
 
-										socket.token = socket.id;
-										childssockets.setTokenToSocketById(socket.id, socket.id);
+								})
+
+								.onLog(function(socket) {
+
+									socket.on('client.allow', function (p_stClient) {
+
+										try {
+
+											if (!that.isSocketClientAllowed(socket)) {
+												socket.emit('client.allow.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+											}
+											else if (!p_stClient || !p_stClient.token) {
+												socket.emit('client.allow.error', 'Les informations sur ce client sont incorrectes.');
+											}
+											else {
+
+												var currentClient = {
+													allowed : true,
+													token : p_stClient.token,
+													name : 'Nouveau client'
+												},
+												clients = Container.get('conf').get('clients');
+
+												clients.push(currentClient);
+
+												Container.get('conf').set('clients', clients).save().then(function() {
+
+													websockets.fireLogin(websockets.getSocket(p_stClient.token), currentClient);
+
+													websockets	.emitTo(p_stClient.token, 'logged', currentClient)
+																.emit('clients', _getClients());
+
+												})
+												.catch(function(e) {
+													Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+													socket.emit('client.allow.error', 'Impossible de sauvegarder la configuration.');
+												});
+
+											}
+
+										}
+										catch (e) {
+											Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+											socket.emit('client.allow.error', "Impossible d'autoriser le client'.");
+										}
+
+									})
+									.on('client.rename', function (p_stClient) {
+
+										try {
+
+											if (!that.isSocketClientAllowed(socket)) {
+												socket.emit('client.rename.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+											}
+											else if (!p_stClient || !p_stClient.token || !p_stClient.name) {
+												socket.emit('client.rename.error', 'Les informations sur ce client sont incorrectes.');
+											}
+											else {
+
+												var clients = Container.get('conf').get('clients');
+
+												for (var i = 0; i < clients.length; ++i) {
+
+													if (p_stClient.token === clients[i].token) {
+														clients[i].name = p_stClient.name;
+														break;
+													}
+
+												}
+
+												Container.get('conf').set('clients', clients).save().then(function() {
+													websockets.emit('clients', _getClients());
+												})
+												.catch(function(e) {
+													Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+													socket.emit('client.rename.error', 'Impossible de sauvegarder la configuration.');
+												});
+
+											}
+
+										}
+										catch (e) {
+											Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+											socket.emit('client.rename.error', "Impossible d'autoriser le client'.");
+										}
+
+									})
+									.on('client.delete', function (p_stClient) {
+
+										try {
+
+											if (!that.isSocketClientAllowed(socket)) {
+												socket.emit('client.delete.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+											}
+											else if (!p_stClient || !p_stClient.token) {
+												socket.emit('client.delete.error', 'Les informations sur ce client sont incorrectes.');
+											}
+											else {
+
+												var clients = Container.get('conf').get('clients');
+
+												for (var i = 0; i < clients.length; ++i) {
+
+													if (p_stClient.token === clients[i].token) {
+														clients.splice(i, 1);
+														break;
+													}
+
+												}
+
+												Container.get('conf').set('clients', clients).save().then(function() {
+
+													websockets	.emitTo(p_stClient.token, 'client.deleted')
+																.disconnect(p_stClient.token);
+
+												})
+												.catch(function(e) {
+													Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+													socket.emit('client.delete.error', 'Impossible de sauvegarder la configuration.');
+												});
+
+											}
+
+										}
+										catch (e) {
+											Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+											socket.emit('client.delete.error', "Impossible de suppprimer le client.");
+										}
+
+									})
+
+									// childs
+
+									.on('child.allow', function (p_stChild) {
+
+										try {
+
+											if (!that.isSocketClientAllowed(socket)) {
+												socket.emit('child.allow.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+											}
+											else if (!p_stChild || !p_stChild.token) {
+												socket.emit('child.allow.error', 'Les informations sur cet enfant sont incorrectes.');
+											}
+											else {
+
+												var currentChild = {
+													allowed : true,
+													token : p_stChild.token,
+													name : 'Nouvel enfant'
+												};
+
+												var childs = Container.get('conf').get('childs');
+												childs.push(currentChild);
+
+												Container.get('conf').set('childs', childs).save().then(function() {
+
+													childssockets.fireLogin(childssockets.getSocket(p_stChild.token), currentChild);
+
+													childssockets.emitTo(p_stChild.token, 'logged', currentChild);
+													websockets.emit('childs', _getChilds());
+
+												})
+												.catch(function(e) {
+													Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+													socket.emit('child.allow.error', 'Impossible de sauvegarder la configuration.');
+												});
+
+											}
+
+										}
+										catch (e) {
+											Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+											socket.emit('child.allow.error', "Impossible d'autoriser l'enfant.");
+										}
+
+									})
+									.on('child.rename', function (p_stChild) {
+
+										try {
+
+											if (!that.isSocketClientAllowed(socket)) {
+												socket.emit('child.rename.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+											}
+											else if (!p_stChild || !p_stChild.token || !p_stChild.name) {
+												socket.emit('child.rename.error', 'Les informations sur cet enfant sont incorrectes.');
+											}
+											else {
+
+												var childs = Container.get('conf').get('childs');
+
+												for (var i = 0; i < childs.length; ++i) {
+
+													if (p_stChild.token === childs[i].token) {
+														childs[i].name = p_stChild.name;
+														break;
+													}
+
+												}
+
+												Container.get('conf').set('childs', childs).save().then(function() {
+													websockets.emit('childs', _getChilds());
+												})
+												.catch(function(e) {
+													Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+													socket.emit('child.rename.error', 'Impossible de sauvegarder la configuration.');
+												});
+
+											}
+
+										}
+										catch (e) {
+											Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+											socket.emit('child.rename.error', "Impossible d'autoriser l'enfant.");
+										}
+
+									})
+									.on('child.delete', function (p_stChild) {
+
+										try {
+
+											if (!that.isSocketClientAllowed(socket)) {
+												socket.emit('child.delete.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+											}
+											else if (!p_stChild || !p_stChild.token) {
+												socket.emit('child.delete.error', 'Les informations sur cet enfant sont incorrectes.');
+											}
+											else {
+
+												var childs = Container.get('conf').get('childs');
+
+												for (var i = 0; i < childs.length; ++i) {
+
+													if (p_stChild.token === childs[i].token) {
+														childs.splice(i, 1);
+														break;
+													}
+
+												}
+
+												Container.get('conf').set('childs', childs).save().then(function() {
+
+													childssockets	.emitTo(p_stChild.token, 'child.deleted')
+																	.disconnect(p_stChild.token);
+
+													websockets.emit('childs', _getChilds());
+
+												})
+												.catch(function(e) {
+													Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+													socket.emit('child.delete.error', 'Impossible de sauvegarder la configuration.');
+												});
+
+											}
+
+										}
+										catch (e) {
+											Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+											socket.emit('child.delete.error', "Impossible de suppprimer l'enfant.");
+										}
+
+									})
+
+									/*// user
+
+									.on('user.update', function (p_stData) {
+
+										try {
+
+											if (!that.isSocketClientAllowed(socket)) {
+												socket.emit('user.update.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+											}
+											else if (!p_stData.login) {
+												socket.emit('user.update.error', 'Login manquant.');
+											}
+											else if (!p_stData.password) {
+												socket.emit('user.update.error', 'Mot de passe manquant.');
+											}
+											else {
+
+												Container.get('conf').set('user', {
+													login : p_stData.login,
+													password : p_stData.password
+												});
+
+												Container.get('conf').save().then(function() {
+													websockets.emit('user.updated');
+												})
+												.catch(function(e) {
+													Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+													socket.emit('user.update.error', 'Impossible de sauvegarder la configuration.');
+												});
+
+											}
+
+										}
+										catch (e) {
+											Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+											socket.emit('user.update.error', "Impossible de mettre à jour l'utilisateur.");
+										}
+
+									})*/;
+
+								});
+
+								childssockets.onDisconnect(function(socket) {
+
+									try {
+
+										// conf
+
 										websockets.emit('childs', _getChilds());
-										
-										// childs
 
-										socket.on('login', function (p_stData) {
+										// listeners
 
-											try {
+											// login
 
-												if (p_stData && p_stData.token) {
+											socket.removeAllListeners('login');
 
-													var childs = Container.get('conf').get('childs'), currentChild = false;
+											// media
 
-													for (var i = 0; i < childs.length; ++i) {
+											socket.removeAllListeners('media.sound.error');
+											socket.removeAllListeners('media.sound.played');
+											socket.removeAllListeners('media.sound.downloaded');
 
-														if (p_stData.token === childs[i].token) {
-															currentChild = childs[i];
-															break;
-														}
+											socket.removeAllListeners('media.video.error');
+											socket.removeAllListeners('media.video.played');
+											socket.removeAllListeners('media.video.downloaded');
 
+									}
+									catch (e) {
+										Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+									}
+
+								})
+								.onConnection(function(socket) {
+
+									socket.token = socket.id;
+									childssockets.setTokenToSocketById(socket.id, socket.id);
+									websockets.emit('childs', _getChilds());
+									
+									// childs
+
+									socket.on('login', function (p_stData) {
+
+										try {
+
+											if (p_stData && p_stData.token) {
+
+												var childs = Container.get('conf').get('childs'), currentChild = false;
+
+												for (var i = 0; i < childs.length; ++i) {
+
+													if (p_stData.token === childs[i].token) {
+														currentChild = childs[i];
+														break;
 													}
 
-													if (!currentChild) {
-														socket.emit('login.error', "Cet enfat n'existe pas ou n'a pas encore été autorisé.");
-													}
-													else {
+												}
 
-														socket.token = currentChild.token;
-
-														childssockets.fireLogin(socket, currentChild);
-
-														Container.get('conf').set('childs', childs);
-														socket.emit('logged', currentChild);
-														websockets.emit('childs', _getChilds());
-
-													}
-
+												if (!currentChild) {
+													socket.emit('login.error', "Cet enfat n'existe pas ou n'a pas encore été autorisé.");
 												}
 												else {
 
-													socket.emit('login.error', "Vous n'avez fourni aucune donnée d'autorisation valide.");
-													
+													socket.token = currentChild.token;
+
+													childssockets.fireLogin(socket, currentChild);
+
+													Container.get('conf').set('childs', childs);
+													socket.emit('logged', currentChild);
+													websockets.emit('childs', _getChilds());
+
 												}
 
 											}
-											catch (e) {
-												m_clLog.err('-- [MIA] ' + ((e.message) ? e.message : e));
-												socket.emit('login.error', "Impossible de vous connecter.");
+											else {
+
+												socket.emit('login.error', "Vous n'avez fourni aucune donnée d'autorisation valide.");
+												
 											}
 
-										});
-
-									})
-									.onLog(function(socket) {
-
-										socket.on('media.sound.error', function (error) {
-											m_clLog.err('play sound - ' + error);
-											websockets.emit('media.sound.error', error);
-										})
-										.on('media.sound.played', function (data) {
-											m_clLog.log('media.sound.played');
-											childssockets.emit('media.sound.played', data);
-										})
-										.on('media.sound.downloaded', function (data) {
-											m_clLog.log('media.sound.downloaded');
-											childssockets.emit('media.sound.downloaded', data);
-										})
-
-										.on('media.video.error', function (error) {
-											m_clLog.err('play video - ' + error);
-											childssockets.emit('media.video.error', error);
-										})
-										.on('media.video.played', function (data) {
-											m_clLog.log('media.video.played');
-											childssockets.emit('media.video.played', data);
-										})
-										.on('media.video.downloaded', function (data) {
-											m_clLog.log('media.video.downloaded');
-											childssockets.emit('media.video.downloaded', data);
-										});
+										}
+										catch (e) {
+											Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+											socket.emit('login.error', "Impossible de vous connecter.");
+										}
 
 									});
 
-									// run
+								})
+								.onLog(function(socket) {
 
-										// server http
+									socket.on('media.sound.error', function (error) {
+										Container.get('logs').err('play sound - ' + error);
+										websockets.emit('media.sound.error', error);
+									})
+									.on('media.sound.played', function (data) {
+										Container.get('logs').log('media.sound.played');
+										childssockets.emit('media.sound.played', data);
+									})
+									.on('media.sound.downloaded', function (data) {
+										Container.get('logs').log('media.sound.downloaded');
+										childssockets.emit('media.sound.downloaded', data);
+									})
 
-										Container.get('webserver').start().then(function() {
+									.on('media.video.error', function (error) {
+										Container.get('logs').err('play video - ' + error);
+										childssockets.emit('media.video.error', error);
+									})
+									.on('media.video.played', function (data) {
+										Container.get('logs').log('media.video.played');
+										childssockets.emit('media.video.played', data);
+									})
+									.on('media.video.downloaded', function (data) {
+										Container.get('logs').log('media.video.downloaded');
+										childssockets.emit('media.video.downloaded', data);
+									});
 
-											// server http socket
+								});
 
-											websockets.start().then(function() {
+								// run
 
-												// server childs
-												
-												childssockets.start().then(function() {
+									// server http
 
-													// plugins
+									Container.get('webserver').start().then(function() {
 
-													Container.get('plugins').getData().then(function(p_tabData) {
+										// server http socket
 
-														p_tabData.forEach(function(p_stPlugin) {
+										websockets.start().then(function() {
 
-															try {
-																require(p_stPlugin.main)(Container);
-																m_clLog.success('-- [plugin] ' + p_stPlugin.name + ' loaded');
-															}
-															catch (e) {
-																m_clLog.err((e.message) ? e.message : e);
-															}
+											// server childs
+											
+											childssockets.start().then(function() {
 
-														});
+												// plugins
 
-													})
-													.catch(deferred.reject);
+												Container.get('plugins').getData().then(function(p_tabData) {
 
-													deferred.resolve();
-										
+													p_tabData.forEach(function(p_stPlugin) {
+
+														try {
+															require(p_stPlugin.main)(Container);
+															Container.get('logs').success('-- [plugin] ' + p_stPlugin.name + ' loaded');
+														}
+														catch (e) {
+															Container.get('logs').err('-- [plugin] ' + p_stPlugin.name + ' ' + ((e.message) ? e.message : e));
+														}
+
+													});
+
 												})
 												.catch(deferred.reject);
-													
+
+												deferred.resolve();
+									
 											})
 											.catch(deferred.reject);
-
+												
 										})
 										.catch(deferred.reject);
 
-								})
-								.catch(function(e) {
-									deferred.reject('-- [conf] ' + ((e.message) ? e.message : e));
-								});
+									})
+									.catch(deferred.reject);
 
 							})
 							.catch(deferred.reject);

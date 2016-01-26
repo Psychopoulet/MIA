@@ -12,9 +12,7 @@
 		// attributes
 			
 			var
-				m_sLocalFile = path.join(__dirname, 'backup.json'),
-				logs = Container.get('logs'),
-				m_clLog = new logs(path.join(__dirname, '..', 'logs', 'plugins', 'warcraftsounds'));
+				m_sLocalFile = path.join(__dirname, 'backup.json');
 
 		// constructor
 
@@ -45,7 +43,7 @@
 										Container.get('websockets').emit('web.warcraftsounds.races.get', p_tabData);
 									})
 									.catch(function (err){
-										m_clLog.err(err);
+										Container.get('logs').err(err);
 										Container.get('websockets').emit('web.warcraftsounds.error', err);
 									});
 
@@ -67,7 +65,7 @@
 
 											})
 											.catch(function (err){
-												m_clLog.err(err);
+												Container.get('logs').err(err);
 												Container.get('websockets').emit('web.warcraftsounds.error', err);
 											});
 
@@ -95,7 +93,7 @@
 
 												})
 												.catch(function (err){
-													m_clLog.err(err);
+													Container.get('logs').err(err);
 													Container.get('websockets').emit('web.warcraftsounds.error', err);
 												});
 
@@ -119,7 +117,7 @@
 
 											})
 											.catch(function (err){
-												m_clLog.err(err);
+												Container.get('logs').err(err);
 												Container.get('websockets').emit('web.warcraftsounds.error', err);
 											});
 
@@ -143,7 +141,7 @@
 
 											})
 											.catch(function (err){
-												m_clLog.err(err);
+												Container.get('logs').err(err);
 												Container.get('websockets').emit('web.warcraftsounds.error', err);
 											});
 
@@ -154,11 +152,11 @@
 							.on('web.warcraftsounds.action.play', function (p_stData) {
 
 								if (!p_stData.action) {
-									m_clLog.err('Missing \'action\' data');
+									Container.get('logs').err('Missing \'action\' data');
 									socket.emit('web.warcraftsounds.error', 'Missing \'action\' data');
 								}
 								else if (!p_stData.action.url) {
-									m_clLog.err('Missing \'action.url\' data');
+									Container.get('logs').err('Missing \'action.url\' data');
 									socket.emit('web.warcraftsounds.error', 'Missing \'action.url\' data');
 								}
 								else {
@@ -169,15 +167,15 @@
 							.on('web.warcraftsounds.music.play', function (p_stData) {
 
 								if (!p_stData.music) {
-									m_clLog.err('Missing \'music\' data');
+									Container.get('logs').err('Missing \'music\' data');
 									socket.emit('web.warcraftsounds.error', 'Missing \'music\' data');
 								}
 								else if (!p_stData.music.url) {
-									m_clLog.err('Missing \'music.url\' data');
+									Container.get('logs').err('Missing \'music.url\' data');
 									socket.emit('web.warcraftsounds.error', 'Missing \'music.url\' data');
 								}
 								else {
-									m_clLog.log('web.warcraftsounds.music.play : ' + p_stData.music.name);
+									Container.get('logs').log('web.warcraftsounds.music.play : ' + p_stData.music.name);
 									Container.get('childssockets').emitTo(p_stData.child.token, 'child.sounds.play', p_stData.music);
 								}
 
@@ -185,15 +183,15 @@
 							.on('web.warcraftsounds.warning.play', function (p_stData) {
 
 								if (!p_stData.warning) {
-									m_clLog.err('Missing \'warning\' data');
+									Container.get('logs').err('Missing \'warning\' data');
 									socket.emit('web.warcraftsounds.error', 'Missing \'warning\' data');
 								}
 								else if (!p_stData.warning.url) {
-									m_clLog.err('Missing \'warning.url\' data');
+									Container.get('logs').err('Missing \'warning.url\' data');
 									socket.emit('web.warcraftsounds.error', 'Missing \'warning.url\' data');
 								}
 								else {
-									m_clLog.log('web.warcraftsounds.warning.play : ' + p_stData.warning.name);
+									Container.get('logs').log('web.warcraftsounds.warning.play : ' + p_stData.warning.name);
 									Container.get('childssockets').emitTo(p_stData.child.token, 'child.sounds.play', p_stData.warning);
 								}
 
@@ -211,7 +209,7 @@
 						socket
 
 							.on('child.sounds.error', function (error) {
-								m_clLog.err(error);
+								Container.get('logs').err(error);
 								Container.get('websockets').emit('child.sounds.error', error);
 							})
 							.on('child.sounds.played', function (p_stData) {

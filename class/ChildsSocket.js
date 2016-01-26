@@ -14,8 +14,6 @@
 			
 			var
 				that = this,
-				logs = Container.get('logs'),
-				m_clLog = new logs(path.join(__dirname, '..', 'logs', 'childsocket')),
 				m_clSocketServer,
 				m_tabOnConnection = [],
 				m_tabOnLog = [],
@@ -35,11 +33,11 @@
 
 							m_clSocketServer.sockets.on('connection', function (socket) {
 
-								m_clLog.success('-- [child socket client] ' + socket.id + ' connected');
+								Container.get('logs').success('-- [child socket client] ' + socket.id + ' connected');
 								
 								socket.on('disconnect', function () {
 									
-									m_clLog.info('-- [child socket client] ' + socket.id + ' disconnected');
+									Container.get('logs').info('-- [child socket client] ' + socket.id + ' disconnected');
 									
 									m_tabOnDisconnect.forEach(function (fOnDisconnect) {
 										fOnDisconnect(socket);
@@ -53,7 +51,7 @@
 								
 							});
 
-							m_clLog.success('-- [child socket server] started on port ' + nChildrenPort);
+							Container.get('logs').success('-- [child socket server] started on port ' + nChildrenPort);
 							
 							deferred.resolve();
 

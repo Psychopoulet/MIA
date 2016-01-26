@@ -6,8 +6,7 @@
 			path = require('path'),
 			fs = require('fs'),
 			q = require('q'),
-			mkdirp = require('mkdirp'),
-			express = require('express')();
+			mkdirp = require('mkdirp');
 		
 // module
 	
@@ -21,8 +20,6 @@
 				m_sDirWeb = path.join(__dirname, '..', 'web'),
 				m_sDirSSL = path.join(__dirname, '..', 'ssl'),
 				m_clPlugins = Container.get('plugins'),
-				logs = Container.get('logs'),
-				m_clLog = new logs(path.join(__dirname, '..', 'logs', 'httpserver')),
 
 				m_bPluginsBuffersCreated = false,
 				m_sPluginsBuffersPath = path.join(__dirname, '..', 'web', 'buffers'),
@@ -86,7 +83,7 @@
 							try {
 
 								if (!fs.existsSync(p_sFilePath)) {
-									m_clLog.err('-- [HTTP server] The ' + p_sFilePath + ' file does not exist');
+									Container.get('logs').err('-- [HTTP server] The ' + p_sFilePath + ' file does not exist');
 									deferred.reject('-- [HTTP server] The ' + p_sFilePath + ' file does not exist');
 								}
 								else {
@@ -278,7 +275,7 @@ q
 							try {
 
 								if (!Container.get('conf').get('ssl')) {
-									deferred.resolve(require('http').createServer(express));
+									deferred.resolve(require('http').createServer(Container.get('express')));
 								}
 								else {
 
@@ -293,17 +290,17 @@ q
 											require('https').createServer({
 												key: data.privateKey,
 												cert: data.certificate
-											}, express)
+											}, Container.get('express'))
 
 										);
 
 									})
 									.catch(function(e) {
 
-										m_clLog.err('-- [HTTP server] openssl : ' ((e.message) ? e.message : e));
+										Container.get('logs').err('-- [HTTP server] openssl : ' ((e.message) ? e.message : e));
 
 										deferred.resolve(
-											require('http').createServer(express)
+											require('http').createServer(Container.get('express'))
 										);
 
 									});
@@ -327,13 +324,9 @@ q
 
 						try {
 
-							Container.set('express', express);
-
 							_initServer().then(function (p_clServer) {
 
-								Container.set('http', p_clServer);
-
-								express.get('/', function (req, res) {
+								Container.set('http', p_clServer).get('express').get('/', function (req, res) {
 
 									_readFile(path.join(m_sDirWeb, 'templates', 'index.html')).then(function (index) {
 
@@ -477,7 +470,7 @@ q
 									});
 
 								p_clServer.listen(nWebPort, function () {
-									m_clLog.success('-- [HTTP server] started on port ' + nWebPort);
+									Container.get('logs').success('-- [HTTP server] started on port ' + nWebPort);
 								});
 
 								deferred.resolve();

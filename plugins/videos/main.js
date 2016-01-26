@@ -14,9 +14,7 @@
 			
 			var
 				m_tabCategories = [],
-				m_sBufferFilePath = path.join(__dirname, 'backup.json'),
-				logs = Container.get('logs'),
-				m_clLog = new logs(path.join(__dirname, '..', 'logs', 'plugins', 'videos'));
+				m_sBufferFilePath = path.join(__dirname, 'backup.json');
 				
 		// methods
 
@@ -195,7 +193,7 @@
 						socket.on('plugins.videos.category.add', function (data) {
 
 							if (Container.get('conf').get('debug')) {
-								m_clLog.log('plugins.videos.category.add');
+								Container.get('logs').log('plugins.videos.category.add');
 							}
 
 							var bFound = false;
@@ -239,7 +237,7 @@
 						.on('plugins.videos.category.edit', function (data) {
 
 							if (Container.get('conf').get('debug')) {
-								m_clLog.log('plugins.videos.category.edit');
+								Container.get('logs').log('plugins.videos.category.edit');
 							}
 
 							var bFound = false;
@@ -276,7 +274,7 @@
 						.on('plugins.videos.category.delete', function (data) {
 
 							if (Container.get('conf').get('debug')) {
-								m_clLog.log('plugins.videos.category.delete');
+								Container.get('logs').log('plugins.videos.category.delete');
 							}
 
 							m_tabCategories.forEach(function(category, key) {
@@ -301,7 +299,7 @@
 						.on('plugins.videos.video.add', function (data) {
 
 							if (Container.get('conf').get('debug')) {
-								m_clLog.log('plugins.videos.video.add');
+								Container.get('logs').log('plugins.videos.video.add');
 							}
 
 							if (!data || !data.video || !data.video.name || !data.video.url) {
@@ -358,7 +356,7 @@
 						.on('plugins.videos.video.edit', function (data) {
 
 							if (Container.get('conf').get('debug')) {
-								m_clLog.log('plugins.videos.video.edit');
+								Container.get('logs').log('plugins.videos.video.edit');
 							}
 
 							if (!data || !data.video || !data.video.name || !data.video.url || !data.video.code) {
@@ -410,7 +408,7 @@
 						.on('plugins.videos.video.delete', function (data) {
 
 							if (Container.get('conf').get('debug')) {
-								m_clLog.log('plugins.videos.video.delete');
+								Container.get('logs').log('plugins.videos.video.delete');
 							}
 
 							var bCategoryFound = false, bVideoFound = false;
@@ -458,19 +456,19 @@
 							socket.on('plugins.videos.video.playsound', function (data) {
 
 								if (Container.get('conf').get('debug')) {
-									m_clLog.log('plugins.videos.video.playsound');
+									Container.get('logs').log('plugins.videos.video.playsound');
 								}
 
 								if (!data) {
-									m_clLog.err('play video - données manquantes');
+									Container.get('logs').err('play video - données manquantes');
 									socket.emit('plugins.videos.error', 'Données manquantes');
 								}
 								else if (!data.child) {
-									m_clLog.err('play video - aucun enfant choisi');
+									Container.get('logs').err('play video - aucun enfant choisi');
 									socket.emit('plugins.videos.error', 'Aucun enfant choisi');
 								}
 								else if (!data.video) {
-									m_clLog.err('play video - aucune vidéo choisie');
+									Container.get('logs').err('play video - aucune vidéo choisie');
 									socket.emit('plugins.videos.error', 'Aucune vidéo choisie');
 								}
 								else {
@@ -482,19 +480,19 @@
 							socket.on('plugins.videos.video.playvideo', function (data) {
 
 								if (Container.get('conf').get('debug')) {
-									m_clLog.log('plugins.videos.video.playvideo');
+									Container.get('logs').log('plugins.videos.video.playvideo');
 								}
 
 								if (!data) {
-									m_clLog.err('play video - données manquantes');
+									Container.get('logs').err('play video - données manquantes');
 									socket.emit('plugins.videos.error', 'Données manquantes');
 								}
 								else if (!data.child) {
-									m_clLog.err('play video - aucun enfant choisi');
+									Container.get('logs').err('play video - aucun enfant choisi');
 									socket.emit('plugins.videos.error', 'Aucun enfant choisi');
 								}
 								else if (!data.video) {
-									m_clLog.err('play video - aucune vidéo choisie');
+									Container.get('logs').err('play video - aucune vidéo choisie');
 									socket.emit('plugins.videos.error', 'Aucune vidéo choisie');
 								}
 								else {
