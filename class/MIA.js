@@ -12,8 +12,7 @@
 		
 		// attributes
 			
-			var
-				that = this,
+			var that = this,
 				childssockets = Container.get('childssockets'),
 				websockets = Container.get('websockets');
 				
@@ -726,42 +725,42 @@
 
 								// run
 
-									// server http
+									// plugins
 
-									Container.get('webserver').start().then(function() {
+									Container.get('plugins').getData().then(function(p_tabData) {
 
-										// server http socket
+										p_tabData.forEach(function(p_stPlugin) {
 
-										websockets.start().then(function() {
+											try {
+												require(p_stPlugin.main)(Container);
+												Container.get('logs').success('-- [plugin] ' + p_stPlugin.name + ' loaded');
+											}
+											catch (e) {
+												Container.get('logs').err('-- [plugin] ' + p_stPlugin.name + ' ' + ((e.message) ? e.message : e));
+											}
 
-											// server childs
-											
-											childssockets.start().then(function() {
+										});
 
-												// plugins
+										// server http
 
-												Container.get('plugins').getData().then(function(p_tabData) {
+										Container.get('webserver').start().then(function() {
 
-													p_tabData.forEach(function(p_stPlugin) {
+											// server http socket
 
-														try {
-															require(p_stPlugin.main)(Container);
-															Container.get('logs').success('-- [plugin] ' + p_stPlugin.name + ' loaded');
-														}
-														catch (e) {
-															Container.get('logs').err('-- [plugin] ' + p_stPlugin.name + ' ' + ((e.message) ? e.message : e));
-														}
+											websockets.start().then(function() {
 
-													});
+												// server childs
+												
+												childssockets.start().then(function() {
 
+													deferred.resolve();
+										
 												})
 												.catch(deferred.reject);
-
-												deferred.resolve();
-									
+													
 											})
 											.catch(deferred.reject);
-												
+
 										})
 										.catch(deferred.reject);
 

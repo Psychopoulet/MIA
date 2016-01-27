@@ -6,4 +6,5 @@ conf.json
 node_modules/
 ssl/
 web/buffers/
+logs/
 *backup.json

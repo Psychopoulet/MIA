@@ -169,7 +169,7 @@ q
 									mkdirp(path.dirname(m_sPluginsWidgetsBufferFile), function (err) {
 
 										if (err) {
-										deferred.reject(err);
+											deferred.reject(err);
 										}
 										else {
 
