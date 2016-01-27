@@ -1,10 +1,9 @@
 
 // dépendances
 	
-	var
-		path = require('path'),
-		fs = require('fs'),
-		q = require('q');
+	const 	path = require('path'),
+			fs = require('fs'),
+			q = require('q');
 
 // module
 	

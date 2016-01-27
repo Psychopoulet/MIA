@@ -74,17 +74,17 @@ app.service('ModelClients', function() {
 
 });
 
-app.controller('ControllerClients', ['$scope', '$popup', 'ModelClients', function($scope, $popup, ModelClients) {
+app.controller('ControllerClients',
+['$scope', '$popup', 'ModelClients'/*, 'ModelEvents'*/,
+function($scope, $popup, ModelClients/*, ModelEvents*/) {
 		
     "use strict";
 
+    // attrs
+
 	$scope.clients = [];
 
-	ModelClients.onError($popup.alert)
-    .onChange(function(p_tabData) {
-		$scope.clients = p_tabData;
-		$scope.$apply();
-	});
+    // meths
 
     $scope.allow = ModelClients.allow;
     
@@ -100,5 +100,18 @@ app.controller('ControllerClients', ['$scope', '$popup', 'ModelClients', functio
     }
 
     $scope.delete = ModelClients.delete;
-	
+
+    // events
+
+    ModelClients.onError($popup.alert)
+    /*.onAllow(function(client) {
+        ModelEvents.add('', 'MIA', "Le client '" + client.name + "' a été autorisé.");
+        $scope.clients.push(client);
+        $scope.$apply();
+    })*/
+    .onChange(function(clients) {
+        $scope.clients = clients;
+        $scope.$apply();
+    });
+
 }]);
