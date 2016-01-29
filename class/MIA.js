@@ -2,7 +2,8 @@
 // dépendances
 	
 	const 	path = require('path'),
-			q = require('q');
+			q = require('q'),
+			spawn = require('child_process').spawn;
 		
 // module
 	
@@ -638,7 +639,7 @@
 
 									.on('plugin.add.github', function(url) {
 
-										var tabUrl;
+										var tabUrl, oSpawn, sResult;
 
 										try {
 
@@ -665,24 +666,49 @@
 												}
 												else {
 
-													console.log(
-														"git -c diff.mnemonicprefix=false -c core.quotepath=false clone --recursive " + url + " "  + path.join(Container.get('plugins').directory, tabUrl[tabUrl.length - 1])
+													oSpawn = spawn(
+														'git', [
+															'-c', 'diff.mnemonicprefix=false', '-c', 'core.quotepath=false', 'clone', '--recursive',
+															url,
+															path.join(Container.get('plugins').directory, tabUrl[tabUrl.length - 1])
+														]
 													);
 
-													_getPlugins().then(function(plugins) {
-														socket.emit('plugins', plugins);
-													})
-													.catch(function(err) {
-														socket.emit('plugins.error', (err.message) ? err.message : err);
+													oSpawn.stdout.on('data', function(data) {
+														sResult += data;
 													});
 
+													oSpawn.stderr.on('data', function(err) {
+														sResult += err;
+													});
+
+													oSpawn.on('close', function (code) {
+
+														if (code) {
+															Container.get('logs').err('-- [plugins] ' + sResult);
+															socket.emit('plugins.error', sResult);
+														}
+														else {
+															
+															_getPlugins().then(function(plugins) {
+																socket.emit('plugins', plugins);
+															})
+															.catch(function(err) {
+																Container.get('logs').err('-- [plugins] ' + ((err.message) ? err.message : err));
+																socket.emit('plugins.error', (err.message) ? err.message : err);
+															});
+
+														}
+														
+													});
+													
 												}
 
 											}
 
 										}
 										catch (e) {
-											Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+											Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
 											socket.emit('child.add.error', "Impossible d'ajouter le plugin.");
 										}
 
@@ -692,6 +718,7 @@
 										socket.emit('plugins', plugins);
 									})
 									.catch(function(err) {
+										Container.get('logs').err('-- [plugins] ' + ((err.message) ? err.message : err));
 										socket.emit('plugins.error', (err.message) ? err.message : err);
 									});
 

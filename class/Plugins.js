@@ -15,8 +15,7 @@
 
 			// private
 
-				var that = this,
-					m_tabData = [];
+				var that = this;
 
 			// public
 
@@ -28,52 +27,48 @@
 
 				this.getData = function () {
 
-					var deferred = q.defer();
+					var deferred = q.defer(), tabData = [];
 
-						if (0 >= m_tabData.length) {
+						require('fs').readdirSync(that.directory).forEach(function (directory) {
 
-							require('fs').readdirSync(that.directory).forEach(function (directory) {
+							var sFile = path.join(that.directory, directory, 'package.json');
 
-								var sFile = path.join(that.directory, directory, 'package.json');
+							if (fs.lstatSync(sFile).isFile()) {
 
-								if (fs.lstatSync(sFile).isFile()) {
+								try {
 
-									try {
+									var plugin = JSON.parse(fs.readFileSync(sFile, 'utf8'));
 
-										var plugin = JSON.parse(fs.readFileSync(sFile, 'utf8'));
+									if (plugin.main && '' != plugin.main) {
+										plugin.main = path.join(that.directory, directory, plugin.main);
+									}
 
-										if (plugin.main && '' != plugin.main) {
-											plugin.main = path.join(that.directory, directory, plugin.main);
+									if (plugin.web) {
+
+										if (plugin.web.templates && plugin.web.templates.widget) {
+											plugin.web.templates.widget = path.join(that.directory, directory, plugin.web.templates.widget);
 										}
 
-										if (plugin.web) {
+										if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
 
-											if (plugin.web.templates && plugin.web.templates.widget) {
-												plugin.web.templates.widget = path.join(that.directory, directory, plugin.web.templates.widget);
-											}
-
-											if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
-
-												for (var i = 0, l = plugin.web.javascripts.length; i < l; ++i) {
-													plugin.web.javascripts[i] = path.join(that.directory, directory, plugin.web.javascripts[i]);
-												}
-
+											for (var i = 0, l = plugin.web.javascripts.length; i < l; ++i) {
+												plugin.web.javascripts[i] = path.join(that.directory, directory, plugin.web.javascripts[i]);
 											}
 
 										}
-
-										m_tabData.push(plugin);
 
 									}
-									catch (e) { console.log(e); }
+
+									tabData.push(plugin);
 
 								}
+								catch (e) { console.log(e); }
 
-							});
+							}
 
-						}
+						});
 
-						deferred.resolve(m_tabData);
+						deferred.resolve(tabData);
 
 					return deferred.promise;
 
