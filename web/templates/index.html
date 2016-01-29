@@ -128,7 +128,7 @@
 
 									<div class="clearfix">
 
-										{{client.name}}
+										<h5 class="pull-left">{{client.name}}</h5>
 
 										<div class="btn-group pull-right">
 											<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="!client.allowed" data-ng-click="allow(client);"></button>
@@ -162,7 +162,7 @@
 
 									<div class="clearfix">
 
-										{{child.name}}
+										<h5 class="pull-left">{{child.name}}</h5>
 
 										<div class="btn-group pull-right">
 											<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="!child.allowed" data-ng-click="allow(child);"></button>
@@ -234,7 +234,7 @@
 
 			</div>
 
-			<div id="modalActions" class="modal fade only-logged hidden">
+			<div id="modalActions" class="modal fade only-logged hidden" data-ng-controller="ControllerActions">
 
 				<div class="modal-dialog">
 
@@ -258,7 +258,7 @@
 
 			</div>
 			
-			<div id="modalConfiguration" class="modal fade only-logged hidden">
+			<div id="modalConfiguration" class="modal fade only-logged hidden" data-ng-controller="ControllerConfiguration">
 
 				<div class="modal-dialog">
 
@@ -282,7 +282,7 @@
 
 			</div>
 			
-			<div id="modalCrons" class="modal fade only-logged hidden">
+			<div id="modalCrons" class="modal fade only-logged hidden" data-ng-controller="ControllerCrons">
 
 				<div class="modal-dialog">
 
@@ -305,8 +305,8 @@
 				</div>
 
 			</div>
-			
-			<div id="modalPlugins" class="modal fade only-logged hidden">
+
+			<div id="modalPlugins" class="modal fade only-logged hidden" data-ng-controller="ControllerPlugins">
 
 				<div class="modal-dialog">
 
@@ -317,7 +317,29 @@
 						</div>
 
 						<div class="modal-body">
-							plugins...
+
+							<button class="btn btn-primary" data-ng-click="addViaGithub();">Ajouter via Github</button>
+
+							<br /><br />
+
+							<ul class="list-group">
+
+								<li class="list-group-item" data-ng-repeat="plugin in plugins">
+
+									<div class="clearfix">
+
+										<h5 class="pull-left">{{plugin.name}}</h5>
+
+										<div class="btn-group pull-right">
+											<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(plugin);"></button>
+										</div>
+
+									</div>
+
+								</li>
+
+							</ul>
+
 						</div>
 
 						<div class="modal-footer">

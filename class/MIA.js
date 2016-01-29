@@ -112,6 +112,35 @@
 
 				}
 
+				function _getPlugins() {
+
+					var deferred = q.defer();
+
+						Container.get('plugins').getData().then(function(plugins) {
+
+							var result = [];
+
+								plugins.forEach(function(plugin) {
+
+									result.push({
+										name : plugin.name,
+										description : plugin.description,
+										version : plugin.version,
+										author : plugin.author,
+										license : plugin.license
+									});
+
+								});
+
+							deferred.resolve(result);
+
+						})
+						.catch(deferred.reject);
+
+					return deferred.promise;
+
+				}
+
 			// public
 
 				this.isSocketClientAllowed = function (socketClient) {
@@ -603,7 +632,68 @@
 											socket.emit('user.update.error', "Impossible de mettre à jour l'utilisateur.");
 										}
 
-									})*/;
+									})*/
+
+									// plugins
+
+									.on('plugin.add.github', function(url) {
+
+										var tabUrl;
+
+										try {
+
+											if (!that.isSocketClientAllowed(socket)) {
+												socket.emit('child.add.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+											}
+											else if (!url || 'string' != typeof url || '' == url) {
+												socket.emit('child.add.error', "Vous n'avez pas fourni d'url.");
+											}
+											else if (-1 == url.indexOf('github')) {
+												socket.emit('child.add.error', "L'url fournie n'est pas une url github.");
+											}
+											else {
+
+												if (Container.get('conf').get('debug')) {
+													Container.get('logs').log('plugin.add.github');
+													Container.get('logs').log(url);
+												}
+
+												tabUrl = url.split('/');
+
+												if (1 > tabUrl.length - 1) {
+													socket.emit('child.add.error', "L'url fournie n'est complète.");
+												}
+												else {
+
+													console.log(
+														"git -c diff.mnemonicprefix=false -c core.quotepath=false clone --recursive " + url + " "  + path.join(Container.get('plugins').directory, tabUrl[tabUrl.length - 1])
+													);
+
+													_getPlugins().then(function(plugins) {
+														socket.emit('plugins', plugins);
+													})
+													.catch(function(err) {
+														socket.emit('plugins.error', (err.message) ? err.message : err);
+													});
+
+												}
+
+											}
+
+										}
+										catch (e) {
+											Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+											socket.emit('child.add.error', "Impossible d'ajouter le plugin.");
+										}
+
+									});
+
+									_getPlugins().then(function(plugins) {
+										socket.emit('plugins', plugins);
+									})
+									.catch(function(err) {
+										socket.emit('plugins.error', (err.message) ? err.message : err);
+									});
 
 								});
 

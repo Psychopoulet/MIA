@@ -48,6 +48,8 @@
 
 		}
 
+		Container.get('conf').spaces = true;
+
 		Container.get('conf').load().then(function() {
 
 			Container.get('logs').showInConsole = Container.get('conf').get('debug');

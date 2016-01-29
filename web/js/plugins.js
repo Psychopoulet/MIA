@@ -1,4 +1,28 @@
-app.controller('ControllerPlugins', [function() {
+app.controller('ControllerPlugins', ['$scope', '$popup', function($scope, $popup) {
+
+	$scope.plugins = [];
+
+	socket.on('plugins', function(plugins) {
+		$scope.plugins = plugins;
+		$scope.$apply();
+	})
+	.on('plugins.error', $popup.alert);
+
+	$scope.addViaGithub = function(url) {
+
+		$popup.prompt("Ajout de plugin", "https://github.com/", function(url) {
+			socket.emit('plugin.add.github', url);
+		});
+
+	};
+
+	$scope.delete = function(plugin) {
+
+		$popup.confirm("Voulez-vous vraiment supprimer le plugin '" + plugin.name + "'", '', function() {
+			socket.emit('plugin.delete', plugin);
+		});
+
+	};
 
 }]);
 

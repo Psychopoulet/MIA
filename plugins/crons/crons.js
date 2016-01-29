@@ -20,7 +20,7 @@
 
 		}, null, true);
 
-		new cronjob('00 00 12 * * 1-5', function() {
+		new cronjob('00 30 12 * * 1-5', function() {
 
 			Container.get('childssockets').emit('media.video.play', {
 				"name":"Manger !",

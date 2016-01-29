@@ -16,15 +16,14 @@
 		
 		// attributes
 			
-			var
-				m_sDirWeb = path.join(__dirname, '..', 'web'),
+			var m_sDirWeb = path.join(__dirname, '..', 'web'),
+					m_sDirTemplates = path.join(m_sDirWeb, 'templates'),
+					m_sDirBuffers = path.join(m_sDirWeb, 'buffers'),
+						m_sIndexBufferFile = path.join(m_sDirBuffers, 'index.html'),
+						m_sPluginsJavascriptsBufferFile = path.join(m_sDirBuffers, 'plugins.js'),
 				m_sDirSSL = path.join(__dirname, '..', 'ssl'),
-				m_clPlugins = Container.get('plugins'),
 
-				m_bPluginsBuffersCreated = false,
-				m_sPluginsBuffersPath = path.join(__dirname, '..', 'web', 'buffers'),
-				m_sPluginsWidgetsBufferFile = path.join(m_sPluginsBuffersPath, 'plugins.html'),
-				m_sPluginsJavascriptsBufferFile = path.join(m_sPluginsBuffersPath, 'plugins.js');
+				m_bBuffersCreated = false;
 				
 		// methodes
 
@@ -161,26 +160,26 @@ q
 
 							try {
 
-								if (!Container.get('conf').get('debug') && m_bPluginsBuffersCreated) {
+								if (!Container.get('conf').get('debug') && m_bBuffersCreated) {
 									deferred.resolve();
 								}
 								else {
 
-									mkdirp(path.dirname(m_sPluginsWidgetsBufferFile), function (err) {
+									mkdirp(path.dirname(m_sIndexBufferFile), function (err) {
 
 										if (err) {
 											deferred.reject(err);
 										}
 										else {
 
+											// on efface les vieilles versions
+
 											try {
-												if (fs.lstatSync(m_sPluginsWidgetsBufferFile).isFile()) {
-													fs.unlinkSync(m_sPluginsWidgetsBufferFile);
+												if (fs.lstatSync(m_sIndexBufferFile).isFile()) {
+													fs.unlinkSync(m_sIndexBufferFile);
 												}
 											}
 											catch(e) {}
-
-											fs.writeFileSync(m_sPluginsWidgetsBufferFile, '', 'utf8');
 
 											try {
 												if (fs.lstatSync(m_sPluginsJavascriptsBufferFile).isFile()) {
@@ -189,9 +188,16 @@ q
 											}
 											catch(e) {}
 
+											// on recréer les fichiers
+
+											fs.writeFileSync(m_sIndexBufferFile, '', 'utf8');
 											fs.writeFileSync(m_sPluginsJavascriptsBufferFile, '', 'utf8');
 
-											m_clPlugins.getData().then(function (p_tabData) {
+											// on les rempli
+
+											Container.get('plugins').getData().then(function (p_tabData) {
+
+												var sPluginsWidgets = '';
 
 												p_tabData.forEach(function(plugin) {
 
@@ -199,33 +205,27 @@ q
 
 														if (plugin.web.templates && plugin.web.templates.widget && plugin.web.widgetcontroller) {
 
-															fs.appendFileSync(
-																m_sPluginsWidgetsBufferFile,
+															sPluginsWidgets += '<div class="col-xs-12 col-md-6">';
 
-																'<div class="col-xs-12 col-md-6">' +
+																sPluginsWidgets += '<div class="panel panel-default" data-ng-controller="' + plugin.web.widgetcontroller + '">';
 
-																	'<div class="panel panel-default" data-ng-controller="' + plugin.web.widgetcontroller + '">' +
+																	sPluginsWidgets += '<div class="panel-heading">';
+																		sPluginsWidgets += '<h4 class="panel-title">' + plugin.name + '</h4>';
+																	sPluginsWidgets += '</div>';
 
-																		'<div class="panel-heading">' +
-																			'<h4 class="panel-title">' + plugin.name + '</h4>' +
-																		'</div>' +
+																	sPluginsWidgets += '<div class="panel-body">';
 
-																		'<div class="panel-body">' +
+																		sPluginsWidgets += fs.readFileSync(plugin.web.templates.widget, 'utf8')
+																							.replace('{{plugin.name}}', plugin.name)
+																							.replace('{{plugin.description}}', plugin.description)
+																							.replace('{{plugin.version}}', plugin.version);
 
-																			fs.readFileSync(plugin.web.templates.widget, 'utf8')
-																				.replace('{{plugin.name}}', plugin.name)
-																				.replace('{{plugin.description}}', plugin.description)
-																				.replace('{{plugin.version}}', plugin.version) +
+																	sPluginsWidgets += '</div>';
 
-																		'</div>' +
+																sPluginsWidgets += '</div>';
 
-																	'</div>' +
+															sPluginsWidgets += '</div>';
 
-																'</div>',
-
-																'utf8'
-															);
-															
 														}
 
 														if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
@@ -246,9 +246,24 @@ q
 
 												});
 
-												m_bPluginsBuffersCreated = true;
+												_readFile(path.join(m_sDirTemplates, 'index.html')).then(function (index) {
 
-												deferred.resolve();
+													dns.lookup(os.hostname(), function (err, ip, fam) {
+
+														fs.appendFileSync(
+															m_sIndexBufferFile,
+															index	.replace('{{ip}}', (err) ? '?.?.?.?' : ip)
+																	.replace('{{widgets}}', sPluginsWidgets),
+															'utf8'
+														);
+
+														m_bBuffersCreated = true;
+														deferred.resolve();
+												
+													});
+
+												})
+												.catch(deferred.reject);
 
 											})
 											.catch(deferred.reject);
@@ -328,38 +343,13 @@ q
 
 								Container.set('http', p_clServer).get('express').get('/', function (req, res) {
 
-									_readFile(path.join(m_sDirWeb, 'templates', 'index.html')).then(function (index) {
-
-										dns.lookup(os.hostname(), function (err, ip, fam) {
-
-											if (err) {
-												_500(res, index.replace('{{widgets}}', err).replace('{{ip}}', '0.0.0.0'));
-											}
-											else {
-											
-												_createBuffers().then(function() {
-
-													_readFile(m_sPluginsWidgetsBufferFile).then(function(sHTML) {
-														_sendHTMLResponse(res, 200, index.replace('{{widgets}}', sHTML).replace('{{ip}}', ip));
-													})
-													.catch(function (err) {
-														_500(res, index.replace('{{widgets}}', err).replace('{{ip}}', ip));
-													});
-
-												})
-												.catch(function(err) {
-													_500(res, index.replace('{{widgets}}', err).replace('{{ip}}', ip));
-												});
-
-											}
-
-										});
-
+									_createBuffers().then(function() {
+										res.sendFile(m_sIndexBufferFile);
 									})
-									.catch(function (err) {
-										_500(res, err);
+									.catch(function(err) {
+										_sendJSResponse(res, 500, (err.message) ? err.message : err)
 									});
-										
+
 								})
 
 								// js
