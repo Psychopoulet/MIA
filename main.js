@@ -41,7 +41,6 @@
 										login : 'rasp',
 										password : 'password'
 									})
-									.set('pid', -1)
 									.set('clients', []).set('childs', [])
 									.save().catch(function(e) {
 										Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));

@@ -198,14 +198,12 @@
 
 						try {
 
-							var nPreviousPID = Container.get('conf').get('pid');
-
-							if (-1 < nPreviousPID) {
+							if (Container.get('conf').has('pid')) {
 
 								try {
 
-									process.kill(nPreviousPID);
-									Container.get('logs').success('[END PROCESS ' + nPreviousPID + ']');
+									process.kill(Container.get('conf').get('pid'));
+									Container.get('logs').success('[END PROCESS ' + Container.get('conf').get('pid') + ']');
 
 								}
 								catch (e) { }
