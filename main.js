@@ -36,7 +36,7 @@
 
 			Container.get('conf')	.set('webport', 1337).set('childrenport', 1338)
 									.set('debug', false)
-									.set('ssl', false)
+									.set('ssl', true)
 									.set('user', {
 										login : 'rasp',
 										password : 'password'
