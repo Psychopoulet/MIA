@@ -1,7 +1,7 @@
 
 // dépendances
 	
-	const 	fs = require('fs'),
+	const 	fs = require('simplefs'),
 			path = require('path'),
 			q = require('q');
 		
@@ -29,11 +29,11 @@
 
 					var deferred = q.defer(), tabData = [];
 
-						require('fs').readdirSync(that.directory).forEach(function (directory) {
+						fs.readdirSync(that.directory).forEach(function (directory) {
 
 							var sFile = path.join(that.directory, directory, 'package.json');
 
-							if (fs.lstatSync(sFile).isFile()) {
+							if (fs.fileExists(sFile)) {
 
 								try {
 

@@ -3,14 +3,15 @@
 // dépendances
 
 	const 	path = require('path'),
+
 			SimpleContainer = require('simplecontainer'),
 			SimpleConfig = require('simpleconfig'),
 			SimpleLogs = require('simplelogs'),
+			SimpleSSL = require('simplessl'),
 			
 			ChildsSocket = require(path.join(__dirname, 'class', 'ChildsSocket.js')),
 			HTTPServer = require(path.join(__dirname, 'class', 'HTTPServer.js')),
 			HTTPSocket = require(path.join(__dirname, 'class', 'HTTPSocket.js')),
-			OpenSSL = require(path.join(__dirname, 'class', 'OpenSSL.js')),
 			Plugins = require(path.join(__dirname, 'class', 'Plugins.js')),
 			MIA = require(path.join(__dirname, 'class', 'MIA.js'));
 
@@ -24,7 +25,7 @@
 					.set('logs', new SimpleLogs(path.join(__dirname, 'logs')))
 					.set('http', null)
 					.set('express', require('express')())
-					.set('openssl', new OpenSSL())
+					.set('openssl', new SimpleSSL())
 					.set('plugins', new Plugins())
 
 					.set('childssockets', new ChildsSocket(Container))

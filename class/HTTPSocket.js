@@ -50,8 +50,13 @@
 								});
 								
 							});
-							
-							Container.get('logs').success('-- [HTTP socket server] started on port ' + Container.get('conf').get('webport'));
+
+							if (Container.get('conf').get('ssl')) {
+								Container.get('logs').success('-- [HTTP socket server] with ssl started on port ' + Container.get('conf').get('webport'));
+							}
+							else {
+								Container.get('logs').success('-- [HTTP socket server] started on port ' + Container.get('conf').get('webport'));
+							}
 
 							deferred.resolve();
 
