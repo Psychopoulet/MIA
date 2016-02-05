@@ -12,8 +12,7 @@
 		
 		// attributes
 			
-			var
-				that = this,
+			var that = this,
 				m_clSocketServer,
 				m_tabOnConnection = [],
 				m_tabOnLog = [],

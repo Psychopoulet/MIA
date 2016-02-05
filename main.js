@@ -8,11 +8,11 @@
 			SimpleConfig = require('simpleconfig'),
 			SimpleLogs = require('simplelogs'),
 			SimpleSSL = require('simplessl'),
+			SimplePluginsManager = require('simplepluginsmanager'),
 			
 			ChildsSocket = require(path.join(__dirname, 'class', 'ChildsSocket.js')),
 			HTTPServer = require(path.join(__dirname, 'class', 'HTTPServer.js')),
 			HTTPSocket = require(path.join(__dirname, 'class', 'HTTPSocket.js')),
-			Plugins = require(path.join(__dirname, 'class', 'Plugins.js')),
 			MIA = require(path.join(__dirname, 'class', 'MIA.js'));
 
 // run
@@ -26,7 +26,7 @@
 					.set('http', null)
 					.set('express', require('express')())
 					.set('openssl', new SimpleSSL())
-					.set('plugins', new Plugins())
+					.set('plugins', new SimplePluginsManager(path.join(__dirname, 'plugins')))
 
 					.set('childssockets', new ChildsSocket(Container))
 					.set('webserver', new HTTPServer(Container))

@@ -183,75 +183,50 @@ q
 
 									// on les rempli
 
-									Container.get('plugins').getData().then(function (p_tabData) {
+									var sPluginsWidgets = '';
 
-										var sPluginsWidgets = '';
+									Container.get('plugins').plugins.forEach(function(plugin) {
 
-										p_tabData.forEach(function(plugin) {
+										if (plugin.widget) {
 
-											if (plugin.web) {
+											sPluginsWidgets += fs.readFileSync(plugin.widget, 'utf8')
+																.replace(/{{plugin.name}}/g, plugin.name)
+																.replace(/{{plugin.description}}/g, plugin.description)
+																.replace(/{{plugin.version}}/g, plugin.version);
 
-												if (plugin.web.templates && plugin.web.templates.widget && plugin.web.widgetcontroller) {
+										}
 
-													sPluginsWidgets += '<div class="col-xs-12 col-md-6">';
+										if (plugin.javascripts && 0 < plugin.javascripts.length) {
 
-														sPluginsWidgets += '<div class="panel panel-default" data-ng-controller="' + plugin.web.widgetcontroller + '">';
-
-															sPluginsWidgets += '<div class="panel-heading">';
-																sPluginsWidgets += '<h4 class="panel-title">' + plugin.name + '</h4>';
-															sPluginsWidgets += '</div>';
-
-															sPluginsWidgets += '<div class="panel-body">';
-
-																sPluginsWidgets += fs.readFileSync(plugin.web.templates.widget, 'utf8')
-																					.replace('{{plugin.name}}', plugin.name)
-																					.replace('{{plugin.description}}', plugin.description)
-																					.replace('{{plugin.version}}', plugin.version);
-
-															sPluginsWidgets += '</div>';
-
-														sPluginsWidgets += '</div>';
-
-													sPluginsWidgets += '</div>';
-
-												}
-
-												if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
-
-													plugin.web.javascripts.forEach(function(javascript) {
-
-														fs.appendFileSync(
-															m_sPluginsJavascriptsBufferFile,
-															fs.readFileSync(javascript, 'utf8'),
-															'utf8'
-														);
-
-													});
-
-												}
-
-											}
-
-										});
-
-										_readFile(path.join(m_sDirTemplates, 'index.html')).then(function (index) {
-
-											dns.lookup(os.hostname(), function (err, ip, fam) {
+											plugin.javascripts.forEach(function(javascript) {
 
 												fs.appendFileSync(
-													m_sIndexBufferFile,
-													index	.replace('{{ip}}', (err) ? '?.?.?.?' : ip)
-															.replace('{{widgets}}', sPluginsWidgets),
+													m_sPluginsJavascriptsBufferFile,
+													fs.readFileSync(javascript, 'utf8'),
 													'utf8'
 												);
 
-												m_bBuffersCreated = true;
-												deferred.resolve();
-										
 											});
 
-										})
-										.catch(deferred.reject);
+										}
+
+									});
+
+									_readFile(path.join(m_sDirTemplates, 'index.html')).then(function (index) {
+
+										dns.lookup(os.hostname(), function (err, ip, fam) {
+
+											fs.appendFileSync(
+												m_sIndexBufferFile,
+												index	.replace('{{ip}}', (err) ? '?.?.?.?' : ip)
+														.replace('{{widgets}}', sPluginsWidgets),
+												'utf8'
+											);
+
+											m_bBuffersCreated = true;
+											deferred.resolve();
+									
+										});
 
 									})
 									.catch(deferred.reject);

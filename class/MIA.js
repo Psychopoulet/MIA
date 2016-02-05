@@ -113,35 +113,6 @@
 
 				}
 
-				function _getPlugins() {
-
-					var deferred = q.defer();
-
-						Container.get('plugins').getData().then(function(plugins) {
-
-							var result = [];
-
-								plugins.forEach(function(plugin) {
-
-									result.push({
-										name : plugin.name,
-										description : plugin.description,
-										version : plugin.version,
-										author : plugin.author,
-										license : plugin.license
-									});
-
-								});
-
-							deferred.resolve(result);
-
-						})
-						.catch(deferred.reject);
-
-					return deferred.promise;
-
-				}
-
 			// public
 
 				this.isSocketClientAllowed = function (socketClient) {
@@ -644,12 +615,6 @@
 											if (!that.isSocketClientAllowed(socket)) {
 												socket.emit('child.add.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
 											}
-											else if (!url || 'string' != typeof url || '' == url) {
-												socket.emit('child.add.error', "Vous n'avez pas fourni d'url.");
-											}
-											else if (-1 == url.indexOf('github')) {
-												socket.emit('child.add.error', "L'url fournie n'est pas une url github.");
-											}
 											else {
 
 												if (Container.get('conf').get('debug')) {
@@ -657,50 +622,11 @@
 													Container.get('logs').log(url);
 												}
 
-												tabUrl = url.split('/');
-
-												if (1 > tabUrl.length - 1) {
-													socket.emit('child.add.error', "L'url fournie n'est complète.");
-												}
-												else {
-
-													oSpawn = spawn(
-														'git', [
-															'-c', 'diff.mnemonicprefix=false', '-c', 'core.quotepath=false', 'clone', '--recursive',
-															url,
-															path.join(Container.get('plugins').directory, tabUrl[tabUrl.length - 1])
-														]
-													);
-
-													oSpawn.stdout.on('data', function(data) {
-														sResult += data;
-													});
-
-													oSpawn.stderr.on('data', function(err) {
-														sResult += err;
-													});
-
-													oSpawn.on('close', function (code) {
-
-														if (code) {
-															Container.get('logs').err('-- [plugins] ' + sResult);
-															socket.emit('plugins.error', sResult);
-														}
-														else {
-															
-															_getPlugins().then(function(plugins) {
-																socket.emit('plugins', plugins);
-															})
-															.catch(function(err) {
-																Container.get('logs').err('-- [plugins] ' + ((err.message) ? err.message : err));
-																socket.emit('plugins.error', (err.message) ? err.message : err);
-															});
-
-														}
-														
-													});
-													
-												}
+												Container.get('plugins').addByGithub(url).then(function() {
+													socket.emit('plugins', Container.get('plugins').plugins);
+												}).catch(function(err) {
+													socket.emit('plugins.error', err);
+												});
 
 											}
 
@@ -712,13 +638,7 @@
 
 									});
 
-									_getPlugins().then(function(plugins) {
-										socket.emit('plugins', plugins);
-									})
-									.catch(function(err) {
-										Container.get('logs').err('-- [plugins] ' + ((err.message) ? err.message : err));
-										socket.emit('plugins.error', (err.message) ? err.message : err);
-									});
+									socket.emit('plugins', Container.get('plugins').plugins);
 
 								});
 
@@ -842,19 +762,14 @@
 
 									// plugins
 
-									Container.get('plugins').getData().then(function(p_tabData) {
-
-										p_tabData.forEach(function(p_stPlugin) {
-
-											try {
-												require(p_stPlugin.main)(Container);
-												Container.get('logs').success('-- [plugin] ' + p_stPlugin.name + ' loaded');
-											}
-											catch (e) {
-												Container.get('logs').err('-- [plugin] ' + p_stPlugin.name + ' ' + ((e.message) ? e.message : e));
-											}
-
-										});
+									Container.get('plugins')
+										.on('load', function (plugin) {
+											Container.get('logs').success('-- [plugins] : ' + plugin.name + ' (v' + plugin.version + ') loaded');
+										})
+										.on('error', function (err) {
+											Container.get('logs').err('-- [plugins] : ' + err);
+										})
+									.loadAll(Container).then(function() {
 
 										// server http
 

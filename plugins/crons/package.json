@@ -1,6 +1,6 @@
 {
   "name": "crons",
-  "description": "",
+  "description": "Crons manager",
   "version": "0.0.1",
   "main": "crons.js",
   "author": "Sébastien VIDAL",

@@ -1,14 +1,26 @@
 
-// dépendances
+"use strict";
+
+// deps
 	
-	var
-		path = require('path'),
+const	path = require('path'),
 		cronjob = require('cron').CronJob; // https://github.com/ncb000gt/node-cron/blob/master/README.md
 
 // module
-	
-	module.exports = function (Container) {
 
+module.exports = class CronPlugin extends require('simpleplugin') {
+
+	constructor () {
+ 
+		super();
+ 
+		this.directory = __dirname;
+		this.loadDataFromPackageFile();
+ 
+	}
+
+	run (Container) {
+		
 		new cronjob('00 00 16 * * 1-5', function() {
 
 			Container.get('childssockets').emit('media.video.play', {
@@ -31,4 +43,10 @@
 
 		}, null, true);
 
-	};
+	}
+
+	free () {
+		super.free(); // must be called 
+	}
+
+};
