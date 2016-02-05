@@ -766,6 +766,9 @@
 										.on('load', function (plugin) {
 											Container.get('logs').success('-- [plugins] : ' + plugin.name + ' (v' + plugin.version + ') loaded');
 										})
+										.on('add', function (plugin) {
+											Container.get('logs').success("-- [plugins] : '" + plugin.name + "' (v" + plugin.version + ')  added');
+										})
 										.on('error', function (err) {
 											Container.get('logs').err('-- [plugins] : ' + err);
 										})
