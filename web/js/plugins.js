@@ -10,7 +10,7 @@ app.controller('ControllerPlugins', ['$scope', '$popup', function($scope, $popup
 
 	$scope.addViaGithub = function(url) {
 
-		$popup.prompt("Ajout de plugin", "https://github.com/", function(url) {
+		$popup.prompt("Ajout de plugin", "", function(url) {
 			socket.emit('plugin.add.github', url);
 		});
 

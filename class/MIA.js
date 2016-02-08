@@ -608,12 +608,10 @@
 
 									.on('plugin.add.github', function(url) {
 
-										var tabUrl, oSpawn, sResult;
-
 										try {
 
 											if (!that.isSocketClientAllowed(socket)) {
-												socket.emit('child.add.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+												socket.emit('plugin.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
 											}
 											else {
 
@@ -626,6 +624,7 @@
 													socket.emit('plugins', Container.get('plugins').plugins);
 												}).catch(function(err) {
 													socket.emit('plugins.error', err);
+													socket.emit('plugins', Container.get('plugins').plugins);
 												});
 
 											}
@@ -633,7 +632,52 @@
 										}
 										catch (e) {
 											Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
-											socket.emit('child.add.error', "Impossible d'ajouter le plugin.");
+											socket.emit('plugin.error', "Impossible d'ajouter le plugin.");
+										}
+
+									})
+
+									.on('plugin.delete', function(plugin) {
+
+										var plugins;
+
+										try {
+
+											if (!that.isSocketClientAllowed(socket)) {
+												socket.emit('plugin.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+											}
+											else {
+
+												if (Container.get('conf').get('debug')) {
+													Container.get('logs').log('plugin.delete');
+													Container.get('logs').log(plugin);
+												}
+
+												plugins = Container.get('plugins').plugins;
+
+												for (var i = 0; i < plugins.length; ++i) {
+
+													if (plugins[i].directory == plugin.directory) {
+
+														Container.get('plugins').remove(i).then(function() {
+															socket.emit('plugins', Container.get('plugins').plugins);
+														}).catch(function(err) {
+															socket.emit('plugins.error', err);
+															socket.emit('plugins', Container.get('plugins').plugins);
+														});
+
+														break;
+
+													}
+
+												}
+
+											}
+
+										}
+										catch (e) {
+											Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
+											socket.emit('plugin.error', "Impossible d'ajouter le plugin.");
 										}
 
 									});
