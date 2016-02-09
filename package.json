@@ -22,7 +22,7 @@
     "simplessl": "^1.1.0",
     
     "simpleplugin": "^1.0.0",
-    "simplepluginsmanager": "^1.2.0"
+    "simplepluginsmanager": "^1.2.1"
 
   },
   "devDependencies": {},
