@@ -620,7 +620,7 @@
 													Container.get('logs').log(url);
 												}
 
-												Container.get('plugins').addByGithub(url).then(function() {
+												Container.get('plugins').addByGithub(url, Container).then(function() {
 													socket.emit('plugins', Container.get('plugins').plugins);
 												}).catch(function(err) {
 													socket.emit('plugins.error', err);
@@ -639,8 +639,6 @@
 
 									.on('plugin.delete', function(plugin) {
 
-										var plugins;
-
 										try {
 
 											if (!that.isSocketClientAllowed(socket)) {
@@ -653,22 +651,18 @@
 													Container.get('logs').log(plugin);
 												}
 
-												plugins = Container.get('plugins').plugins;
+												if (!plugin || !plugin.directory) {
+													Container.get('logs').err('-- [plugins] : dossier de plugin inexistant.');
+													socket.emit('plugin.error', "Impossible de suppprimer le plugin.");
+												}
+												else {
 
-												for (var i = 0; i < plugins.length; ++i) {
-
-													if (plugins[i].directory == plugin.directory) {
-
-														Container.get('plugins').remove(i).then(function() {
-															socket.emit('plugins', Container.get('plugins').plugins);
-														}).catch(function(err) {
-															socket.emit('plugins.error', err);
-															socket.emit('plugins', Container.get('plugins').plugins);
-														});
-
-														break;
-
-													}
+													Container.get('plugins').removeByDirectory(plugin.directory).then(function() {
+														socket.emit('plugins', Container.get('plugins').plugins);
+													}).catch(function(err) {
+														socket.emit('plugins.error', err);
+														socket.emit('plugins', Container.get('plugins').plugins);
+													});
 
 												}
 
@@ -677,7 +671,7 @@
 										}
 										catch (e) {
 											Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
-											socket.emit('plugin.error', "Impossible d'ajouter le plugin.");
+											socket.emit('plugin.error', "Impossible de suppprimer le plugin.");
 										}
 
 									});
