@@ -19,40 +19,92 @@
 				m_tabOnDisconnect = [];
 				
 		// methodes
+
+			// private
+
+				function _initServer() {
+
+					return new Promise(function(resolve, reject) {
+
+						var sDirSSL = path.join(__dirname, '..', 'ssl')
+
+						try {
+
+							if (!Container.get('conf').get('ssl')) {
+								Container.get('logs').success('-- [child socket server] started on port ' + Container.get('conf').get('childrenport'));
+								resolve(require('socket.io').listen(Container.get('conf').get('childrenport')));
+							}
+							else {
+
+								Container.get('openssl').createCertificate(
+									path.join(sDirSSL, 'server.key'),
+									path.join(sDirSSL, 'server.csr'),
+									path.join(sDirSSL, 'server.crt')
+								).then(function(keys) {
+
+									var server = require('https').createServer({
+										key: keys.privateKey,
+										cert: keys.certificate
+									});
+
+									server.listen(Container.get('conf').get('childrenport'), function() {
+										Container.get('logs').success('-- [child socket server] with ssl started on port ' + Container.get('conf').get('childrenport'));
+										resolve(require('socket.io')(server));
+									});
+
+								})
+								.catch(function(err) {
+									Container.get('logs').err('-- [SimpleSSL] : ' ((e.message) ? e.message : e));
+									deferred.reject((e.message) ? e.message : e);
+								});
+
+							}
+
+						}
+						catch (e) {
+							reject(((e.message) ? e.message : e));
+						}
+
+					});
+
+				}
 			
 			// public
 				
 				this.start = function () {
 					
-					var deferred = q.defer(), nChildrenPort = Container.get('conf').get('childrenport');
+					var deferred = q.defer();
 
 						try {
 
-							m_clSocketServer = require('socket.io').listen(nChildrenPort);
+							_initServer().then(function(server) {
 
-							m_clSocketServer.sockets.on('connection', function (socket) {
+								m_clSocketServer = server;
 
-								Container.get('logs').success('-- [child socket client] ' + socket.id + ' connected');
-								
-								socket.on('disconnect', function () {
+								m_clSocketServer.sockets.on('connection', function (socket) {
+
+									Container.get('logs').success('-- [child socket client] ' + socket.id + ' connected');
 									
-									Container.get('logs').info('-- [child socket client] ' + socket.id + ' disconnected');
-									
-									m_tabOnDisconnect.forEach(function (fOnDisconnect) {
-										fOnDisconnect(socket);
+									socket.on('disconnect', function () {
+										
+										Container.get('logs').info('-- [child socket client] ' + socket.id + ' disconnected');
+										
+										m_tabOnDisconnect.forEach(function (fOnDisconnect) {
+											fOnDisconnect(socket);
+										});
+
 									});
 
+									m_tabOnConnection.forEach(function (fOnConnection) {
+										fOnConnection(socket);
+									});
+									
 								});
 
-								m_tabOnConnection.forEach(function (fOnConnection) {
-									fOnConnection(socket);
-								});
-								
-							});
+								deferred.resolve();
 
-							Container.get('logs').success('-- [child socket server] started on port ' + nChildrenPort);
-							
-							deferred.resolve();
+							})
+							.catch(deferred.reject);
 
 						}
 						catch (e) {

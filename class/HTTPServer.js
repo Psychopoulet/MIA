@@ -270,7 +270,7 @@ q
 
 									})
 									.catch(function(e) {
-										Container.get('logs').err('-- [HTTP server] openssl : ' ((e.message) ? e.message : e));
+										Container.get('logs').err('-- [HTTPS server] openssl : ' ((e.message) ? e.message : e));
 										deferred.reject((e.message) ? e.message : e);
 									});
 
