@@ -1,9 +1,10 @@
 
+"use strict";
+
 // dépendances
 	
-	const 	path = require('path'),
-			q = require('q');
-		
+	const path = require('path');
+	
 // module
 	
 	module.exports = function (Container) {
@@ -55,7 +56,7 @@
 								})
 								.catch(function(err) {
 									Container.get('logs').err('-- [SimpleSSL] : ' ((e.message) ? e.message : e));
-									deferred.reject((e.message) ? e.message : e);
+									reject((e.message) ? e.message : e);
 								});
 
 							}
@@ -72,8 +73,8 @@
 			// public
 				
 				this.start = function () {
-					
-					var deferred = q.defer();
+
+					return new Promise(function(resolve, reject) {
 
 						try {
 
@@ -101,35 +102,20 @@
 									
 								});
 
-								deferred.resolve();
+								resolve();
 
 							})
-							.catch(deferred.reject);
+							.catch(reject);
 
 						}
 						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
+							reject((e.message) ? e.message : e);
 						}
-						
-					return deferred.promise;
+
+					});
 
 				};
 				
-				this.stop = function () {
-
-					var deferred = q.defer();
-
-						try {
-							deferred.resolve();
-						}
-						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
-						}
-						
-					return deferred.promise;
-
-				};
-
 				this.emit = function (p_sOrder, p_vData) {
 					m_clSocketServer.sockets.emit(p_sOrder, p_vData);
 				};

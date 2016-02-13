@@ -1,8 +1,9 @@
 
+"use strict";
+
 // dépendances
 	
-	const 	path = require('path'),
-			q = require('q');
+	const path = require('path');
 
 // module
 	
@@ -12,8 +13,7 @@
 		
 		// attributes
 			
-			var
-				that = this,
+			var that = this,
 				m_clSocketServer,
 				m_tabOnConnection = [],
 				m_tabOnLog = [],
@@ -25,7 +25,7 @@
 				
 				this.start = function () {
 
-					var deferred = q.defer();
+					return new Promise(function(resolve, reject) {
 
 						try {
 
@@ -58,32 +58,17 @@
 								Container.get('logs').success('-- [HTTP socket server] started on port ' + Container.get('conf').get('webport'));
 							}
 
-							deferred.resolve();
+							resolve();
 
 						}
 						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
+							reject((e.message) ? e.message : e);
 						}
-						
-					return deferred.promise;
+
+					});
 					
 				}
 
-				this.stop = function () {
-
-					var deferred = q.defer();
-
-						try {
-							deferred.resolve();
-						}
-						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
-						}
-						
-					return deferred.promise;
-
-				};
-				
 				this.emit = function (p_sOrder, p_vData) {
 					m_clSocketServer.sockets.emit(p_sOrder, p_vData);
 				};

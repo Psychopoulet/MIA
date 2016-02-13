@@ -2,7 +2,6 @@
 // dépendances
 	
 	const 	path = require('path'),
-			q = require('q'),
 			spawn = require('child_process').spawn;
 		
 // module
@@ -165,7 +164,7 @@
 				
 				this.start = function () {
 
-					var deferred = q.defer();
+					return new Promise(function(resolve, reject) {
 
 						try {
 
@@ -824,29 +823,29 @@
 												
 												childssockets.start().then(function() {
 
-													deferred.resolve();
+													resolve();
 										
 												})
-												.catch(deferred.reject);
+												.catch(reject);
 													
 											})
-											.catch(deferred.reject);
+											.catch(reject);
 
 										})
-										.catch(deferred.reject);
+										.catch(reject);
 
 									})
-									.catch(deferred.reject);
+									.catch(reject);
 
 							})
-							.catch(deferred.reject);
+							.catch(reject);
 
 						}
 						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
+							reject((e.message) ? e.message : e);
 						}
-						
-					return deferred.promise;
+
+					});
 
 				};
 				

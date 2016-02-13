@@ -1,11 +1,12 @@
 
+"use strict";
+
 // dépendances
 
 	const 	os = require('os'),
 			dns = require('dns'),
 			path = require('path'),
-			fs = require('simplefs'),
-			q = require('q');
+			fs = require('simplefs');
 		
 // module
 	
@@ -75,23 +76,23 @@
 
 					function _readFile(p_sFilePath) {
 
-						var deferred = q.defer();
+						return new Promise(function(resolve, reject) {
 
 							try {
 
 								if (!fs.fileExists(p_sFilePath)) {
 									Container.get('logs').err('-- [HTTP server] The ' + p_sFilePath + ' file does not exist');
-									deferred.reject('-- [HTTP server] The ' + p_sFilePath + ' file does not exist');
+									reject('-- [HTTP server] The ' + p_sFilePath + ' file does not exist');
 								}
 								else {
 
 									fs.readFile(p_sFilePath, 'utf8', function (err, data) {
 
 										if (err) {
-											deferred.reject(err);
+											reject(err);
 										}
 										else {
-											deferred.resolve(data);
+											resolve(data);
 										}
 
 									});
@@ -100,16 +101,16 @@
 								
 							}
 							catch (e) {
-								deferred.reject((e.message) ? e.message : e);
+								reject((e.message) ? e.message : e);
 							}
-							
-						return deferred.promise;
+
+						});
 						
 					}
 					
 					function _readAllFiles(p_sDirectory) {
-q
-						var deferred = q.defer();
+
+						return new Promise(function(resolve, reject) {
 
 							try {
 
@@ -118,7 +119,7 @@ q
 									var bResult = true, sResult = '';
 
 									if (err) {
-										deferred.reject(err);
+										reject(err);
 									}
 									else {
 
@@ -133,10 +134,10 @@ q
 										});
 
 										if (bResult) {
-											deferred.resolve(sResult);
+											resolve(sResult);
 										}
 										else {
-											deferred.reject(sResult);
+											reject(sResult);
 										}
 
 									}
@@ -145,24 +146,24 @@ q
 
 							}
 							catch (e) {
-								deferred.reject((e.message) ? e.message : e);
+								reject((e.message) ? e.message : e);
 							}
-							
-						return deferred.promise;
+
+						});
 
 					}
 					
 					function _createBuffers() {
 
-						var deferred = q.defer();
+						return new Promise(function(resolve, reject) {
 
 							try {
 
 								if (!Container.get('conf').get('debug') && m_bBuffersCreated) {
-									deferred.resolve();
+									resolve();
 								}
 								else if (!fs.mkdirp(path.dirname(m_sIndexBufferFile))) {
-									deferred.reject('Impossible to create the html file');
+									reject('Impossible to create the html file');
 								}
 								else {
 
@@ -224,32 +225,34 @@ q
 											);
 
 											m_bBuffersCreated = true;
-											deferred.resolve();
+											resolve();
 									
 										});
 
 									})
-									.catch(deferred.reject);
+									.catch(reject);
 
 								}
 
 							}
 							catch (e) {
-								deferred.reject((e.message) ? e.message : e);
+								reject((e.message) ? e.message : e);
 							}
-							
-						return deferred.promise;
+
+						});
 
 					}
 
 					function _initServer() {
 
-						var deferred = q.defer(), sDirSSL = path.join(__dirname, '..', 'ssl');
+						return new Promise(function(resolve, reject) {
+
+							var sDirSSL = path.join(__dirname, '..', 'ssl');
 
 							try {
 
 								if (!Container.get('conf').get('ssl')) {
-									deferred.resolve(require('http').createServer(Container.get('express')));
+									resolve(require('http').createServer(Container.get('express')));
 								}
 								else {
 
@@ -259,7 +262,7 @@ q
 										path.join(sDirSSL, 'server.crt')
 									).then(function(keys) {
 
-										deferred.resolve(
+										resolve(
 
 											require('https').createServer({
 												key: keys.privateKey,
@@ -271,17 +274,17 @@ q
 									})
 									.catch(function(e) {
 										Container.get('logs').err('-- [HTTPS server] openssl : ' ((e.message) ? e.message : e));
-										deferred.reject((e.message) ? e.message : e);
+										reject((e.message) ? e.message : e);
 									});
 
 								}
 
 							}
 							catch (e) {
-								deferred.reject((e.message) ? e.message : e);
+								reject((e.message) ? e.message : e);
 							}
-							
-						return deferred.promise;
+
+						});
 
 					}
 					
@@ -289,7 +292,9 @@ q
 
 				this.start = function () {
 
-					var deferred = q.defer(), nWebPort = Container.get('conf').get('webport');
+					return new Promise(function(resolve, reject) {
+
+						var nWebPort = Container.get('conf').get('webport');
 
 						try {
 
@@ -422,38 +427,21 @@ q
 										Container.get('logs').success('-- [HTTP server] started on port ' + nWebPort);
 									}
 
-									deferred.resolve();
+									resolve();
 									
 								});
 
 							})
-							.catch(deferred.reject);
+							.catch(reject);
 
 						}
 						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
+							reject((e.message) ? e.message : e);
 						}
-						
-					return deferred.promise;
+
+					});
 
 				};
 				
-				this.stop = function () {
-
-					var deferred = q.defer();
-
-						try {
-
-							deferred.resolve();
-					
-						}
-						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
-						}
-						
-					return deferred.promise;
-
-				};
-
 	};
 	
