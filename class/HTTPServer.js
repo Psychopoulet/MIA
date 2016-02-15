@@ -272,9 +272,8 @@
 										);
 
 									})
-									.catch(function(e) {
-										Container.get('logs').err('-- [HTTPS server] openssl : ' ((e.message) ? e.message : e));
-										reject((e.message) ? e.message : e);
+									.catch(function(err) {
+										reject('-- [HTTPS server] openssl : ' + ((err.message) ? err.message : err));
 									});
 
 								}

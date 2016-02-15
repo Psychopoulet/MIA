@@ -821,12 +821,7 @@
 
 												// server childs
 												
-												childssockets.start().then(function() {
-
-													resolve();
-										
-												})
-												.catch(reject);
+												childssockets.start().then(resolve).catch(reject);
 													
 											})
 											.catch(reject);

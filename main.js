@@ -32,6 +32,8 @@
 					.set('webserver', new HTTPServer(Container))
 					.set('websockets', new HTTPSocket(Container));
 
+		Container.get('conf').spaces = true;
+
 		if (!Container.get('conf').fileExists()) {
 
 			Container.get('conf')	.set('webport', 1337).set('childrenport', 1338)
@@ -41,22 +43,36 @@
 										login : 'rasp',
 										password : 'password'
 									})
-									.set('clients', []).set('childs', [])
+									.set('clients', []).set('childs', []).set('actions', []).set('crons', [])
 									.save().catch(function(e) {
 										Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
 									});
 
 		}
 
-		Container.get('conf').spaces = true;
-
 		Container.get('conf').load().then(function() {
+
+			if (!Container.get('conf').has('actions') || !Container.get('conf').has('crons')) {
+
+				if (!Container.get('conf').has('actions')) {
+					Container.get('conf').set('actions', []);
+				}
+
+				if (!Container.get('conf').has('crons')) {
+					Container.get('conf').set('crons', []);
+				}
+
+				Container.get('conf').save().catch(function(e) {
+					Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+				});
+
+			}
 
 			Container.get('logs').showInConsole = Container.get('conf').get('debug');
 			Container.get('logs').showInFiles = !(Container.get('conf').get('debug'));
 
 			new MIA(Container).start()
-				.catch(function (err) { Container.get('logs').err('-- [MIA] ' + ((err.message) ? err.message : err)); });
+				.catch(function (err) { Container.get('logs').err(((err.message) ? err.message : err)); });
 			
 		})
 		.catch(function(e) {
