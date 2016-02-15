@@ -656,7 +656,7 @@
 												}
 												else {
 
-													Container.get('plugins').removeByDirectory(plugin.directory).then(function() {
+													Container.get('plugins').removeByDirectory(plugin.directory, Container).then(function() {
 														socket.emit('plugins', Container.get('plugins').plugins);
 													}).catch(function(err) {
 														socket.emit('plugins.error', err);
