@@ -605,12 +605,32 @@
 
 									// plugins
 
+									.on('plugins', function() {
+
+										try {
+
+											if (!that.isSocketClientAllowed(socket)) {
+												socket.emit('plugins.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+											}
+											else {
+												socket.emit('plugins', Container.get('plugins').plugins);
+											}
+
+										}
+										catch (e) {
+											Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
+											socket.emit('plugins.error', "Impossible de récupérer les plugins.");
+										}
+
+									})
+
+
 									.on('plugin.add.github', function(url) {
 
 										try {
 
 											if (!that.isSocketClientAllowed(socket)) {
-												socket.emit('plugin.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+												socket.emit('plugins.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
 											}
 											else {
 
@@ -631,7 +651,7 @@
 										}
 										catch (e) {
 											Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
-											socket.emit('plugin.error', "Impossible d'ajouter le plugin.");
+											socket.emit('plugins.error', "Impossible d'ajouter le plugin.");
 										}
 
 									})
@@ -641,7 +661,7 @@
 										try {
 
 											if (!that.isSocketClientAllowed(socket)) {
-												socket.emit('plugin.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+												socket.emit('plugins.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
 											}
 											else {
 
@@ -652,7 +672,7 @@
 
 												if (!plugin || !plugin.directory) {
 													Container.get('logs').err('-- [plugins] : dossier de plugin inexistant.');
-													socket.emit('plugin.error', "Impossible de suppprimer le plugin.");
+													socket.emit('plugins.error', "Impossible de suppprimer le plugin.");
 												}
 												else {
 
@@ -670,12 +690,32 @@
 										}
 										catch (e) {
 											Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
-											socket.emit('plugin.error', "Impossible de suppprimer le plugin.");
+											socket.emit('plugins.error', "Impossible de suppprimer le plugin.");
+										}
+
+									})
+
+									// actions
+
+
+									.on('actions', function() {
+
+										try {
+
+											if (!that.isSocketClientAllowed(socket)) {
+												socket.emit('actions.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+											}
+											else {
+												socket.emit('actions', Container.get('conf').get('actions'));
+											}
+
+										}
+										catch (e) {
+											Container.get('logs').err('-- [actions] ' + ((e.message) ? e.message : e));
+											socket.emit('actions.error', "Impossible de récupérer les actions.");
 										}
 
 									});
-
-									socket.emit('plugins', Container.get('plugins').plugins);
 
 								});
 

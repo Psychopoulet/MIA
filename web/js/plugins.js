@@ -2,7 +2,10 @@ app.controller('ControllerPlugins', ['$scope', '$popup', function($scope, $popup
 
 	$scope.plugins = [];
 
-	socket.on('plugins', function(plugins) {
+	socket.on('logged', function() {
+		socket.emit('plugins');
+	})
+	.on('plugins', function(plugins) {
 		$scope.plugins = plugins;
 		$scope.$apply();
 	})
@@ -18,7 +21,7 @@ app.controller('ControllerPlugins', ['$scope', '$popup', function($scope, $popup
 
 	$scope.delete = function(plugin) {
 
-		$popup.confirm("Voulez-vous vraiment supprimer le plugin '" + plugin.name + "'", '', function() {
+		$popup.confirm("Voulez-vous vraiment supprimer le plugin '" + plugin.name + "' ?", '', function() {
 			socket.emit('plugin.delete', plugin);
 		});
 

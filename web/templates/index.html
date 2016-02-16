@@ -245,7 +245,26 @@
 						</div>
 
 						<div class="modal-body">
-							actions...
+							
+							<ul class="list-group">
+
+								<li class="list-group-item" data-ng-repeat="action in actions">
+
+									<div class="clearfix">
+
+										<h5 class="pull-left">{{action.name}}</h5>
+
+										<div class="btn-group pull-right">
+											<button type="button" class="btn btn-primary glyphicon glyphicon-play" data-ng-click="execute(action);"></button>
+											<button type="button" class="btn btn-primary glyphicon glyphicon-trash" data-ng-click="delete(action);"></button>
+										</div>
+
+									</div>
+
+								</li>
+
+							</ul>
+
 						</div>
 
 						<div class="modal-footer">
@@ -318,7 +337,9 @@
 
 						<div class="modal-body">
 
-							<button class="btn btn-primary" data-ng-click="addViaGithub();">Ajouter via Github</button>
+							<button class="btn btn-primary" data-ng-click="addViaGithub();">
+								<span class="glyphicon glyphicon-plus"></span> Ajouter via Github
+							</button>
 
 							<br /><br />
 
