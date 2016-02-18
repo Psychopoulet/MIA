@@ -697,7 +697,6 @@
 
 									// actions
 
-
 									.on('actions', function() {
 
 										try {
@@ -713,6 +712,87 @@
 										catch (e) {
 											Container.get('logs').err('-- [actions] ' + ((e.message) ? e.message : e));
 											socket.emit('actions.error', "Impossible de récupérer les actions.");
+										}
+
+									})
+									.on('action.execute', function(action) {
+
+										try {
+
+											if (!that.isSocketClientAllowed(socket)) {
+												socket.emit('actions.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+											}
+
+											else if (!action) {
+												socket.emit('actions.error', "Aucune action n'a été fournie.");
+											}
+											else if (!action.name) {
+												socket.emit('actions.error', "Le nom de l'action est manquant.");
+											}
+											else if (!action.child) {
+												socket.emit('actions.error', "L'enfant conserné par l'action est manquant.");
+											}
+												else if (!action.child.token) {
+													socket.emit('actions.error', "L'enfant conserné par l'action n'a pas de token.");
+												}
+											else if (!action.command) {
+												socket.emit('actions.error', "La commande consernée par l'action est manquante.");
+											}
+											else if (!action.params) {
+												Container.get('childssockets').emitTo(action.child.token, action.command);
+											}
+											else {
+												Container.get('childssockets').emitTo(action.child.token, action.command, action.params);
+											}
+
+										}
+										catch (e) {
+											Container.get('logs').err('-- [actions] ' + ((e.message) ? e.message : e));
+											socket.emit('actions.error', "Impossible d'exécuter cette action.");
+										}
+
+									})
+									.on('action.add', function(action) {
+
+										try {
+
+											if (!that.isSocketClientAllowed(socket)) {
+												socket.emit('actions.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
+											}
+
+											else if (!action) {
+												socket.emit('actions.error', "Aucune action n'a été fournie.");
+											}
+											else if (!action.name) {
+												socket.emit('actions.error', "Le nom de l'action est manquant.");
+											}
+											else if (!action.child) {
+												socket.emit('actions.error', "L'enfant conserné par l'action est manquant.");
+											}
+												else if (!action.child.token) {
+													socket.emit('actions.error', "L'enfant conserné par l'action n'a pas de token.");
+												}
+											else if (!action.command) {
+												socket.emit('actions.error', "La commande consernée par l'action est manquante.");
+											}
+
+											else {
+
+												var actions = Container.get('conf').get('actions');
+												actions.push(action);
+												Container.get('conf').set('actions', actions).save().then(function() {
+													
+												}).catch(function(err) {
+													Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
+													socket.emit('actions.error', "Impossible de sauvegarder cette action.");
+												});
+
+											}
+
+										}
+										catch (e) {
+											Container.get('logs').err('-- [actions] ' + ((e.message) ? e.message : e));
+											socket.emit('actions.error', "Impossible d'exécuter cette action.");
 										}
 
 									});
