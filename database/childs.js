@@ -124,7 +124,7 @@ module.exports = class DBChilds {
 
 	}
 
-	lastInserted() {
+	lastInserted () {
 
 		var that = this;
 
@@ -145,7 +145,7 @@ module.exports = class DBChilds {
 
 	}
 
-	getAll() {
+	getAll () {
 		
 		var that = this;
 

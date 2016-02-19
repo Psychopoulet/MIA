@@ -145,7 +145,7 @@ module.exports = class DBClients {
 
 	}
 
-	lastInserted() {
+	lastInserted () {
 
 		var that = this;
 
@@ -166,7 +166,7 @@ module.exports = class DBClients {
 
 	}
 
-	getAll() {
+	getAll () {
 		
 		var that = this;
 

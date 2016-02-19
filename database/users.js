@@ -39,8 +39,19 @@ module.exports = class DBUsers {
 				}
 				else {
 					
-					that.add({ login: 'rasp', password: 'password' }).then(function() {
-						that.getAll().then(resolve).catch(reject);
+					that.getAll().then(function(users) {
+
+						if (0 < users.length) {
+							resolve(users);
+						}
+						else {
+
+							that.add({ login: 'rasp', password: 'password' }).then(function() {
+								that.getAll().then(resolve).catch(reject);
+							}).catch(reject);
+
+						}
+
 					}).catch(reject);
 
 				}
@@ -92,7 +103,36 @@ module.exports = class DBUsers {
 
 	}
 
-	lastInserted() {
+	exists (login, password) {
+
+		var that = this;
+
+		return new Promise(function(resolve, reject) {
+
+			that.getAll().then(function(users) {
+
+				var result = false;
+
+					password = _cryptPassword(password);
+
+					for (var i = 0; i < users.length; ++i) {
+
+						if (users[i].password === password) {
+							result = true;
+							break;
+						}
+
+					}
+
+				resolve(result);
+
+			}).catch(reject);
+
+		});
+
+	}
+
+	lastInserted () {
 
 		var that = this;
 
@@ -113,7 +153,7 @@ module.exports = class DBUsers {
 
 	}
 
-	getAll() {
+	getAll () {
 		
 		var that = this;
 

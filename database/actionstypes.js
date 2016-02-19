@@ -33,14 +33,25 @@ module.exports = class DBActionsTypes {
 				}
 				else {
 
-					that.add({ name : 'Jouer un son', command : 'media.sound.play' }).then(function() {
+					that.getAll().then(function(actionstypes) {
 
-						that.add({ name : 'Jouer une vidéo', command : 'media.video.play' }).then(function() {
-							that.getAll().then(resolve).catch(reject);
-						}).catch(reject);
+						if (0 < actionstypes.length) {
+							resolve(actionstypes);
+						}
+						else {
+
+							that.add({ name : 'Jouer un son', command : 'media.sound.play' }).then(function() {
+
+								that.add({ name : 'Jouer une vidéo', command : 'media.video.play' }).then(function() {
+									that.getAll().then(resolve).catch(reject);
+								}).catch(reject);
+
+							}).catch(reject);
+					
+						}
 
 					}).catch(reject);
-					
+
 				}
 
 			});
@@ -90,7 +101,7 @@ module.exports = class DBActionsTypes {
 
 	}
 
-	lastInserted() {
+	lastInserted () {
 
 		var that = this;
 
@@ -111,7 +122,7 @@ module.exports = class DBActionsTypes {
 
 	}
 
-	getAll() {
+	getAll () {
 		
 		var that = this;
 

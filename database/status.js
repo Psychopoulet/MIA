@@ -34,18 +34,29 @@ module.exports = class DBStatus {
 				}
 				else {
 
-					that.add({ code : 'ACCEPTED', name : 'Accepté(e)', color : 'green' }).then(function() {
+					that.getAll().then(function(status) {
 
-						that.add({ code : 'BLOCKED', name : 'Bloqué(e)', color : 'red' }).then(function() {
-							
-							that.add({ code : 'WAITING', name : 'En attente', color : 'yellow' }).then(function() {
-								that.getAll().then(resolve).catch(reject);
+						if (0 < status.length) {
+							resolve(status);
+						}
+						else {
+
+							that.add({ code : 'ACCEPTED', name : 'Accepté(e)', color : 'green' }).then(function() {
+
+								that.add({ code : 'BLOCKED', name : 'Bloqué(e)', color : 'red' }).then(function() {
+									
+									that.add({ code : 'WAITING', name : 'En attente', color : 'yellow' }).then(function() {
+										that.getAll().then(resolve).catch(reject);
+									}).catch(reject);
+
+								}).catch(reject);
+								
 							}).catch(reject);
-
-						}).catch(reject);
-						
-					}).catch(reject);
 					
+						}
+
+					}).catch(reject);
+
 				}
 
 			});
@@ -99,7 +110,7 @@ module.exports = class DBStatus {
 
 	}
 
-	lastInserted() {
+	lastInserted () {
 
 		var that = this;
 
@@ -120,7 +131,7 @@ module.exports = class DBStatus {
 
 	}
 
-	getAll() {
+	getAll () {
 		
 		var that = this;
 
