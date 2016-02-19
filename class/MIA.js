@@ -20,7 +20,7 @@
 
 			// private
 
-				function _getClients() {
+				function _sendClients() {
 
 					var tabResult = Container.get('conf').get('clients').slice();
 
@@ -62,11 +62,11 @@
 							Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
 						}
 
-					return tabResult;
+					websockets.emit('clients', tabResult);
 
 				}
 
-				function _getChilds() {
+				function _sendChilds() {
 
 					var tabResult = Container.get('conf').get('childs').slice();
 
@@ -108,7 +108,7 @@
 							Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
 						}
 
-					return tabResult;
+					websockets.emit('childs', tabResult);
 
 				}
 
@@ -176,7 +176,7 @@
 
 									// conf
 
-									websockets.emit('clients', _getClients());
+									_sendClients();
 
 									// listeners
 
@@ -199,9 +199,10 @@
 
 								socket.token = socket.id;
 
-								websockets	.setTokenToSocketById(socket.id, socket.id)
-											.emit('clients', _getClients());
-								
+								websockets	.setTokenToSocketById(socket.id, socket.id);
+
+								_sendClients();
+
 								socket.on('login', function (p_stData) {
 
 									try {
@@ -230,8 +231,9 @@
 
 												Container.get('conf').set('clients', clients);
 												socket.emit('logged', currentClient);
-												socket.emit('childs', _getChilds());
-												websockets.emit('clients', _getClients());
+
+												_sendChilds();
+												_sendClients();
 
 											}
 
@@ -263,8 +265,9 @@
 														websockets.fireLogin(socket, currentClient);
 
 														socket.emit('logged', currentClient);
-														socket.emit('childs', _getChilds());
-														websockets.emit('clients', _getClients());
+
+														_sendChilds();
+														_sendClients();
 
 													})
 													.catch(function(e) {
@@ -321,8 +324,9 @@
 
 												websockets.fireLogin(websockets.getSocket(p_stClient.token), currentClient);
 
-												websockets	.emitTo(p_stClient.token, 'logged', currentClient)
-															.emit('clients', _getClients());
+												websockets.emitTo(p_stClient.token, 'logged', currentClient);
+
+												_sendClients();
 
 											})
 											.catch(function(e) {
@@ -362,9 +366,7 @@
 
 											}
 
-											Container.get('conf').set('clients', clients).save().then(function() {
-												websockets.emit('clients', _getClients());
-											})
+											Container.get('conf').set('clients', clients).save().then(_sendClients)
 											.catch(function(e) {
 												Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
 												socket.emit('client.rename.error', 'Impossible de sauvegarder la configuration.');
@@ -451,7 +453,8 @@
 												childssockets.fireLogin(childssockets.getSocket(p_stChild.token), currentChild);
 
 												childssockets.emitTo(p_stChild.token, 'logged', currentChild);
-												websockets.emit('childs', _getChilds());
+
+												_sendChilds();
 
 											})
 											.catch(function(e) {
@@ -491,9 +494,7 @@
 
 											}
 
-											Container.get('conf').set('childs', childs).save().then(function() {
-												websockets.emit('childs', _getChilds());
-											})
+											Container.get('conf').set('childs', childs).save().then(_sendChilds)
 											.catch(function(e) {
 												Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
 												socket.emit('child.rename.error', 'Impossible de sauvegarder la configuration.');
@@ -536,7 +537,7 @@
 												childssockets	.emitTo(p_stChild.token, 'child.deleted')
 																.disconnect(p_stChild.token);
 
-												websockets.emit('childs', _getChilds());
+												_sendChilds();
 
 											})
 											.catch(function(e) {
@@ -696,7 +697,16 @@
 											socket.emit('actions.error', "Vous n'avez pas encore été autorisé à vous connecter à MIA.");
 										}
 										else {
-											socket.emit('actions', Container.get('conf').get('actions'));
+
+											Container.get('actions').getAll().then(function(actions) {
+
+												socket.emit('actions', actions);
+
+											}).catch(function(err) {
+												Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
+												socket.emit('actions.error', "Impossible de récupérer les actions.");
+											});
+
 										}
 
 									}
@@ -754,25 +764,19 @@
 										else if (!action) {
 											socket.emit('actions.error', "Aucune action n'a été fournie.");
 										}
-										else if (!action.name) {
-											socket.emit('actions.error', "Le nom de l'action est manquant.");
-										}
-										else if (!action.child) {
-											socket.emit('actions.error', "L'enfant conserné par l'action est manquant.");
-										}
-											else if (!action.child.token) {
-												socket.emit('actions.error', "L'enfant conserné par l'action n'a pas de token.");
-											}
-										else if (!action.command) {
-											socket.emit('actions.error', "La commande consernée par l'action est manquante.");
-										}
-
 										else {
 
-											var actions = Container.get('conf').get('actions');
-											actions.push(action);
-											Container.get('conf').set('actions', actions).save().then(function() {
-												
+											Container.get('actions').add(action).then(function() {
+
+												Container.get('actions').getAll().then(function(actions) {
+
+													socket.emit('actions', actions);
+
+												}).catch(function(err) {
+													Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
+													socket.emit('actions.error', "Impossible de récupérer les actions.");
+												});
+
 											}).catch(function(err) {
 												Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
 												socket.emit('actions.error', "Impossible de sauvegarder cette action.");
@@ -796,7 +800,7 @@
 
 									// conf
 
-									websockets.emit('childs', _getChilds());
+									_sendChilds();
 
 									// listeners
 
@@ -824,7 +828,7 @@
 
 								socket.token = socket.id;
 								childssockets.setTokenToSocketById(socket.id, socket.id);
-								websockets.emit('childs', _getChilds());
+								_sendChilds();
 								
 								// childs
 
@@ -856,7 +860,8 @@
 
 												Container.get('conf').set('childs', childs);
 												socket.emit('logged', currentChild);
-												websockets.emit('childs', _getChilds());
+												
+												_sendChilds();
 
 											}
 
