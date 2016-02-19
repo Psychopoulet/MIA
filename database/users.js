@@ -7,13 +7,19 @@
 
 // private
 
+	var _pInsert;
+
 	function _cryptPassword (password) {
 		return crypto.createHash('sha1').update("MIA_" + password + "_MIA").digest('hex');
 	}
 
 // module
 
-module.exports = class DBUsers extends require(require('path').join(__dirname, 'main.js')) {
+module.exports = class DBUsers {
+
+	constructor (db) {
+		this.db = db;
+	}
 
 	create () {
 
@@ -21,29 +27,25 @@ module.exports = class DBUsers extends require(require('path').join(__dirname, '
 
 		return new Promise(function(resolve, reject) {
 
-			that.init().then(function() {
+			that.db.run(
+				"CREATE TABLE IF NOT EXISTS users (" +
+					" id INTEGER PRIMARY KEY AUTOINCREMENT," +
+					" login VARCHAR(50) NOT NULL," +
+					" password VARCHAR(100) NOT NULL" +
+			");", [], function(err) {
 
-				that.db.run(
-					"CREATE TABLE IF NOT EXISTS users (" +
-						" id INTEGER PRIMARY KEY AUTOINCREMENT," +
-						" login VARCHAR(50) NOT NULL," +
-						" password VARCHAR(100) NOT NULL" +
-					");", [], function(err) {
+				if (err) {
+					reject((err.message) ? err.message : err);
+				}
+				else {
+					
+					that.add({ login: 'rasp', password: 'password' }).then(function() {
+						that.getAll().then(resolve).catch(reject);
+					}).catch(reject);
 
-					if (err) {
-						reject((err.message) ? err.message : err);
-					}
-					else {
-						
-						that.add({ login: 'rasp', password: 'password' }).then(function() {
-							that.getAll().then(resolve).catch(reject);
-						}).catch(reject);
+				}
 
-					}
-
-				});
-
-			}).catch(reject);
+			});
 
 		});
 
@@ -55,44 +57,36 @@ module.exports = class DBUsers extends require(require('path').join(__dirname, '
 
 		return new Promise(function(resolve, reject) {
 
-			that.init().then(function() {
+			if (!user) {
+				reject('Aucun utilisateur renseigné.');
+			}
+			else if (!user.login) {
+				reject('Aucun login renseigné.');
+			}
+			else if (!user.password) {
+				reject('Aucun mot de passe renseigné.');
+			}
+			else {
 
-				if (!user) {
-					reject('Aucun utilisateur renseigné.');
-				}
-				else if (!user.login) {
-					reject('Aucun login renseigné.');
-				}
-				else if (!user.password) {
-					reject('Aucun mot de passe renseigné.');
-				}
-				else {
-
-					that.db.run(
-						"INSERT INTO users (login, password) VALUES (:login, :password);", {
-							':login': user.login,
-							':password': _cryptPassword(user.password)
-						}, function(err) {
-
-						if (err) {
-							reject((err.message) ? err.message : err);
-						}
-						else {
-							that.lastInserted().then(resolve).catch(reject);
-						}
-
-					});
-
-					/*that.db.prepare("INSERT INTO users (login, password) VALUES (:login, :password);")
-					.run({
-						':login': 'rasp',
-						':password': crypto.createHash('sha1').update("MIA_password_MIA").digest('hex')
-					})
-					.finalize();*/
-
+				if (!_pInsert) {
+					_pInsert = that.db.prepare("INSERT INTO users (login, password) VALUES (:login, :password);");
 				}
 
-			}).catch(reject);
+				_pInsert.run({
+					':login': user.login,
+					':password': _cryptPassword(user.password)
+				}, function(err) {
+
+					if (err) {
+						reject((err.message) ? err.message : err);
+					}
+					else {
+						that.lastInserted().then(resolve).catch(reject);
+					}
+
+				});
+
+			}
 
 		});
 
@@ -104,20 +98,16 @@ module.exports = class DBUsers extends require(require('path').join(__dirname, '
 
 		return new Promise(function(resolve, reject) {
 
-			that.init().then(function() {
+			that.db.get("SELECT id, login, password FROM users ORDER BY id DESC LIMIT 0,1;", [], function(err, row) {
+				
+				if (err) {
+					reject((err.message) ? err.message : err);
+				}
+				else {
+					resolve((row) ? row : {});
+				}
 
-				that.db.get("SELECT id, login, password FROM users ORDER BY id DESC LIMIT 0,1;", [], function(err, row) {
-					
-					if (err) {
-						reject((err.message) ? err.message : err);
-					}
-					else {
-						resolve(row);
-					}
-
-				});
-
-			}).catch(reject);
+			});
 
 		});
 
@@ -129,20 +119,16 @@ module.exports = class DBUsers extends require(require('path').join(__dirname, '
 
 		return new Promise(function(resolve, reject) {
 
-			that.init().then(function() {
+			that.db.all("SELECT id, login, password FROM users;", [], function(err, rows) {
 
-				that.db.all("SELECT id, login, password FROM users;", [], function(err, rows) {
+				if (err) {
+					reject((err.message) ? err.message : err);
+				}
+				else {
+					resolve((rows) ? rows : []);
+				}
 
-					if (err) {
-						reject((err.message) ? err.message : err);
-					}
-					else {
-						resolve(rows);
-					}
-
-				});
-
-			}).catch(reject);
+			});
 
 		});
 

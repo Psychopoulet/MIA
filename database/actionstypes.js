@@ -3,9 +3,17 @@
 
 // deps
 
+// private
+
+	var _pInsert;
+
 // module
 
-module.exports = class DBActionsTypes extends require(require('path').join(__dirname, 'main.js')) {
+module.exports = class DBActionsTypes {
+
+	constructor (db) {
+		this.db = db;
+	}
 
 	create () {
 
@@ -13,33 +21,29 @@ module.exports = class DBActionsTypes extends require(require('path').join(__dir
 
 		return new Promise(function(resolve, reject) {
 
-			that.init().then(function() {
+			that.db.run(
+				"CREATE TABLE IF NOT EXISTS actionstypes (" +
+					" id INTEGER PRIMARY KEY AUTOINCREMENT," +
+					" name VARCHAR(50) NOT NULL," +
+					" command VARCHAR(100) NOT NULL" +
+			");", [], function(err) {
 
-				that.db.run(
-					"CREATE TABLE IF NOT EXISTS actionstypes (" +
-						" id INTEGER PRIMARY KEY AUTOINCREMENT," +
-						" name VARCHAR(50) NOT NULL," +
-						" command VARCHAR(100) NOT NULL" +
-					");", [], function(err) {
+				if (err) {
+					reject((err.message) ? err.message : err);
+				}
+				else {
 
-					if (err) {
-						reject((err.message) ? err.message : err);
-					}
-					else {
+					that.add({ name : 'Jouer un son', command : 'media.sound.play' }).then(function() {
 
-						that.add({ name : 'Jouer un son', command : 'media.sound.play' }).then(function() {
-
-							that.add({ name : 'Jouer une vidéo', command : 'media.video.play' }).then(function() {
-								that.getAll().then(resolve).catch(reject);
-							}).catch(reject);
-
+						that.add({ name : 'Jouer une vidéo', command : 'media.video.play' }).then(function() {
+							that.getAll().then(resolve).catch(reject);
 						}).catch(reject);
-						
-					}
 
-				});
+					}).catch(reject);
+					
+				}
 
-			}).catch(reject);
+			});
 
 		});
 
@@ -51,37 +55,36 @@ module.exports = class DBActionsTypes extends require(require('path').join(__dir
 
 		return new Promise(function(resolve, reject) {
 
-			that.init().then(function() {
+			if (!actiontype) {
+				reject("Aucun type d'action renseigné.");
+			}
+			else if (!actiontype.name) {
+				reject('Aucun nom renseigné.');
+			}
+			else if (!actiontype.command) {
+				reject('Aucune commande renseignée.');
+			}
+			else {
 
-				if (!actiontype) {
-					reject('Aucun utilisateur renseigné.');
-				}
-				else if (!actiontype.name) {
-					reject('Aucun nom renseigné.');
-				}
-				else if (!actiontype.command) {
-					reject('Aucune commande renseignée.');
-				}
-				else {
-
-					that.db.run(
-						"INSERT INTO actionstypes (name, command) VALUES (:name, :command);", {
-							':name': actiontype.name,
-							':command': actiontype.command
-						}, function(err) {
-
-						if (err) {
-							reject((err.message) ? err.message : err);
-						}
-						else {
-							that.lastInserted().then(resolve).catch(reject);
-						}
-
-					});
-
+				if (!_pInsert) {
+					_pInsert = that.db.prepare("INSERT INTO actionstypes (name, command) VALUES (:name, :command);");
 				}
 
-			}).catch(reject);
+				_pInsert.run({
+					':name': actiontype.name,
+					':command': actiontype.command
+				}, function(err) {
+
+					if (err) {
+						reject((err.message) ? err.message : err);
+					}
+					else {
+						that.lastInserted().then(resolve).catch(reject);
+					}
+
+				});
+
+			}
 
 		});
 
@@ -93,20 +96,16 @@ module.exports = class DBActionsTypes extends require(require('path').join(__dir
 
 		return new Promise(function(resolve, reject) {
 
-			that.init().then(function() {
+			that.db.get("SELECT id, name, command FROM actionstypes ORDER BY id DESC LIMIT 0,1;", [], function(err, row) {
+				
+				if (err) {
+					reject((err.message) ? err.message : err);
+				}
+				else {
+					resolve((row) ? row : {});
+				}
 
-				that.db.get("SELECT id, name, command FROM actionstypes ORDER BY id DESC LIMIT 0,1;", [], function(err, row) {
-					
-					if (err) {
-						reject((err.message) ? err.message : err);
-					}
-					else {
-						resolve(row);
-					}
-
-				});
-
-			}).catch(reject);
+			});
 
 		});
 
@@ -118,20 +117,16 @@ module.exports = class DBActionsTypes extends require(require('path').join(__dir
 
 		return new Promise(function(resolve, reject) {
 
-			that.init().then(function() {
+			that.db.all("SELECT id, name, command FROM actionstypes;", [], function(err, rows) {
 
-				that.db.all("SELECT id, name, command FROM actionstypes;", [], function(err, rows) {
+				if (err) {
+					reject((err.message) ? err.message : err);
+				}
+				else {
+					resolve((rows) ? rows : []);
+				}
 
-					if (err) {
-						reject((err.message) ? err.message : err);
-					}
-					else {
-						resolve(rows);
-					}
-
-				});
-
-			}).catch(reject);
+			});
 
 		});
 
