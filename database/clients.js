@@ -20,7 +20,8 @@
 		" status.id AS status_id," +
 		" status.code AS status_code," +
 		" status.name AS status_name," +
-		" status.color AS status_color" +
+		" status.backgroundcolor AS status_backgroundcolor," +
+		" status.textcolor AS status_textcolor" +
 
 	" FROM clients" +
 		" INNER JOIN users ON users.id = clients.id_user" +
@@ -40,7 +41,8 @@
 			id : client.status_id,
 			code : client.status_code,
 			name : client.status_name,
-			color : client.status_color
+			backgroundcolor : client.status_backgroundcolor,
+			textcolor : client.status_textcolor
 		};
 
 			delete client.status_id;
@@ -172,7 +174,7 @@ module.exports = class DBClients {
 
 		return new Promise(function(resolve, reject) {
 
-			that.db.get( _sSelectQuery, [], function(err, rows) {
+			that.db.all( _sSelectQuery, [], function(err, rows) {
 
 				if (err) {
 					reject((err.message) ? err.message : err);

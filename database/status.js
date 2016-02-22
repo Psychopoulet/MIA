@@ -26,7 +26,8 @@ module.exports = class DBStatus {
 					" id INTEGER PRIMARY KEY AUTOINCREMENT," +
 					" code VARCHAR(50) NOT NULL UNIQUE," +
 					" name VARCHAR(50) NOT NULL," +
-					" color VARCHAR(50) NOT NULL" +
+					" backgroundcolor VARCHAR(50) NOT NULL," +
+					" textcolor VARCHAR(50) NOT NULL" +
 			");", [], function(err) {
 
 				if (err) {
@@ -41,11 +42,11 @@ module.exports = class DBStatus {
 						}
 						else {
 
-							that.add({ code : 'ACCEPTED', name : 'Accepté(e)', color : 'green' }).then(function() {
+							that.add({ code : 'ACCEPTED', name : 'Accepté(e)', backgroundcolor : '#dff0d8', textcolor : '#3c763d' }).then(function() {
 
-								that.add({ code : 'BLOCKED', name : 'Bloqué(e)', color : 'red' }).then(function() {
+								that.add({ code : 'BLOCKED', name : 'Bloqué(e)', backgroundcolor : 'red', textcolor : 'black' }).then(function() {
 									
-									that.add({ code : 'WAITING', name : 'En attente', color : 'yellow' }).then(function() {
+									that.add({ code : 'WAITING', name : 'En attente', backgroundcolor : '#fcf8e3', textcolor : '#8a6d3b' }).then(function() {
 										that.getAll().then(resolve).catch(reject);
 									}).catch(reject);
 
@@ -80,19 +81,23 @@ module.exports = class DBStatus {
 			else if (!status.name) {
 				reject('Aucun nom renseigné.');
 			}
-			else if (!status.color) {
-				reject('Aucune couleur renseignée.');
+			else if (!status.backgroundcolor) {
+				reject('Aucune couleur de fond renseignée.');
+			}
+			else if (!status.textcolor) {
+				reject('Aucune couleur de texte renseignée.');
 			}
 			else {
 
 				if (!_pInsert) {
-					_pInsert = that.db.prepare("INSERT INTO status (code, name, color) VALUES (:code, :name, :color);");
+					_pInsert = that.db.prepare("INSERT INTO status (code, name, backgroundcolor, textcolor) VALUES (:code, :name, :backgroundcolor, :textcolor);");
 				}
 
 				_pInsert.run({
 					':code': status.code,
 					':name': status.name,
-					':color': status.color
+					':backgroundcolor': status.backgroundcolor,
+					':textcolor': status.textcolor
 				}, function(err) {
 
 					if (err) {
@@ -116,7 +121,7 @@ module.exports = class DBStatus {
 
 		return new Promise(function(resolve, reject) {
 
-			that.db.get("SELECT id, code, name, color FROM status ORDER BY id DESC LIMIT 0,1;", [], function(err, row) {
+			that.db.get("SELECT id, code, name, backgroundcolor, textcolor FROM status ORDER BY id DESC LIMIT 0,1;", [], function(err, row) {
 				
 				if (err) {
 					reject((err.message) ? err.message : err);
@@ -137,7 +142,7 @@ module.exports = class DBStatus {
 
 		return new Promise(function(resolve, reject) {
 
-			that.db.all("SELECT id, code, name, color FROM status;", [], function(err, rows) {
+			that.db.all("SELECT id, code, name, backgroundcolor, textcolor FROM status;", [], function(err, rows) {
 
 				if (err) {
 					reject((err.message) ? err.message : err);
@@ -147,6 +152,39 @@ module.exports = class DBStatus {
 				}
 
 			});
+
+		});
+
+	}
+
+	getOneByCode (code) {
+		
+		var that = this;
+
+		return new Promise(function(resolve, reject) {
+
+			that.getAll().then(function(status) {
+
+				var stResult;
+
+				for (var i = 0; i < status.length; ++i) {
+
+					if (status[i].code === code) {
+						stResult = status[i];
+						break;
+					}
+
+				}
+
+				if (stResult) {
+					resolve(stResult);
+				}
+				else {
+					reject("Le code statut '" + code + "' n'existe pas.");
+				}
+
+			})
+			.catch(reject);
 
 		});
 

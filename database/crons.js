@@ -145,7 +145,7 @@ module.exports = class DBCrons {
 
 		return new Promise(function(resolve, reject) {
 
-			that.db.get(_sSelectQuery, [], function(err, rows) {
+			that.db.all(_sSelectQuery, [], function(err, rows) {
 
 				if (err) {
 					reject((err.message) ? err.message : err);

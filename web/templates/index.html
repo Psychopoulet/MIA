@@ -158,15 +158,15 @@
 
 								<li class="list-group-item"
 									data-ng-repeat="child in childs"
-									data-ng-class="{ 'list-group-item-success' : child.connected && child.allowed, 'list-group-item-warning' : child.connected && !child.allowed }">
+									data-ng-style="{ 'background-color' : child.status.backgroundcolor }">
 
 									<div class="clearfix">
 
 										<h5 class="pull-left">{{child.name}}</h5>
 
 										<div class="btn-group pull-right">
-											<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="!child.allowed" data-ng-click="allow(child);"></button>
-											<button type="button" class="btn glyphicon glyphicon-edit" data-ng-show="child.allowed" data-ng-click="rename(child);"></button>
+											<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="'ACCEPTED' != child.status.code" data-ng-click="allow(child);"></button>
+											<button type="button" class="btn glyphicon glyphicon-edit" data-ng-show="'ACCEPTED' == child.status.code" data-ng-click="rename(child);"></button>
 											<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(child);"></button>
 										</div>
 

@@ -36,7 +36,7 @@
 				Container.get('conf')	.set('webport', 1337).set('childrenport', 1338)
 										.set('debug', false)
 										.set('ssl', true)
-										.set('clients', []).set('childs', []).set('actions', [])
+										.set('clients', []).set('actions', [])
 										.save().catch(function(e) {
 											Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
 										});

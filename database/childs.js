@@ -17,7 +17,8 @@
 		" status.id AS status_id," +
 		" status.code AS status_code," +
 		" status.name AS status_name," +
-		" status.color AS status_color" +
+		" status.backgroundcolor AS status_backgroundcolor," +
+		" status.textcolor AS status_textcolor" +
 
 	" FROM childs" +
 		" INNER JOIN status ON status.id = childs.id_status";
@@ -28,13 +29,15 @@
 			id : child.status_id,
 			code : child.status_code,
 			name : child.status_name,
-			color : child.status_color
+			backgroundcolor : child.status_backgroundcolor,
+			textcolor : child.status_textcolor
 		};
 
 			delete child.status_id;
 			delete child.status_code;
 			delete child.status_name;
-			delete child.status_color;
+			delete child.status_backgroundcolor;
+			delete child.status_textcolor;
 
 		return child;
 
@@ -151,7 +154,7 @@ module.exports = class DBChilds {
 
 		return new Promise(function(resolve, reject) {
 
-			that.db.get( _sSelectQuery, [], function(err, rows) {
+			that.db.all(_sSelectQuery, [], function(err, rows) {
 
 				if (err) {
 					reject((err.message) ? err.message : err);
@@ -167,6 +170,81 @@ module.exports = class DBChilds {
 
 					resolve(rows);
 
+				}
+
+			});
+
+		});
+
+	}
+
+	getOneByToken (token) {
+		
+		var that = this;
+
+		return new Promise(function(resolve, reject) {
+
+			that.getAll().then(function(childs) {
+
+				var stResult;
+
+				for (var i = 0; i < childs.length; ++i) {
+
+					if (childs[i].token === token) {
+						stResult = childs[i];
+						break;
+					}
+
+				}
+
+				if (stResult) {
+					resolve(stResult);
+				}
+				else {
+					reject("Le token enfant '" + token + "' n'existe pas.");
+				}
+
+			})
+			.catch(reject);
+
+		});
+
+	}
+
+	rename (token, name) {
+		
+		var that = this;
+
+		return new Promise(function(resolve, reject) {
+
+			that.db.run("UPDATE childs SET name = :name WHERE token = :token;", { ':name': name, ':token' : token }, function(err) {
+
+				if (err) {
+					reject((err.message) ? err.message : err);
+				}
+				else {
+					that.getOneByToken(token).then(resolve).catch(reject);
+				}
+
+			});
+
+		});
+
+	}
+
+	delete (token) {
+		
+		var that = this;
+
+		return new Promise(function(resolve, reject) {
+
+			that.db.run("DELETE FROM childs WHERE token = :token;", { ':token' : token }, function(err) {
+
+				if (err) {
+					reject((err.message) ? err.message : err);
+				}
+				else {
+					resolve();
 				}
 
 			});
