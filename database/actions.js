@@ -215,4 +215,37 @@ module.exports = class DBActions {
 
 	}
 
+	getOneById (id) {
+		
+		var that = this;
+
+		return new Promise(function(resolve, reject) {
+
+			that.getAll().then(function(actions) {
+
+				var stResult;
+
+				for (var i = 0; i < actions.length; ++i) {
+
+					if (actions[i].id === id) {
+						stResult = actions[i];
+						break;
+					}
+
+				}
+
+				if (stResult) {
+					resolve(stResult);
+				}
+				else {
+					reject("L'id action '" + id + "' n'existe pas.");
+				}
+
+			})
+			.catch(reject);
+
+		});
+
+	}
+
 };

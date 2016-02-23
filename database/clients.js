@@ -198,4 +198,79 @@ module.exports = class DBClients {
 
 	}
 
+	getOneByToken (token) {
+		
+		var that = this;
+
+		return new Promise(function(resolve, reject) {
+
+			that.getAll().then(function(clients) {
+
+				var stResult;
+
+				for (var i = 0; i < clients.length; ++i) {
+
+					if (clients[i].token === token) {
+						stResult = clients[i];
+						break;
+					}
+
+				}
+
+				if (stResult) {
+					resolve(stResult);
+				}
+				else {
+					reject("Le token client '" + token + "' n'existe pas.");
+				}
+
+			})
+			.catch(reject);
+
+		});
+
+	}
+
+	rename (token, name) {
+		
+		var that = this;
+
+		return new Promise(function(resolve, reject) {
+
+			that.db.run("UPDATE clients SET name = :name WHERE token = :token;", { ':name': name, ':token' : token }, function(err) {
+
+				if (err) {
+					reject((err.message) ? err.message : err);
+				}
+				else {
+					that.getOneByToken(token).then(resolve).catch(reject);
+				}
+
+			});
+
+		});
+
+	}
+
+	delete (token) {
+		
+		var that = this;
+
+		return new Promise(function(resolve, reject) {
+
+			that.db.run("DELETE FROM clients WHERE token = :token;", { ':token' : token }, function(err) {
+
+				if (err) {
+					reject((err.message) ? err.message : err);
+				}
+				else {
+					resolve();
+				}
+
+			});
+
+		});
+
+	}
+
 };

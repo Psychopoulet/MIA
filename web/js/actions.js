@@ -1,58 +1,58 @@
-app.service('$actions', ['$q', function($q) {
+app.service('$actions', ['$q', '$popup', function($q, $popup) {
 
-	this.add = function(name, child, command, params) {
+	var that = this;
 
-		var deferred = $q.defer(), data;
+	this.writedaction = null;
+	this.actionstypes = [];
 
-			if (!name) {
-				deferred.reject("Le nom de l'action est manquant.");
-			}
-			else if (!child) {
-				deferred.reject("L'enfant conserné par l'action est manquant.");
-			}
-				else if (!child.token) {
-					deferred.reject("L'enfant conserné par l'action n'a pas de token.");
-				}
-			else if (!command) {
-				deferred.reject("La commande consernée par l'action est manquante.");
-			}
-			else {
+	this.add = function(name, child, actiontype, params) {
 
-				data = {
-					name : name, child : child, command : command
-				};
+		that.writedaction = {
+			id: null,
+			name: (name) ? name : '',
+			child: (child) ? child : null,
+			actiontype: (actiontype) ? actiontype : null,
+			params: (params) ? params : null
+		};
 
-				if (params) {
-					data.params = params;
-				}
-
-				console.log('action.add');
-				console.log(data);
-
-				socket.emit('action.add', data);
-
-				deferred.resolve();
-
-			}
-
-		return deferred.promise;
+		jQuery('#modalAction').modal({
+			backdrop: 'static',
+			keyboard: false,
+			show: true
+		});
 
 	};
 
-}]);
-
-app.controller('ControllerAction', ['$scope', '$popup', '$actions', function($scope, $popup, $actions) {
-
-	$scope.actions = [];
-
-	socket.on('logged', function() {
-		socket.emit('actions');
+	socket.on('actionstypes', function(actionstypes) {
+		that.actionstypes = actionstypes;
 	})
-	.on('actions', function(actions) {
-		$scope.actions = actions;
-		$scope.$apply();
-	})
-	.on('actions.error', $popup.alert);
+	.on('actionstypes.error', $popup.alert);
+
+	socket.emit('actionstypes');
+
+}])
+
+.controller('ControllerAction', ['$scope', '$popup', '$actions', function($scope, $popup, $actions) {
+
+	$scope.action = {};
+	$scope.actionstypes = $actions.actionstypes;
+
+
+	jQuery('#modalAction').on('show.bs.modal', function () {
+		
+		if ($actions.writedaction) {
+			$scope.action = $actions.writedaction;
+		}
+
+	});
+
+	$scope.add = function(action) {
+		socket.emit('action.add', action);
+	};
+
+	$scope.edit = function(action) {
+		socket.emit('action.edit', action);
+	};
 
 	$scope.execute = function(action) {
 		socket.emit('action.execute', action);
@@ -69,9 +69,9 @@ app.controller('ControllerAction', ['$scope', '$popup', '$actions', function($sc
 
 	};
 
-}]);
+}])
 
-app.controller('ControllerActions', ['$scope', '$popup', '$actions', function($scope, $popup, $actions) {
+.controller('ControllerActions', ['$scope', '$popup', '$actions', function($scope, $popup, $actions) {
 
 	$scope.actions = [];
 

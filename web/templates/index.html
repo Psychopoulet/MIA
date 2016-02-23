@@ -124,15 +124,15 @@
 
 								<li class="list-group-item"
 									data-ng-repeat="client in clients"
-									data-ng-class="{ 'list-group-item-success' : client.connected && client.allowed, 'list-group-item-warning' : client.connected && !client.allowed }">
+									data-ng-style="{ 'background-color' : client.status.backgroundcolor, 'color' : client.status.textcolor }">
 
 									<div class="clearfix">
 
-										<h5 class="pull-left">{{client.name}}</h5>
+										<h5 class="pull-left">{{client.name}}<span data-ng-show="client.user"> ({{client.user.login}})</span></h5>
 
 										<div class="btn-group pull-right">
-											<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="!client.allowed" data-ng-click="allow(client);"></button>
-											<button type="button" class="btn glyphicon glyphicon-edit" data-ng-show="client.allowed" data-ng-click="rename(client);"></button>
+											<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="'ACCEPTED' != client.status.code" data-ng-click="allow(client);"></button>
+											<button type="button" class="btn glyphicon glyphicon-edit" data-ng-show="'ACCEPTED' == client.status.code" data-ng-click="rename(client);"></button>
 											<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(client);"></button>
 										</div>
 
@@ -158,7 +158,7 @@
 
 								<li class="list-group-item"
 									data-ng-repeat="child in childs"
-									data-ng-style="{ 'background-color' : child.status.backgroundcolor }">
+									data-ng-style="{ 'background-color' : child.status.backgroundcolor, 'color' : client.status.textcolor }">
 
 									<div class="clearfix">
 
@@ -332,7 +332,31 @@
 				</div>
 
 			</div>
-			
+				
+				<div id="modalAction" class="modal fade only-logged hidden" data-ng-controller="ControllerAction">
+
+					<div class="modal-dialog">
+
+						<div class="modal-content">
+
+							<div class="modal-header">
+								<h4 class="modal-title"><span class="glyphicon glyphicon-fire"></span> {{action.name}}</h4>
+							</div>
+
+							<div class="modal-body">
+								{{action}}
+							</div>
+
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+				
 			<div id="modalPlugins" class="modal fade only-logged hidden" data-ng-controller="ControllerPlugins">
 
 				<div class="modal-dialog">
