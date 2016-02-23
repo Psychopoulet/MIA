@@ -4,6 +4,7 @@ app.service('$actions', ['$q', '$popup', function($q, $popup) {
 
 	this.writedaction = null;
 	this.actionstypes = [];
+	this.childs = [];
 
 	this.add = function(name, child, actiontype, params) {
 
@@ -26,6 +27,9 @@ app.service('$actions', ['$q', '$popup', function($q, $popup) {
 	socket.on('actionstypes', function(actionstypes) {
 		that.actionstypes = actionstypes;
 	})
+	.on('childs', function(childs) {
+		that.childs = childs;
+	})
 	.on('actionstypes.error', $popup.alert);
 
 	socket.emit('actionstypes');
@@ -35,14 +39,21 @@ app.service('$actions', ['$q', '$popup', function($q, $popup) {
 .controller('ControllerAction', ['$scope', '$popup', '$actions', function($scope, $popup, $actions) {
 
 	$scope.action = {};
-	$scope.actionstypes = $actions.actionstypes;
-
+	$scope.childs = [];
+	$scope.actionstypes = [];
 
 	jQuery('#modalAction').on('show.bs.modal', function () {
+
+		$scope.actionstypes = $actions.actionstypes;
+		$scope.childs = $actions.childs;
 		
 		if ($actions.writedaction) {
 			$scope.action = $actions.writedaction;
 		}
+
+	}).on('shown.bs.modal', function () {
+
+		jQuery('#formActionName').focus();
 
 	});
 

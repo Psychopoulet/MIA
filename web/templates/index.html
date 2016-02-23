@@ -343,9 +343,33 @@
 								<h4 class="modal-title"><span class="glyphicon glyphicon-fire"></span> {{action.name}}</h4>
 							</div>
 
-							<div class="modal-body">
-								{{action}}
-							</div>
+							<form class="modal-body">
+
+								<div class="form-group">
+									<label for="formActionName">Nom</label>
+									<input id="formActionName" type="text" class="form-control" placeholder="Nom" data-ng-model="action.name">
+								</div>
+
+								<div class="form-group">
+									<label for="formActionChild">Enfant</label>
+									<select id="formActionChild" class="form-control" data-ng-model="action.child" ng-options="child.name group by child.status.name for child in childs">
+										<option>-- NC --</option>
+									</select>
+								</div>
+
+								<div class="form-group">
+									<label for="formActionType">Type</label>
+									<select id="formActionType" class="form-control" data-ng-model="action.actiontype" ng-options="actiontype.name for actiontype in actionstypes">
+										<option>-- NC --</option>
+									</select>
+								</div>
+
+								<div class="form-group">
+									<label>Paramètres</label>
+									<p class="form-control-static">{{action.params}}</p>
+								</div>
+
+							</form>
 
 							<div class="modal-footer">
 								<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
