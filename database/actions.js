@@ -18,9 +18,11 @@
 		" users.login AS user_login," +
 
 		" childs.id AS child_id," +
+		" childs.token AS child_token," +
 		" childs.name AS child_name," +
 
 		" actionstypes.id AS actiontype_id," +
+		" actionstypes.command AS actiontype_command," +
 		" actionstypes.name AS actiontype_name" +
 
 	" FROM actions" +
@@ -40,18 +42,22 @@
 
 		action.child = {
 			id : action.child_id,
+			token : action.child_token,
 			name : action.child_name
 		};
 
 			delete action.child_id;
+			delete action.child_token;
 			delete action.child_name;
 
 		action.type = {
 			id : action.actiontype_id,
+			command : action.actiontype_command,
 			name : action.actiontype_name
 		};
 
 			delete action.actiontype_id;
+			delete action.actiontype_command;
 			delete action.actiontype_name;
 
 		return action;
@@ -243,6 +249,37 @@ module.exports = class DBActions {
 
 			})
 			.catch(reject);
+
+		});
+
+	}
+
+	delete (action) {
+		
+		var that = this;
+
+		return new Promise(function(resolve, reject) {
+
+			if (!action) {
+				reject('Aucune action renseignée.');
+			}
+			else if (!action.id) {
+				reject("L'action renseignée est invalide.");
+			}
+			else {
+
+				that.db.run("DELETE FROM actions WHERE id = :id;", { ':id' : action.id }, function(err) {
+
+					if (err) {
+						reject((err.message) ? err.message : err);
+					}
+					else {
+						resolve();
+					}
+
+				});
+
+			}
 
 		});
 

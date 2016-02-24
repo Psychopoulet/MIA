@@ -56,8 +56,8 @@
 
 		return new Promise(function(resolve, reject) {
 
-			// var db = new sqlite3.Database(path.join(__dirname, 'database', 'MIA.sqlite3'));
-			var db = new sqlite3.Database(':memory:');
+			var db = new sqlite3.Database(path.join(__dirname, 'database', 'MIA.sqlite3'));
+			// var db = new sqlite3.Database(':memory:');
 
 			db.serialize(function() {
 

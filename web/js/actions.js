@@ -6,13 +6,13 @@ app.service('$actions', ['$q', '$popup', function($q, $popup) {
 	this.actionstypes = [];
 	this.childs = [];
 
-	this.add = function(name, child, actiontype, params) {
+	this.add = function(name, child, type, params) {
 
 		that.writedaction = {
 			id: null,
 			name: (name) ? name : '',
 			child: (child) ? child : null,
-			actiontype: (actiontype) ? actiontype : null,
+			type: (type) ? type : null,
 			params: (params) ? params : null
 		};
 
@@ -52,9 +52,7 @@ app.service('$actions', ['$q', '$popup', function($q, $popup) {
 		}
 
 	}).on('shown.bs.modal', function () {
-
 		jQuery('#formActionName').focus();
-
 	});
 
 	$scope.add = function(action) {
@@ -65,20 +63,9 @@ app.service('$actions', ['$q', '$popup', function($q, $popup) {
 		socket.emit('action.edit', action);
 	};
 
-	$scope.execute = function(action) {
-		socket.emit('action.execute', action);
-	};
-
-	$scope.delete = function(action) {
-
-		$popup.confirm({
-			message : "Voulez-vous vraiment supprimer l'action' '" + action.name + "' ?",
-			onyes : function() {
-				socket.emit('action.delete', action);
-			}
-		});
-
-	};
+	socket.on('action.added', function() {
+		jQuery('#modalAction').modal('hide');
+	});
 
 }])
 

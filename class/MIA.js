@@ -2,7 +2,8 @@
 // dépendances
 	
 	const 	path = require('path'),
-			spawn = require('child_process').spawn;
+			spawn = require('child_process').spawn,
+			cronjob = require('cron').CronJob; // https://github.com/ncb000gt/node-cron/blob/master/README.md
 		
 // module
 	
@@ -652,18 +653,17 @@
 											Container.get('actions').getOneById(action.id).then(function(action) {
 
 												if (!action.params) {
-													Container.get('childssockets').emitTo(action.child.token, action.command);
+													Container.get('childssockets').emitTo(action.child.token, action.type.command);
 												}
 												else {
-													Container.get('childssockets').emitTo(action.child.token, action.command, action.params);
+													Container.get('childssockets').emitTo(action.child.token, action.type.command, JSON.parse(action.params));
 												}
 
 											})
 											.catch(function(err) {
 												Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
-												socket.emit('actions.error', "Impossible d'exécuter cette action.");
+												socket.emit('actions.error', "Impossible de récupérer cette action : " + ((err.message) ? err.message : err));
 											});
-
 
 										}
 
@@ -678,33 +678,71 @@
 
 									try {
 
-										if (!action) {
-											socket.emit('actions.error', "Aucune action n'a été fournie.");
-										}
-										else {
+										Container.get('users').lastInserted().then(function(user) {
 
-											Container.get('actions').add(action).then(function() {
+											action.user = user;
+
+											Container.get('actions').add(action).then(function(action) {
+
+												socket.emit('action.added', action);
 
 												Container.get('actions').getAll().then(function(actions) {
 
 													socket.emit('actions', actions);
 
-												}).catch(function(err) {
+												})
+												.catch(function(err) {
 													Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
 													socket.emit('actions.error', "Impossible de récupérer les actions.");
 												});
 
-											}).catch(function(err) {
+											})
+											.catch(function(err) {
 												Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
-												socket.emit('actions.error', "Impossible de sauvegarder cette action.");
+												socket.emit('actions.error', "Impossible de sauvegarder cette action : " + ((err.message) ? err.message : err));
 											});
 
-										}
+										})
+										.catch(function(err) {
+											Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
+											socket.emit('actions.error', "Impossible de sauvegarder cette action : " + ((err.message) ? err.message : err));
+										});
 
 									}
 									catch (e) {
 										Container.get('logs').err('-- [actions] ' + ((e.message) ? e.message : e));
-										socket.emit('actions.error', "Impossible d'exécuter cette action.");
+										socket.emit('actions.error', "Impossible de sauvegarder cette action.");
+									}
+
+								})
+								.on('action.delete', function(action) {
+
+									try {
+
+										Container.get('actions').delete(action).then(function() {
+
+											socket.emit('action.deleted');
+
+											Container.get('actions').getAll().then(function(actions) {
+
+												socket.emit('actions', actions);
+
+											})
+											.catch(function(err) {
+												Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
+												socket.emit('actions.error', "Impossible de récupérer les actions.");
+											});
+
+										})
+										.catch(function(err) {
+											Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
+											socket.emit('actions.error', "Impossible de supprimer cette action : " + ((err.message) ? err.message : err));
+										});
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [actions] ' + ((e.message) ? e.message : e));
+										socket.emit('actions.error', "Impossible de supprimer cette action.");
 									}
 
 								})
@@ -728,6 +766,29 @@
 									catch (e) {
 										Container.get('logs').err('-- [actionstypes] ' + ((e.message) ? e.message : e));
 										socket.emit('actionstypes.error', "Impossible de récupérer les types d'action.");
+									}
+
+								})
+
+								// crons
+
+								.on('crons', function() {
+
+									try {
+
+										Container.get('crons').getAll().then(function(crons) {
+
+											socket.emit('crons', crons);
+
+										}).catch(function(err) {
+											Container.get('logs').err('-- [crons] ' + ((err.message) ? err.message : err));
+											socket.emit('crons.error', "Impossible de récupérer les tâches plannifiées.");
+										});
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [crons] ' + ((e.message) ? e.message : e));
+										socket.emit('crons.error', "Impossible de récupérer les tâches plannifiées.");
 									}
 
 								});
@@ -833,24 +894,24 @@
 								})
 								.on('media.sound.played', function (data) {
 									Container.get('logs').log('media.sound.played');
-									childssockets.emit('media.sound.played', data);
+									websockets.emit('media.sound.played', data);
 								})
 								.on('media.sound.downloaded', function (data) {
 									Container.get('logs').log('media.sound.downloaded');
-									childssockets.emit('media.sound.downloaded', data);
+									websockets.emit('media.sound.downloaded', data);
 								})
 
 								.on('media.video.error', function (error) {
 									Container.get('logs').err('play video - ' + error);
-									childssockets.emit('media.video.error', error);
+									websockets.emit('media.video.error', error);
 								})
 								.on('media.video.played', function (data) {
 									Container.get('logs').log('media.video.played');
-									childssockets.emit('media.video.played', data);
+									websockets.emit('media.video.played', data);
 								})
 								.on('media.video.downloaded', function (data) {
 									Container.get('logs').log('media.video.downloaded');
-									childssockets.emit('media.video.downloaded', data);
+									websockets.emit('media.video.downloaded', data);
 								});
 
 							});

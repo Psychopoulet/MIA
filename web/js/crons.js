@@ -1,5 +1,16 @@
 app.controller('ControllerCrons', [function() {
 
+	$scope.crons = {};
+
+	socket.on('logged', function() {
+		socket.emit('crons');
+	})
+	.on('crons', function(crons) {
+		$scope.crons = crons;
+		$scope.$apply();
+	})
+	.on('crons.error', $popup.alert);
+
 }]);
 
 jQuery(document).ready(function() {
