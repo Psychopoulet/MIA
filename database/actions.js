@@ -82,7 +82,7 @@ module.exports = class DBActions {
 				"CREATE TABLE IF NOT EXISTS actions (" +
 					" id INTEGER PRIMARY KEY AUTOINCREMENT," +
 					" id_user INTEGER NOT NULL," +
-					" id_child INTEGER NOT NULL," +
+					" id_child INTEGER DEFAULT NULL," +
 					" id_type INTEGER NOT NULL," +
 					" name VARCHAR(50) NOT NULL," +
 					" params VARCHAR(150) NOT NULL," +
@@ -119,12 +119,6 @@ module.exports = class DBActions {
 				else if (!action.user.id) {
 					reject("L'utilisateur renseigné n'est pas valide.");
 				}
-			else if (!action.child) {
-				reject('Aucun enfant renseigné.');
-			}
-				else if (!action.child.id) {
-					reject("L'enfant renseigné n'est pas valide.");
-				}
 			else if (!action.type) {
 				reject('Aucun type renseigné.');
 			}
@@ -149,7 +143,7 @@ module.exports = class DBActions {
 
 				_pInsert.run({
 					':id_user': action.user.id,
-					':id_child': action.child.id,
+					':id_child': (action.child && action.child.id) ? action.child.id : null,
 					':id_type': action.type.id,
 					':name': action.name,
 					':params': action.params

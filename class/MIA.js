@@ -14,12 +14,89 @@
 		// attributes
 			
 			var that = this,
+				crons = [],
 				childssockets = Container.get('childssockets'),
 				websockets = Container.get('websockets');
 				
 		// methodes
 
 			// private
+
+				function _runCron(cron) {
+
+					Container.get('crons').getActionsOfCron(cron).then(function(actions) {
+
+						try {
+
+							cron.job = new cronjob(cron.timer, function() {
+
+								actions.forEach(function(action) {
+
+									if (action.child && action.child.token) {
+
+										if (action.params) {
+											childssockets.emitTo(action.child.token, action.type.command, action.params);
+										}
+										else {
+											childssockets.emitTo(action.child.token, action.type.command);
+										}
+
+									}
+									else {
+
+										if (action.params) {
+											childssockets.emit(action.type.command, action.params);
+										}
+										else {
+											childssockets.emit(action.type.command);
+										}
+
+									}
+
+								});
+
+								if (cron.actions) {
+
+									cron.actions.forEach(function(action) {
+
+										if (action.child && action.child.token) {
+
+											if (action.params) {
+												childssockets.emitTo(action.child.token, action.type.command, action.params);
+											}
+											else {
+												childssockets.emitTo(action.child.token, action.type.command);
+											}
+
+										}
+										else {
+
+											if (action.params) {
+												childssockets.emit(action.type.command, action.params);
+											}
+											else {
+												childssockets.emit(action.type.command);
+											}
+
+										}
+
+									});
+
+								}
+
+							}, null, true);
+
+						}
+						catch(e) {
+							Container.get('logs').err('-- [crons] : ' + ((e.message) ? e.message : e));
+						}
+
+					})
+					.catch(function (err) {
+						Container.get('logs').err('-- [crons] : ' + err);
+					});
+
+				}
 
 				function _sendClients() {
 
@@ -653,10 +730,10 @@
 											Container.get('actions').getOneById(action.id).then(function(action) {
 
 												if (!action.params) {
-													Container.get('childssockets').emitTo(action.child.token, action.type.command);
+													childssockets.emitTo(action.child.token, action.type.command);
 												}
 												else {
-													Container.get('childssockets').emitTo(action.child.token, action.type.command, JSON.parse(action.params));
+													childssockets.emitTo(action.child.token, action.type.command, JSON.parse(action.params));
 												}
 
 											})
@@ -791,6 +868,78 @@
 										socket.emit('crons.error', "Impossible de récupérer les tâches plannifiées.");
 									}
 
+								})
+								.on('cron.add', function(cron) {
+
+									try {
+
+										Container.get('users').lastInserted().then(function(user) {
+
+											cron.user = user;
+
+											Container.get('crons').add(cron).then(function(cron) {
+
+												socket.emit('cron.added', cron);
+
+												Container.get('crons').getAll().then(function(crons) {
+
+													socket.emit('crons', crons);
+
+												})
+												.catch(function(err) {
+													Container.get('logs').err('-- [crons] ' + ((err.message) ? err.message : err));
+													socket.emit('crons.error', "Impossible de récupérer les tâches plannifiées.");
+												});
+
+											})
+											.catch(function(err) {
+												Container.get('logs').err('-- [crons] ' + ((err.message) ? err.message : err));
+												socket.emit('crons.error', "Impossible de sauvegarder cette tâche plannifiée : " + ((err.message) ? err.message : err));
+											});
+
+										})
+										.catch(function(err) {
+											Container.get('logs').err('-- [crons] ' + ((err.message) ? err.message : err));
+											socket.emit('crons.error', "Impossible de sauvegarder cette tâche plannifiée : " + ((err.message) ? err.message : err));
+										});
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [crons] ' + ((e.message) ? e.message : e));
+										socket.emit('crons.error', "Impossible de sauvegarder cette tâche plannifiée.");
+									}
+
+								})
+								.on('cron.delete', function(cron) {
+
+									try {
+
+										Container.get('cron').delete(cron).then(function() {
+
+											socket.emit('cron.deleted');
+
+											Container.get('cron').getAll().then(function(cron) {
+
+												socket.emit('cron', cron);
+
+											})
+											.catch(function(err) {
+												Container.get('logs').err('-- [cron] ' + ((err.message) ? err.message : err));
+												socket.emit('cron.error', "Impossible de récupérer les tâches plannifiées.");
+											});
+
+										})
+										.catch(function(err) {
+											Container.get('logs').err('-- [cron] ' + ((err.message) ? err.message : err));
+											socket.emit('cron.error', "Impossible de supprimer cette tâche plannifiée : " + ((err.message) ? err.message : err));
+										});
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [cron] ' + ((e.message) ? e.message : e));
+										socket.emit('cron.error', "Impossible de supprimer cette tâche plannifiée.");
+									}
+
 								});
 
 							});
@@ -918,6 +1067,66 @@
 
 							// run
 
+								// crons
+
+									Container.get('crons').getAll().then(function(_crons) {
+
+										crons = _crons;
+
+										crons.push({
+											id : 1,
+											name : 'café',
+											timer : '00 00 16 * * 1-5',
+											actions : [
+												{
+													id : 50,
+													name : 'café',
+													child : null,
+													type: {
+														id : 1,
+														name : '',
+														command : 'media.video.play'
+													},
+													params : {
+														name: "Manger !",
+														url: "https://www.youtube.com/watch?v=ATy8bM8eeVQ",
+														urlembeded: "https://www.youtube.com/embed/ATy8bM8eeVQ",
+														code: "ATy8bM8eeVQ"
+													}
+												}
+											]
+										});
+										
+										crons.push({
+											id : 2,
+											name : 'manger',
+											timer : '00 30 12 * * 1-5',
+											actions : [
+												{
+													id : 50,
+													name : 'café',
+													type: {
+														id : 1,
+														name : '',
+														command : 'media.video.play'
+													},
+													params : {
+														name: "Café !",
+														url: "https://www.youtube.com/watch?v=JFjUOBP6vaI",
+														urlembeded: "https://www.youtube.com/embed/JFjUOBP6vaI",
+														code: "JFjUOBP6vaI"
+													}
+												}
+											]
+										});
+		
+										crons.forEach(_runCron);
+
+									})
+									.catch(function (err) {
+										Container.get('logs').err('-- [crons] : ' + err);
+									});
+
 								// plugins
 
 								Container.get('plugins')
@@ -961,6 +1170,6 @@
 					});
 
 				};
-				
+
 	};
 	
