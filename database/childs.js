@@ -67,7 +67,7 @@ module.exports = class DBChilds {
 			");", [], function(err) {
 
 				if (err) {
-					reject((err.message) ? err.message : err);
+					reject('(create table childs) ' + (err.message) ? err.message : err);
 				}
 				else {
 					that.getAll().then(resolve).catch(reject);

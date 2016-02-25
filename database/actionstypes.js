@@ -29,7 +29,7 @@ module.exports = class DBActionsTypes {
 			");", [], function(err) {
 
 				if (err) {
-					reject((err.message) ? err.message : err);
+					reject('(create table actionstypes) ' + (err.message) ? err.message : err);
 				}
 				else {
 

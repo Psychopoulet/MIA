@@ -31,7 +31,7 @@ module.exports = class DBStatus {
 			");", [], function(err) {
 
 				if (err) {
-					reject((err.message) ? err.message : err);
+					reject('(create table status) ' + (err.message) ? err.message : err);
 				}
 				else {
 

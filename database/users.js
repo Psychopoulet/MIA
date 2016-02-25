@@ -35,7 +35,7 @@ module.exports = class DBUsers {
 			");", [], function(err) {
 
 				if (err) {
-					reject((err.message) ? err.message : err);
+					reject('(create table users) ' + (err.message) ? err.message : err);
 				}
 				else {
 					
