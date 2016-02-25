@@ -1088,10 +1088,10 @@
 														command : 'media.video.play'
 													},
 													params : {
-														name: "Manger !",
-														url: "https://www.youtube.com/watch?v=ATy8bM8eeVQ",
-														urlembeded: "https://www.youtube.com/embed/ATy8bM8eeVQ",
-														code: "ATy8bM8eeVQ"
+														name: "Café !",
+														url: "https://www.youtube.com/watch?v=JFjUOBP6vaI",
+														urlembeded: "https://www.youtube.com/embed/JFjUOBP6vaI",
+														code: "JFjUOBP6vaI"
 													}
 												}
 											]
@@ -1104,17 +1104,17 @@
 											actions : [
 												{
 													id : 50,
-													name : 'café',
+													name : 'Manger',
 													type: {
 														id : 1,
 														name : '',
 														command : 'media.video.play'
 													},
 													params : {
-														name: "Café !",
-														url: "https://www.youtube.com/watch?v=JFjUOBP6vaI",
-														urlembeded: "https://www.youtube.com/embed/JFjUOBP6vaI",
-														code: "JFjUOBP6vaI"
+														name: "Manger !",
+														url: "https://www.youtube.com/watch?v=ATy8bM8eeVQ",
+														urlembeded: "https://www.youtube.com/embed/ATy8bM8eeVQ",
+														code: "ATy8bM8eeVQ"
 													}
 												}
 											]
