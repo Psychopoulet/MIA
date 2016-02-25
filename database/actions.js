@@ -86,16 +86,33 @@ module.exports = class DBActions {
 					" id_type INTEGER NOT NULL," +
 					" name VARCHAR(50) NOT NULL," +
 					" params VARCHAR(150) NOT NULL," +
-					" FOREIGN KEY(id_user) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE" +
-					" FOREIGN KEY(id_child) REFERENCES childs(id) ON DELETE CASCADE ON UPDATE CASCADE" +
+					" FOREIGN KEY(id_user) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE," +
+					" FOREIGN KEY(id_child) REFERENCES childs(id) ON DELETE CASCADE ON UPDATE CASCADE," +
 					" FOREIGN KEY(id_type) REFERENCES actionstypes(id) ON DELETE CASCADE ON UPDATE CASCADE" +
 			");", [], function(err) {
 
 				if (err) {
-					reject((err.message) ? err.message : err);
+					reject('(create table actions) ' + (err.message) ? err.message : err);
 				}
 				else {
-					that.getAll().then(resolve).catch(reject);
+
+					that.db.run(
+						"CREATE TABLE IF NOT EXISTS actions_crons (" +
+							" id_action INTEGER NOT NULL," +
+							" id_cron INTEGER NOT NULL," +
+							" FOREIGN KEY(id_action) REFERENCES actions(id) ON DELETE CASCADE ON UPDATE CASCADE," +
+							" FOREIGN KEY(id_cron) REFERENCES crons(id) ON DELETE CASCADE ON UPDATE CASCADE" +
+					");", [], function(err) {
+
+						if (err) {
+							reject('(create table actions_crons) ' + (err.message) ? err.message : err);
+						}
+						else {
+							that.getAll().then(resolve).catch(reject);
+						}
+
+					});
+
 				}
 
 			});
@@ -191,7 +208,7 @@ module.exports = class DBActions {
 
 		return new Promise(function(resolve, reject) {
 
-			that.db.all(_sSelectQuery, [], function(err, rows) {
+			that.db.all(_sSelectQuery + ";", [], function(err, rows) {
 
 				if (err) {
 					reject((err.message) ? err.message : err);
@@ -210,6 +227,51 @@ module.exports = class DBActions {
 				}
 
 			});
+
+		});
+
+	}
+
+	getAllByCron(cron) {
+		
+		var that = this;
+
+		return new Promise(function(resolve, reject) {
+
+			var query;
+
+			if (!cron) {
+				reject('Aucun cron renseigné.');
+			}
+			else if (!cron.id) {
+				reject("Le cron renseigné n'est pas valide.");
+			}
+			else {
+
+				query  = _sSelectQuery;
+				query += " INNER JOIN actions_crons ON actions_crons.id_action = actions.id AND actions_crons.id_cron = :id_cron;";
+
+				that.db.all(query, { ':id_cron' : cron.id }, function(err, rows) {
+
+					if (err) {
+						reject((err.message) ? err.message : err);
+					}
+					else if (!rows) {
+						resolve([]);
+					}
+					else {
+
+						rows.forEach(function(row, key) {
+							rows[key] = _formateAction(row);
+						});
+
+						resolve(rows);
+
+					}
+
+				});
+
+			}
 
 		});
 

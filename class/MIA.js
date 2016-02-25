@@ -24,7 +24,7 @@
 
 				function _runCron(cron) {
 
-					Container.get('crons').getActionsOfCron(cron).then(function(actions) {
+					Container.get('actions').getAllByCron(cron).then(function(actions) {
 
 						try {
 

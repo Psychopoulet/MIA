@@ -58,7 +58,7 @@ module.exports = class DBCrons {
 			");", [], function(err) {
 
 				if (err) {
-					reject((err.message) ? err.message : err);
+					reject('(create table crons) ' + (err.message) ? err.message : err);
 				}
 				else {
 					that.getAll().then(resolve).catch(reject);
@@ -164,38 +164,6 @@ module.exports = class DBCrons {
 				}
 
 			});
-
-		});
-
-	}
-
-	getActionsOfCron(cron) {
-		
-		var that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			resolve([]);
-
-			/*that.db.all('SELECT id FROM actions WHERE ', [], function(err, rows) {
-
-				if (err) {
-					reject((err.message) ? err.message : err);
-				}
-				else if (!rows) {
-					resolve([]);
-				}
-				else {
-
-					rows.forEach(function(row, key) {
-						rows[key] = _formateCron(row);
-					});
-
-					resolve(rows);
-
-				}
-
-			});*/
 
 		});
 
