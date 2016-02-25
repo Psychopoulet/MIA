@@ -1,4 +1,4 @@
-app.controller('ControllerCrons', [function() {
+app.controller('ControllerCrons', ['$scope', '$popup', function($scope, $popup) {
 
 	$scope.crons = {};
 
