@@ -59,10 +59,6 @@ app.service('$actions', ['$q', '$popup', function($q, $popup) {
 		socket.emit('action.add', action);
 	};
 
-	$scope.edit = function(action) {
-		socket.emit('action.edit', action);
-	};
-
 	socket.on('action.added', function() {
 		jQuery('#modalAction').modal('hide');
 	});

@@ -14,7 +14,7 @@
 		// attributes
 			
 			var that = this,
-				crons = [],
+				_crons = [],
 				childssockets = Container.get('childssockets'),
 				websockets = Container.get('websockets');
 				
@@ -879,7 +879,10 @@
 
 											Container.get('crons').add(cron).then(function(cron) {
 
+												_crons.push(cron);
 												socket.emit('cron.added', cron);
+
+												_runCron(cron);
 
 												Container.get('crons').getAll().then(function(crons) {
 
@@ -914,13 +917,13 @@
 
 									try {
 
-										Container.get('cron').delete(cron).then(function() {
+										Container.get('crons').delete(cron).then(function() {
 
 											socket.emit('cron.deleted');
 
-											Container.get('cron').getAll().then(function(cron) {
+											Container.get('crons').getAll().then(function(crons) {
 
-												socket.emit('cron', cron);
+												socket.emit('crons', crons);
 
 											})
 											.catch(function(err) {
@@ -1069,11 +1072,11 @@
 
 								// crons
 
-									Container.get('crons').getAll().then(function(_crons) {
+									Container.get('crons').getAll().then(function(crons) {
 
-										crons = _crons;
+										_crons = crons;
 
-										crons.push({
+										_crons.push({
 											id : 1,
 											name : 'café',
 											timer : '00 00 16 * * 1-5',
@@ -1097,7 +1100,7 @@
 											]
 										});
 										
-										crons.push({
+										_crons.push({
 											id : 2,
 											name : 'manger',
 											timer : '00 30 12 * * 1-5',
@@ -1120,7 +1123,7 @@
 											]
 										});
 		
-										crons.forEach(_runCron);
+										_crons.forEach(_runCron);
 
 									})
 									.catch(function (err) {

@@ -169,4 +169,35 @@ module.exports = class DBCrons {
 
 	}
 
+	delete (cron) {
+		
+		var that = this;
+
+		return new Promise(function(resolve, reject) {
+
+			if (!cron) {
+				reject('Aucune tâche plannifiée renseignée.');
+			}
+			else if (!cron.id) {
+				reject("La tâche plannifiée renseignée est invalide.");
+			}
+			else {
+
+				that.db.run("DELETE FROM crons WHERE id = :id;", { ':id' : cron.id }, function(err) {
+
+					if (err) {
+						reject((err.message) ? err.message : err);
+					}
+					else {
+						resolve();
+					}
+
+				});
+
+			}
+
+		});
+
+	}
+
 };

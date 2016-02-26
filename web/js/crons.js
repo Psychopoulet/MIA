@@ -1,4 +1,24 @@
-app.controller('ControllerCrons', ['$scope', '$popup', function($scope, $popup) {
+app.controller('ControllerCron', ['$scope', '$popup', function($scope, $popup) {
+
+	$scope.cron = {};
+
+	jQuery('#modalCron').on('shown.bs.modal', function () {
+		jQuery('#formCronName').focus();
+	});
+
+	$scope.add = function(cron) {
+		socket.emit('cron.add', cron);
+	};
+
+	socket.on('cron.added', function() {
+		$scope.cron = {};
+		jQuery('#modalCron').modal('hide');
+	})
+	.on('cron.add.error', $popup.alert);
+
+}])
+
+.controller('ControllerCrons', ['$scope', '$popup', function($scope, $popup) {
 
 	$scope.crons = {};
 
@@ -10,6 +30,27 @@ app.controller('ControllerCrons', ['$scope', '$popup', function($scope, $popup) 
 		$scope.$apply();
 	})
 	.on('crons.error', $popup.alert);
+
+	$scope.add = function () {
+
+		jQuery('#modalCron').modal({
+			backdrop: 'static',
+			keyboard: false,
+			show: true
+		});
+
+	};
+
+	$scope.delete = function (cron) {
+
+		$popup.confirm({
+			message : "Voulez-vous vraiment supprimer la tâche plannifiée '" + cron.name + "' ?",
+			onyes : function() {
+				socket.emit('cron.delete', cron);
+			}
+		});
+
+	};
 
 }]);
 
