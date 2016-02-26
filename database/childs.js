@@ -1,11 +1,7 @@
 
 "use strict";
 
-// deps
-
 // private
-
-	var _pInsert;
 
 	var _sSelectQuery = "" +
 	" SELECT" +
@@ -102,11 +98,7 @@ module.exports = class DBChilds {
 			}
 			else {
 
-				if (!_pInsert) {
-					_pInsert = that.db.prepare("INSERT INTO childs (id_status, token, name) VALUES (:id_status, :token, :name);");
-				}
-
-				_pInsert.run({
+				that.db.run("INSERT INTO childs (id_status, token, name) VALUES (:id_status, :token, :name);", {
 					':id_status': child.status.id,
 					':token': child.token,
 					':name': child.name

@@ -22,6 +22,7 @@
 			Childs = require(path.join(__dirname, 'database', 'childs.js')),
 			Clients = require(path.join(__dirname, 'database', 'clients.js')),
 			Crons = require(path.join(__dirname, 'database', 'crons.js')),
+			CronsActions = require(path.join(__dirname, 'database', 'cronsactions.js')),
 			Status = require(path.join(__dirname, 'database', 'status.js')),
 			Users = require(path.join(__dirname, 'database', 'users.js'));
 
@@ -66,6 +67,7 @@
 					childs = new Childs(db),
 					clients = new Clients(db),
 					crons = new Crons(db),
+					cronsactions = new CronsActions(db),
 					status = new Status(db),
 					users = new Users(db);
 
@@ -74,6 +76,7 @@
 							.set('childs', childs)
 							.set('clients', clients)
 							.set('crons', crons)
+							.set('cronsactions', cronsactions)
 							.set('status', status)
 							.set('users', users);
 
@@ -89,7 +92,11 @@
 
 									actionstypes.create().then(function() {
 
-										actions.create().then(resolve).catch(reject);
+										actions.create().then(function() {
+
+											cronsactions.create().then(resolve).catch(reject);
+										
+										}).catch(reject);
 									
 									}).catch(reject);
 

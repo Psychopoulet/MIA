@@ -1,11 +1,7 @@
 
 "use strict";
 
-// deps
-
 // private
-
-	var _pInsert;
 
 	var _sSelectQuery = "" +
 	" SELECT" +
@@ -121,11 +117,7 @@ module.exports = class DBClients {
 			}
 			else {
 
-				if (!_pInsert) {
-					_pInsert = that.db.prepare("INSERT INTO clients (id_user, id_status, token, name) VALUES (:id_user, :id_status, :token, :name);");
-				}
-
-				_pInsert.run({
+				that.db.run("INSERT INTO clients (id_user, id_status, token, name) VALUES (:id_user, :id_status, :token, :name);", {
 					':id_user': client.user.id,
 					':id_status': client.status.id,
 					':token': client.token,

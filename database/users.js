@@ -7,8 +7,6 @@
 
 // private
 
-	var _pInsert;
-
 	function _cryptPassword (password) {
 		return crypto.createHash('sha1').update("MIA_" + password + "_MIA").digest('hex');
 	}
@@ -79,11 +77,7 @@ module.exports = class DBUsers {
 			}
 			else {
 
-				if (!_pInsert) {
-					_pInsert = that.db.prepare("INSERT INTO users (login, password) VALUES (:login, :password);");
-				}
-
-				_pInsert.run({
+				that.db.run("INSERT INTO users (login, password) VALUES (:login, :password);", {
 					':login': user.login,
 					':password': _cryptPassword(user.password)
 				}, function(err) {

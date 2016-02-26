@@ -1,14 +1,6 @@
 
 "use strict";
 
-// deps
-
-// private
-
-	var _pInsert;
-
-// module
-
 module.exports = class DBActionsTypes {
 
 	constructor (db) {
@@ -77,11 +69,7 @@ module.exports = class DBActionsTypes {
 			}
 			else {
 
-				if (!_pInsert) {
-					_pInsert = that.db.prepare("INSERT INTO actionstypes (name, command) VALUES (:name, :command);");
-				}
-
-				_pInsert.run({
+				that.db.run("INSERT INTO actionstypes (name, command) VALUES (:name, :command);", {
 					':name': actiontype.name,
 					':command': actiontype.command
 				}, function(err) {

@@ -1,11 +1,7 @@
 
 "use strict";
 
-// deps
-
 // private
-
-	var _pInsert;
 
 	var _sSelectQuery = "" +
 	" SELECT" +
@@ -61,7 +57,32 @@ module.exports = class DBCrons {
 					reject('(create table crons) ' + (err.message) ? err.message : err);
 				}
 				else {
-					that.getAll().then(resolve).catch(reject);
+
+					that.getAll().then(function(crons) {
+
+						if (0 < crons.length) {
+							resolve(crons);
+						}
+						else {
+
+							var Users = require(require('path').join(__dirname, 'users')), users = new Users(that.db);
+
+							users.lastInserted().then(function(user) {
+
+								that.add({ name : 'Café !!', timer : '00 00 16 * * 1-5', user : user }).then(function() {
+
+									that.add({ name : 'Manger !!', timer : '00 30 12 * * 1-5', user : user }).then(function() {
+										that.getAll().then(resolve).catch(reject);
+									}).catch(reject);
+
+								}).catch(reject);
+
+							}).catch(reject);
+					
+						}
+
+					}).catch(reject);
+
 				}
 
 			});
@@ -93,11 +114,7 @@ module.exports = class DBCrons {
 			}
 			else {
 
-				if (!_pInsert) {
-					_pInsert = that.db.prepare("INSERT INTO crons (id_user, name, timer) VALUES (:id_user, :name, :timer);");
-				}
-
-				_pInsert.run({
+				that.db.run("INSERT INTO crons (id_user, name, timer) VALUES (:id_user, :name, :timer);", {
 					':id_user': cron.user.id,
 					':name': cron.name,
 					':timer': cron.timer

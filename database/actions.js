@@ -1,11 +1,7 @@
 
 "use strict";
 
-// deps
-
 // private
-
-	var _pInsert;
 
 	var _sSelectQuery = "" +
 	" SELECT" +
@@ -95,24 +91,7 @@ module.exports = class DBActions {
 					reject('(create table actions) ' + (err.message) ? err.message : err);
 				}
 				else {
-
-					that.db.run(
-						"CREATE TABLE IF NOT EXISTS actions_crons (" +
-							" id_action INTEGER NOT NULL," +
-							" id_cron INTEGER NOT NULL," +
-							" FOREIGN KEY(id_action) REFERENCES actions(id) ON DELETE CASCADE ON UPDATE CASCADE," +
-							" FOREIGN KEY(id_cron) REFERENCES crons(id) ON DELETE CASCADE ON UPDATE CASCADE" +
-					");", [], function(err) {
-
-						if (err) {
-							reject('(create table actions_crons) ' + (err.message) ? err.message : err);
-						}
-						else {
-							that.getAll().then(resolve).catch(reject);
-						}
-
-					});
-
+					that.getAll().then(resolve).catch(reject);
 				}
 
 			});
@@ -154,11 +133,7 @@ module.exports = class DBActions {
 					action.params = JSON.stringify(action.params);
 				}
 
-				if (!_pInsert) {
-					_pInsert = that.db.prepare("INSERT INTO actions (id_user, id_child, id_type, name, params) VALUES (:id_user, :id_child, :id_type, :name, :params);");
-				}
-
-				_pInsert.run({
+				that.db.run("INSERT INTO actions (id_user, id_child, id_type, name, params) VALUES (:id_user, :id_child, :id_type, :name, :params);", {
 					':id_user': action.user.id,
 					':id_child': (action.child && action.child.id) ? action.child.id : null,
 					':id_type': action.type.id,

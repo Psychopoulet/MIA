@@ -14,7 +14,6 @@
 		// attributes
 			
 			var that = this,
-				_crons = [],
 				childssockets = Container.get('childssockets'),
 				websockets = Container.get('websockets');
 				
@@ -24,11 +23,11 @@
 
 				function _runCron(cron) {
 
-					Container.get('actions').getAllByCron(cron).then(function(actions) {
+					try {
 
-						try {
+						cron.job = new cronjob(cron.timer, function() {
 
-							cron.job = new cronjob(cron.timer, function() {
+							Container.get('actions').getAllByCron(cron).then(function(actions) {
 
 								actions.forEach(function(action) {
 
@@ -55,46 +54,17 @@
 
 								});
 
-								if (cron.actions) {
+							})
+							.catch(function (err) {
+								Container.get('logs').err('-- [crons] : ' + err);
+							});
 
-									cron.actions.forEach(function(action) {
+						}, null, true);
 
-										if (action.child && action.child.token) {
-
-											if (action.params) {
-												childssockets.emitTo(action.child.token, action.type.command, action.params);
-											}
-											else {
-												childssockets.emitTo(action.child.token, action.type.command);
-											}
-
-										}
-										else {
-
-											if (action.params) {
-												childssockets.emit(action.type.command, action.params);
-											}
-											else {
-												childssockets.emit(action.type.command);
-											}
-
-										}
-
-									});
-
-								}
-
-							}, null, true);
-
-						}
-						catch(e) {
-							Container.get('logs').err('-- [crons] : ' + ((e.message) ? e.message : e));
-						}
-
-					})
-					.catch(function (err) {
-						Container.get('logs').err('-- [crons] : ' + err);
-					});
+					}
+					catch(e) {
+						Container.get('logs').err('-- [crons] : ' + ((e.message) ? e.message : e));
+					}
 
 				}
 
@@ -879,9 +849,7 @@
 
 											Container.get('crons').add(cron).then(function(cron) {
 
-												_crons.push(cron);
 												socket.emit('cron.added', cron);
-
 												_runCron(cron);
 
 												Container.get('crons').getAll().then(function(crons) {
@@ -1073,58 +1041,7 @@
 								// crons
 
 									Container.get('crons').getAll().then(function(crons) {
-
-										_crons = crons;
-
-										_crons.push({
-											id : 1,
-											name : 'café',
-											timer : '00 00 16 * * 1-5',
-											actions : [
-												{
-													id : 50,
-													name : 'café',
-													child : null,
-													type: {
-														id : 1,
-														name : '',
-														command : 'media.video.play'
-													},
-													params : {
-														name: "Café !",
-														url: "https://www.youtube.com/watch?v=JFjUOBP6vaI",
-														urlembeded: "https://www.youtube.com/embed/JFjUOBP6vaI",
-														code: "JFjUOBP6vaI"
-													}
-												}
-											]
-										});
-										
-										_crons.push({
-											id : 2,
-											name : 'manger',
-											timer : '00 30 12 * * 1-5',
-											actions : [
-												{
-													id : 50,
-													name : 'Manger',
-													type: {
-														id : 1,
-														name : '',
-														command : 'media.video.play'
-													},
-													params : {
-														name: "Manger !",
-														url: "https://www.youtube.com/watch?v=ATy8bM8eeVQ",
-														urlembeded: "https://www.youtube.com/embed/ATy8bM8eeVQ",
-														code: "ATy8bM8eeVQ"
-													}
-												}
-											]
-										});
-		
-										_crons.forEach(_runCron);
-
+										crons.forEach(_runCron);
 									})
 									.catch(function (err) {
 										Container.get('logs').err('-- [crons] : ' + err);

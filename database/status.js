@@ -1,12 +1,6 @@
 
 "use strict";
 
-// deps
-
-// private
-
-	var _pInsert;
-
 // module
 
 module.exports = class DBStatus {
@@ -89,11 +83,7 @@ module.exports = class DBStatus {
 			}
 			else {
 
-				if (!_pInsert) {
-					_pInsert = that.db.prepare("INSERT INTO status (code, name, backgroundcolor, textcolor) VALUES (:code, :name, :backgroundcolor, :textcolor);");
-				}
-
-				_pInsert.run({
+				that.db.run("INSERT INTO status (code, name, backgroundcolor, textcolor) VALUES (:code, :name, :backgroundcolor, :textcolor);", {
 					':code': status.code,
 					':name': status.name,
 					':backgroundcolor': status.backgroundcolor,
