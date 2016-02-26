@@ -35,7 +35,17 @@ app.controller('ControllerCron', ['$scope', '$popup', function($scope, $popup) {
 
 		jQuery('#modalCron').modal({
 			backdrop: 'static',
-			keyboard: false,
+			keyboard: true,
+			show: true
+		});
+
+	};
+
+	$scope.linkToAction = function (cron) {
+
+		jQuery('#modalLinkCronsActions').modal({
+			backdrop: 'static',
+			keyboard: true,
 			show: true
 		});
 
@@ -60,7 +70,7 @@ jQuery(document).ready(function() {
 
 		jQuery('#modalCrons').modal({
 			backdrop: 'static',
-			keyboard: false,
+			keyboard: true,
 			show: true
 		});
 

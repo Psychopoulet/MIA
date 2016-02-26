@@ -82,6 +82,16 @@ app.service('$actions', ['$q', '$popup', function($q, $popup) {
 		socket.emit('action.execute', action);
 	};
 
+	$scope.linkToCron = function(action) {
+		
+		jQuery('#modalLinkCronsActions').modal({
+			backdrop: 'static',
+			keyboard: true,
+			show: true
+		});
+
+	};
+
 	$scope.delete = function(action) {
 
 		$popup.confirm({
@@ -101,7 +111,7 @@ jQuery(document).ready(function() {
 
 		jQuery('#modalActions').modal({
 			backdrop: 'static',
-			keyboard: false,
+			keyboard: true,
 			show: true
 		});
 

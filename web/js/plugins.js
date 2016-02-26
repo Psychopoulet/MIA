@@ -35,7 +35,7 @@ jQuery(document).ready(function() {
 
 		jQuery('#modalPlugins').modal({
 			backdrop: 'static',
-			keyboard: false,
+			keyboard: true,
 			show: true
 		});
 

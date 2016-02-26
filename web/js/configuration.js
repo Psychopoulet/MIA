@@ -8,7 +8,7 @@ jQuery(document).ready(function() {
 
 		jQuery('#modalConfiguration').modal({
 			backdrop: 'static',
-			keyboard: false,
+			keyboard: true,
 			show: true
 		});
 

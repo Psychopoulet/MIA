@@ -369,6 +369,73 @@
 
 				</div>
 				
+				<div id="modalLinkCronsActions" class="modal fade only-logged hidden" data-ng-controller="ControllerLinkCronsActions">
+
+					<div class="modal-dialog">
+
+						<form class="modal-content">
+
+							<div class="modal-header">
+								<h4 class="modal-title"><span class="glyphicon glyphicon-link"></span> Liens entre tâches plannifiées et actions</h4>
+							</div>
+
+							<div class="modal-body">
+
+								<div data-ng-show="crons.length && actions.length">
+									
+									<button class="btn btn-primary" data-ng-click="link(cron, action);"
+											data-ng-disabled="cron && action" data-ng-class="{ 'disabled' : cron && action }">
+										<span class="glyphicon glyphicon-plus"></span> Lier
+									</button>
+
+									<br /><br />
+
+								</div>
+
+								<div class="row">
+									
+									<div class="col-xs-6">
+
+										<div class="panel panel-default">
+
+											<div class="panel-heading">Tâches plannifiées</div>
+
+											<ul class="list-group">
+												<li class="list-group-item" data-ng-repeat="cron in crons">{{cron.name}}</li>
+											</ul>
+
+										</div>
+										
+									</div>
+
+									<div class="col-xs-6">
+										
+										<div class="panel panel-default">
+
+											<div class="panel-heading">Actions</div>
+
+											<ul class="list-group">
+												<li class="list-group-item" data-ng-repeat="action in actions">{{action.name}}</li>
+											</ul>
+
+										</div>
+										
+									</div>
+
+								</div>
+
+							</div>
+
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+							</div>
+
+						</form>
+
+					</div>
+
+				</div>
+				
 			<div id="modalActions" class="modal fade only-logged hidden" data-ng-controller="ControllerActions">
 
 				<div class="modal-dialog">
