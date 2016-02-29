@@ -56,6 +56,10 @@
 			delete action.actiontype_command;
 			delete action.actiontype_name;
 
+		if ('string' === typeof action.params && '' != action.params) {
+			action.params = JSON.parse(action.params);
+		}
+
 		return action;
 
 	}

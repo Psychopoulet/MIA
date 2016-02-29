@@ -208,14 +208,36 @@
 
 									// listeners
 
-									socket.removeAllListeners('client.allow');
-									socket.removeAllListeners('client.delete');
 									socket.removeAllListeners('login');
+
+									socket.removeAllListeners('client.allow');
+									socket.removeAllListeners('client.rename');
+									socket.removeAllListeners('client.delete');
 									
 									socket.removeAllListeners('child.allow');
+									socket.removeAllListeners('child.rename');
 									socket.removeAllListeners('child.delete');
 
-									socket.removeAllListeners('user.update');
+									// socket.removeAllListeners('user.update');
+
+									socket.removeAllListeners('plugins');
+									socket.removeAllListeners('plugin.add.github');
+									socket.removeAllListeners('plugin.delete');
+									
+									socket.removeAllListeners('actions');
+									socket.removeAllListeners('action.execute');
+									socket.removeAllListeners('action.add');
+									socket.removeAllListeners('action.delete');
+									
+									socket.removeAllListeners('actionstypes');
+
+									socket.removeAllListeners('crons');
+									socket.removeAllListeners('cron.add');
+									socket.removeAllListeners('cron.delete');
+									
+									socket.removeAllListeners('cronsactions');
+									socket.removeAllListeners('cronaction.link');
+									socket.removeAllListeners('cronaction.unlink');
 
 								}
 								catch (e) {
@@ -605,8 +627,6 @@
 									}
 
 								})
-
-
 								.on('plugin.add.github', function(url) {
 
 									try {
@@ -630,7 +650,6 @@
 									}
 
 								})
-
 								.on('plugin.delete', function(plugin) {
 
 									try {
@@ -669,6 +688,10 @@
 
 									try {
 
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('actions');
+										}
+
 										Container.get('actions').getAll().then(function(actions) {
 
 											socket.emit('actions', actions);
@@ -688,6 +711,11 @@
 								.on('action.execute', function(action) {
 
 									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('action.execute');
+											Container.get('logs').log(action);
+										}
 
 										if (!action) {
 											socket.emit('actions.error', "Aucune action n'a été fournie.");
@@ -724,6 +752,11 @@
 								.on('action.add', function(action) {
 
 									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('action.add');
+											Container.get('logs').log(action);
+										}
 
 										Container.get('users').lastInserted().then(function(user) {
 
@@ -766,6 +799,11 @@
 
 									try {
 
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('action.delete');
+											Container.get('logs').log(action);
+										}
+
 										Container.get('actions').delete(action).then(function() {
 
 											socket.emit('action.deleted');
@@ -800,6 +838,10 @@
 
 									try {
 
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('actionstypes');
+										}
+
 										Container.get('actionstypes').getAll().then(function(actionstypes) {
 
 											socket.emit('actionstypes', actionstypes);
@@ -823,6 +865,10 @@
 
 									try {
 
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('crons');
+										}
+
 										Container.get('crons').getAll().then(function(crons) {
 
 											socket.emit('crons', crons);
@@ -842,6 +888,11 @@
 								.on('cron.add', function(cron) {
 
 									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('cron.add');
+											Container.get('logs').log(cron);
+										}
 
 										Container.get('users').lastInserted().then(function(user) {
 
@@ -885,6 +936,11 @@
 
 									try {
 
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('cron.delete');
+											Container.get('logs').log(cron);
+										}
+
 										Container.get('crons').delete(cron).then(function() {
 
 											socket.emit('cron.deleted');
@@ -895,20 +951,146 @@
 
 											})
 											.catch(function(err) {
-												Container.get('logs').err('-- [cron] ' + ((err.message) ? err.message : err));
-												socket.emit('cron.error', "Impossible de récupérer les tâches plannifiées.");
+												Container.get('logs').err('-- [crons] ' + ((err.message) ? err.message : err));
+												socket.emit('crons.error', "Impossible de récupérer les tâches plannifiées.");
 											});
 
 										})
 										.catch(function(err) {
-											Container.get('logs').err('-- [cron] ' + ((err.message) ? err.message : err));
-											socket.emit('cron.error', "Impossible de supprimer cette tâche plannifiée : " + ((err.message) ? err.message : err));
+											Container.get('logs').err('-- [crons] ' + ((err.message) ? err.message : err));
+											socket.emit('crons.error', "Impossible de supprimer cette tâche plannifiée : " + ((err.message) ? err.message : err));
 										});
 
 									}
 									catch (e) {
-										Container.get('logs').err('-- [cron] ' + ((e.message) ? e.message : e));
-										socket.emit('cron.error', "Impossible de supprimer cette tâche plannifiée.");
+										Container.get('logs').err('-- [crons] ' + ((e.message) ? e.message : e));
+										socket.emit('crons.error', "Impossible de supprimer cette tâche plannifiée.");
+									}
+
+								})
+
+								// lien entre cron et action
+
+								.on('cronsactions', function() {
+
+									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('cronsactions');
+										}
+
+										Container.get('cronsactions').getAll().then(function(cronsactions) {
+
+											socket.emit('cronsactions', cronsactions);
+
+										})
+										.catch(function(err) {
+											Container.get('logs').err('-- [Impossible] ' + ((err.message) ? err.message : err));
+											socket.emit('Impossible.error', "Impossible de récupérer les liens entre tâches plannifiées et actions.");
+										});
+											
+									}
+									catch (e) {
+										Container.get('logs').err('-- [Impossible] ' + ((e.message) ? e.message : e));
+										socket.emit('Impossible.error', "Impossible de récupérer les liens entre tâches plannifiées et actions.");
+									}
+
+								})
+								.on('cronaction.link', function(data) {
+
+									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('cronaction.link');
+											Container.get('logs').log(data);
+										}
+
+										if (!data) {
+											socket.emit('cronsactions.error', "Aucune donnée renseignée.");
+										}
+										else if (!data.cron) {
+											socket.emit('cronsactions.error', "Aucune tâche plannifiée renseignée.");
+										}
+										else if (!data.action) {
+											socket.emit('cronsactions.error', "Aucune action renseignée.");
+										}
+										else {
+
+											Container.get('cronsactions').link(data.cron, data.action).then(function() {
+
+												socket.emit('cronaction.linked', data);
+
+												Container.get('cronsactions').getAll().then(function(cronsactions) {
+
+													socket.emit('cronsactions', cronsactions);
+
+												})
+												.catch(function(err) {
+													Container.get('logs').err('-- [Impossible] ' + ((err.message) ? err.message : err));
+													socket.emit('Impossible.error', "Impossible de récupérer les liens entre tâches plannifiées et actions.");
+												});
+
+											})
+											.catch(function(err) {
+												Container.get('logs').err('-- [cronsactions] ' + ((err.message) ? err.message : err));
+												socket.emit('cronsactions.error', "Impossible de lier cette tâche plannifiée à cette action : " + ((err.message) ? err.message : err));
+											});
+											
+										}
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [cronsactions] ' + ((e.message) ? e.message : e));
+										socket.emit('cronsactions.error', "Impossible de lier cette tâche plannifiée à cette action.");
+									}
+
+								})
+								.on('cronaction.unlink', function(data) {
+
+									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('cronaction.unlink');
+											Container.get('logs').log(data);
+										}
+
+										if (!data) {
+											socket.emit('cronsactions.error', "Aucune donnée renseignée.");
+										}
+										else if (!data.cron) {
+											socket.emit('cronsactions.error', "Aucune tâche plannifiée renseignée.");
+										}
+										else if (!data.action) {
+											socket.emit('cronsactions.error', "Aucune action renseignée.");
+										}
+										else {
+
+											Container.get('cronsactions').unlink(data.cron, data.action).then(function() {
+
+												socket.emit('cronaction.unlinked', data);
+
+												Container.get('cronsactions').getAll().then(function(cronsactions) {
+
+													socket.emit('cronsactions', cronsactions);
+
+												})
+												.catch(function(err) {
+													Container.get('logs').err('-- [Impossible] ' + ((err.message) ? err.message : err));
+													socket.emit('Impossible.error', "Impossible de récupérer les liens entre tâches plannifiées et actions.");
+												});
+
+											})
+											.catch(function(err) {
+												Container.get('logs').err('-- [cronsactions] ' + ((err.message) ? err.message : err));
+												socket.emit('cronsactions.error', "Impossible de lier cette tâche plannifiée à cette action : " + ((err.message) ? err.message : err));
+											});
+											
+										}
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [cronsactions] ' + ((e.message) ? e.message : e));
+										socket.emit('cronsactions.error', "Impossible de délier cette tâche plannifiée et cette action.");
 									}
 
 								});

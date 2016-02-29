@@ -36,65 +36,68 @@ module.exports = class DBCronsActions {
 
 	}
 
-	/*add (action) {
+	link (cron, action) {
 
 		var that = this;
 
 		return new Promise(function(resolve, reject) {
 
-			if (!action) {
+			if (!cron) {
+				reject('Aucune tâche plannifiée renseignée.');
+			}
+				else if (!cron.id) {
+					reject("La tâche plannifiée renseignée est invalide.");
+				}
+			else if (!action) {
 				reject('Aucune action renseignée.');
 			}
-			else if (!action.user) {
-				reject('Aucun utilisateur renseigné.');
-			}
-				else if (!action.user.id) {
-					reject("L'utilisateur renseigné n'est pas valide.");
+				else if (!action.id) {
+					reject("L'action renseignée est invalide.");
 				}
-			else if (!action.type) {
-				reject('Aucun type renseigné.');
-			}
-				else if (!action.type.id) {
-					reject("Le type d'action renseigné n'est pas valide.");
-				}
-			else if (!action.name) {
-				reject('Aucun nom renseigné.');
-			}
 			else {
 
-				if (!action.params) {
-					action.params = '';
-				}
-				else if ('object' === typeof action.params) {
-					action.params = JSON.stringify(action.params);
-				}
+				that.getAll().then(function(links) {
 
-				if (!_pInsert) {
-					_pInsert = that.db.prepare("INSERT INTO actions (id_user, id_child, id_type, name, params) VALUES (:id_user, :id_child, :id_type, :name, :params);");
-				}
+					var bFound = false;
 
-				_pInsert.run({
-					':id_user': action.user.id,
-					':id_child': (action.child && action.child.id) ? action.child.id : null,
-					':id_type': action.type.id,
-					':name': action.name,
-					':params': action.params
-				}, function(err) {
+					for (var i = 0; i < links.length; ++i) {
 
-					if (err) {
-						reject((err.message) ? err.message : err);
+						if (links[i].cron.id == cron.id && links[i].action.id == action.id) {
+							bFound = true;
+							break;
+						}
+
+					}
+
+					if (bFound) {
+						resolve();
 					}
 					else {
-						that.lastInserted().then(resolve).catch(reject);
+
+						that.db.run("INSERT INTO actions_crons (id_action, id_cron) VALUES (:id_action, :id_cron);", {
+							':id_action' : action.id,
+							':id_cron' : cron.id
+						}, function(err) {
+
+							if (err) {
+								reject((err.message) ? err.message : err);
+							}
+							else {
+								resolve();
+							}
+
+						});
+
 					}
 
-				});
+				})
+				.catch(reject);
 
 			}
 
 		});
 
-	}*/
+	}
 
 	getAll() {
 		
@@ -102,9 +105,20 @@ module.exports = class DBCronsActions {
 
 		return new Promise(function(resolve, reject) {
 
-			resolve([]);
+			var sSelectQuery = "" +
+			" SELECT" +
 
-			/*that.db.all(_sSelectQuery + ";", [], function(err, rows) {
+				" crons.id AS cron_id," +
+				" crons.name AS cron_name," +
+
+				" actions.id AS action_id," +
+				" actions.name AS action_name" +
+
+			" FROM actions_crons" +
+				" INNER JOIN crons ON crons.id = actions_crons.id_cron" +
+				" INNER JOIN actions ON actions.id = actions_crons.id_action";
+
+			that.db.all(sSelectQuery + ";", [], function(err, rows) {
 
 				if (err) {
 					reject((err.message) ? err.message : err);
@@ -115,34 +129,54 @@ module.exports = class DBCronsActions {
 				else {
 
 					rows.forEach(function(row, key) {
-						rows[key] = _formateAction(row);
+
+						rows[key] = {
+							action : {
+								id : row.action_id,
+								name : row.action_name
+							},
+							cron : {
+								id : row.cron_id,
+								name : row.cron_name
+							}
+						};
+
 					});
 
 					resolve(rows);
 
 				}
 
-			});*/
+			});
 
 		});
 
 	}
 
-	/*delete (action) {
+	unlink (cron, action) {
 		
 		var that = this;
 
 		return new Promise(function(resolve, reject) {
 
-			if (!action) {
+			if (!cron) {
+				reject('Aucune tâche plannifiée renseignée.');
+			}
+				else if (!cron.id) {
+					reject("La tâche plannifiée renseignée est invalide.");
+				}
+			else if (!action) {
 				reject('Aucune action renseignée.');
 			}
-			else if (!action.id) {
-				reject("L'action renseignée est invalide.");
-			}
+				else if (!action.id) {
+					reject("L'action renseignée est invalide.");
+				}
 			else {
 
-				that.db.run("DELETE FROM actions WHERE id = :id;", { ':id' : action.id }, function(err) {
+				that.db.run("DELETE FROM actions_crons WHERE id_action = :id_action AND id_cron = :id_cron;", {
+					':id_action' : action.id,
+					':id_cron' : cron.id
+				}, function(err) {
 
 					if (err) {
 						reject((err.message) ? err.message : err);
@@ -157,6 +191,6 @@ module.exports = class DBCronsActions {
 
 		});
 
-	}*/
+	}
 
 };
