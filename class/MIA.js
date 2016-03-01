@@ -222,6 +222,7 @@
 
 									socket.removeAllListeners('plugins');
 									socket.removeAllListeners('plugin.add.github');
+									socket.removeAllListeners('plugin.update.github');
 									socket.removeAllListeners('plugin.delete');
 									
 									socket.removeAllListeners('actions');
@@ -636,7 +637,8 @@
 											Container.get('logs').log(url);
 										}
 
-										Container.get('plugins').addByGithub(url, Container).then(function() {
+										Container.get('plugins').addByGithub(url, Container).then(function(plugin) {
+											socket.emit('plugin.added', plugin);
 											socket.emit('plugins', Container.get('plugins').plugins);
 										}).catch(function(err) {
 											socket.emit('plugins.error', err);
@@ -647,6 +649,30 @@
 									catch (e) {
 										Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
 										socket.emit('plugins.error', "Impossible d'ajouter le plugin.");
+									}
+
+								})
+								.on('plugin.update.github', function(plugin) {
+
+									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('plugin.update.github');
+											Container.get('logs').log(plugin);
+										}
+
+										Container.get('plugins').updateByDirectory(plugin.directory, Container).then(function(plugin) {
+											socket.emit('plugin.updated', plugin);
+											socket.emit('plugins', Container.get('plugins').plugins);
+										}).catch(function(err) {
+											socket.emit('plugins.error', err);
+											socket.emit('plugins', Container.get('plugins').plugins);
+										});
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
+										socket.emit('plugins.error', "Impossible de mettre à jour le plugin.");
 									}
 
 								})

@@ -50,7 +50,7 @@
 					<div class="collapse navbar-collapse">
 
 						<ul class="nav navbar-nav only-logged hidden">
-							<!-- <li><a id="navConfiguration" href="#"><span class="glyphicon glyphicon-cog"></span> Configuration</a></li> -->
+							<li><a id="navConfiguration" href="#"><span class="glyphicon glyphicon-cog"></span> Configuration</a></li>
 							<li><a id="navCrons" href="#"><span class="glyphicon glyphicon-calendar"></span> Tâches plannifiées</a></li>
 							<li><a id="navActions" href="#"><span class="glyphicon glyphicon-fire"></span> Actions</a></li>
 							<li><a id="navPlugins" href="#"><span class="glyphicon glyphicon-paperclip"></span> Plugins</a></li>
@@ -574,7 +574,16 @@
 										<h5 class="pull-left">{{plugin.name}}</h5>
 
 										<div class="btn-group pull-right">
-											<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(plugin);"></button>
+
+											<button type="button" class="btn glyphicon glyphicon-cloud-download"
+													data-ng-show="plugin.github && '' != plugin.github"
+													data-ng-click="updateViaGithub(plugin);">
+											</button>
+
+											<button type="button" class="btn glyphicon glyphicon-trash"
+													data-ng-click="delete(plugin);">
+											</button>
+										
 										</div>
 
 									</div>

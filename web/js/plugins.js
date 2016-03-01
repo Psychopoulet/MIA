@@ -9,7 +9,23 @@ app.controller('ControllerPlugins', ['$scope', '$popup', function($scope, $popup
 		$scope.plugins = plugins;
 		$scope.$apply();
 	})
-	.on('plugins.error', $popup.alert);
+	.on('plugin.updated', function(plugin) {
+
+		$popup.alert({
+			message: "Le plugin '" + plugin.name + "' a été mis à jour.",
+			type: 'info'
+		});
+
+	})
+	.on('plugins.error', function(err) {
+
+		$popup.alert({
+			title: "Plugins",
+			message: (err.message) ? err.message : err,
+			type: "danger"
+		});
+
+	});
 
 	$scope.addViaGithub = function(url) {
 
@@ -18,6 +34,18 @@ app.controller('ControllerPlugins', ['$scope', '$popup', function($scope, $popup
 			placeholder : "https://github.com/<compte>/<plugin>",
 			onconfirm: function(url) {
 				socket.emit('plugin.add.github', url);
+			}
+		});
+
+	};
+
+	$scope.updateViaGithub = function(plugin) {
+
+		$popup.confirm({
+			title : "Mise à jour de plugin",
+			message: "Voulez-vous mettre le plugin '" + plugin.name + "' à jour ?",
+			onyes: function(url) {
+				socket.emit('plugin.update.github', plugin);
 			}
 		});
 
