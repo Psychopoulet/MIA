@@ -25,9 +25,12 @@ app.controller('ControllerPlugins', ['$scope', '$popup', function($scope, $popup
 
 	$scope.delete = function(plugin) {
 
-		$popup.confirm("Voulez-vous vraiment supprimer le plugin '" + plugin.name + "' ?", '', function() {
-			socket.emit('plugin.delete', plugin);
-		});
+		$popup.confirm({
+            message : "Voulez-vous vraiment supprimer le plugin '" + plugin.name + "' ?",
+            onyes : function() {
+				socket.emit('plugin.delete', plugin);
+            }
+        });
 
 	};
 

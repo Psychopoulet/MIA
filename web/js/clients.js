@@ -90,11 +90,15 @@ function($scope, $popup, ModelClients/*, ModelEvents*/) {
     
     $scope.rename = function (client) {
 
-        $popup.prompt('Nouveau nom', client.name, function(name) {
+        $popup.prompt({
+            title: 'Nouveau nom',
+            val: client.name,
+            onconfirm: function(name) {
 
-            client.name = name;
-            ModelClients.rename(client);
+                client.name = name;
+                ModelClients.rename(client);
 
+            }
         });
 
     }

@@ -36,7 +36,7 @@ app.service('$actions', ['$q', '$popup', function($q, $popup) {
 
 }])
 
-.controller('ControllerAction', ['$scope', '$popup', '$actions', function($scope, $popup, $actions) {
+.controller('ControllerAction', ['$scope', '$actions', function($scope, $actions) {
 
 	$scope.action = {};
 	$scope.childs = [];

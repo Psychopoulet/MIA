@@ -19,11 +19,15 @@ app.controller('ControllerChilds', ['$scope', '$popup', function($scope, $popup)
 
     $scope.rename = function (child) {
 
-        $popup.prompt('Nouveau nom', child.name, function(name) {
+        $popup.prompt({
+            title: 'Nouveau nom',
+            val: child.name,
+            onconfirm: function(name) {
 
-            child.name = name;
-            socket.emit('child.rename', child);
+                child.name = name;
+                socket.emit('child.rename', child);
 
+            }
         });
 
     }
