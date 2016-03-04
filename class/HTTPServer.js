@@ -384,6 +384,9 @@
 										});
 
 									})
+									.get('/libs/interact.js', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'interactjs', 'interact.js'));
+									})
 									.get('/libs/bootstrap.js', function (req, res) {
 
 										_readAllFiles(path.join(m_sDirWeb, 'libs', 'bootstrap', 'js')).then(function (data) {
