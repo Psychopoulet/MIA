@@ -3,8 +3,7 @@ app.service('$actions', ['$q', '$popup', function($q, $popup) {
 	var that = this;
 
 	this.writedaction = null;
-	this.actionstypes = [];
-	this.childs = [];
+	this.actionstypes = this.childs = [];
 
 	this.add = function(name, child, type, params) {
 
@@ -39,8 +38,7 @@ app.service('$actions', ['$q', '$popup', function($q, $popup) {
 .controller('ControllerAction', ['$scope', '$actions', function($scope, $actions) {
 
 	$scope.action = {};
-	$scope.childs = [];
-	$scope.actionstypes = [];
+	$scope.childs = $scope.actionstypes = [];
 
 	jQuery('#modalAction').on('show.bs.modal', function () {
 
@@ -82,7 +80,7 @@ app.service('$actions', ['$q', '$popup', function($q, $popup) {
 		socket.emit('action.execute', action);
 	};
 
-	$scope.linkToCron = function(action) {
+	$scope.linkToCron = function() {
 		
 		jQuery('#modalLinkCronsActions').modal({
 			backdrop: 'static',

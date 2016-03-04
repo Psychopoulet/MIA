@@ -7,10 +7,7 @@ app.controller('ControllerChilds', ['$scope', '$popup', function($scope, $popup)
     socket.on('child.allow.error', $popup.alert)
     .on('child.delete.error', $popup.alert)
     .on('childs', function (childs) {
-
-        $scope.childs = childs;
-        $scope.$apply();
-
+        $scope.$apply(function () { $scope.childs = childs; });
     });
 
     $scope.allow = function (child) {

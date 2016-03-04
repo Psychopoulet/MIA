@@ -6,8 +6,7 @@ app.controller('ControllerPlugins', ['$scope', '$popup', function($scope, $popup
 		socket.emit('plugins');
 	})
 	.on('plugins', function(plugins) {
-		$scope.plugins = plugins;
-		$scope.$apply();
+        $scope.$apply(function () { $scope.plugins = plugins; });
 	})
 	.on('plugin.updated', function(plugin) {
 

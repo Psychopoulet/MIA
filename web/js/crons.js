@@ -26,8 +26,7 @@ app.controller('ControllerCron', ['$scope', '$popup', function($scope, $popup) {
 		socket.emit('crons');
 	})
 	.on('crons', function(crons) {
-		$scope.crons = crons;
-		$scope.$apply();
+        $scope.$apply(function () { $scope.crons = crons; });
 	})
 	.on('crons.error', $popup.alert);
 
@@ -41,7 +40,7 @@ app.controller('ControllerCron', ['$scope', '$popup', function($scope, $popup) {
 
 	};
 
-	$scope.linkToAction = function (cron) {
+	$scope.linkToAction = function () {
 
 		jQuery('#modalLinkCronsActions').modal({
 			backdrop: 'static',

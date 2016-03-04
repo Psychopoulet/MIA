@@ -82,19 +82,19 @@
 
 								websockets.getSockets().forEach(function(socket) {
 
-									var isClient = false;
+									var isAllowed = false;
 
 									for (var i = 0; i < clients.length; ++i) {
 
 										if (socket.token == clients[i].token) {
 											clients[i].connected = true;
-											isClient = true;
+											isAllowed = true;
 											break;
 										}
 
 									}
 
-									if (!isClient) {
+									if (!isAllowed) {
 
 										clients.push({
 											status : waitingstatus,
@@ -136,25 +136,25 @@
 
 							try {
 
-								childs.forEach(function (client, i) {
+								childs.forEach(function (child, i) {
 									childs[i].connected = false;
 								});
 
 								childssockets.getSockets().forEach(function(socket) {
 
-									var isChild = false;
+									var isAllowed = false;
 
 									for (var i = 0; i < childs.length; ++i) {
 
 										if (socket.token == childs[i].token) {
 											childs[i].connected = true;
-											isChild = true;
+											isAllowed = true;
 											break;
 										}
 
 									}
 
-									if (!isChild) {
+									if (!isAllowed) {
 
 										childs.push({
 											status : waitingstatus,
