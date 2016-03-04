@@ -280,8 +280,12 @@
 
 						<div class="modal-body">
 							
-							<button class="btn btn-primary" data-ng-click="add();">
+							<button type="button" class="btn btn-primary" data-ng-click="add();">
 								<span class="glyphicon glyphicon-plus"></span> Ajouter
+							</button>
+
+							<button type="button" class="btn btn-primary" data-ng-click="linkToAction();" data-ng-show="0 < crons.length">
+								<span class="glyphicon glyphicon-fire"></span> Lier à une action
 							</button>
 
 							<br /><br />
@@ -299,10 +303,6 @@
 										<h5 class="pull-left">{{cron.name}}</h5>
 
 										<div class="btn-group pull-right">
-											<button type="button" class="btn btn-primary glyphicon glyphicon-fire"
-													data-ng-click="linkToAction(cron);"
-													data-toggle="tooltip" data-placement="auto" title="Lier la tâche plannifiée à une action">
-											</button>
 											<button type="button" class="btn btn-primary glyphicon glyphicon-trash"
 													data-ng-click="delete(cron);"
 													data-toggle="tooltip" data-placement="auto" title="Supprimer la tâche plannifiée">
@@ -369,42 +369,49 @@
 						<form class="modal-content">
 
 							<div class="modal-header">
-								<h4 class="modal-title"><span class="glyphicon glyphicon-link"></span> Liens entre tâches plannifiées et actions</h4>
+								<h4 class="modal-title">
+									<span class="glyphicon glyphicon-link"></span> Liens entre tâches plannifiées et actions
+								</h4>
 							</div>
 
 							<div class="modal-body">
 
-								<div data-ng-show="crons.length && actions.length">
+								<div class="row">
 									
-									<button class="btn btn-primary" data-ng-click="link(cron, action);"
-											data-ng-disabled="!cron || !action || linked(cron, action)" data-ng-class="{ 'disabled' : !cron || !action || linked(cron, action) }">
-										<span class="glyphicon glyphicon-plus"></span> Lier
-									</button>
-
-									<button class="btn btn-primary" data-ng-click="unlink(cron, action);"
-											data-ng-disabled="!cron || !action || !linked(cron, action)" data-ng-class="{ 'disabled' : !cron || !action || !linked(cron, action) }">
-										<span class="glyphicon glyphicon-minus"></span> Délier
-									</button>
-
-									<br /><br />
+									<div class="col-xs-12 text-center">
+										Pour créer un lien, glissez-déposez une action sur une tâche plannifiée.
+									</div>
 
 								</div>
 
+								<br />
+
 								<div class="row">
-									
+
 									<div class="col-xs-6">
 
 										<div class="panel panel-default">
 
 											<div class="panel-heading">Tâches plannifiées</div>
 
-											<div class="list-group">
+											<div class="panel-body" data-ng-show="0 >= crons.length">
+												Aucune tâche plannifiée enregistrée
+											</div>
 
-												<a href="#" class="list-group-item" data-ng-repeat="_cron in crons"
-													data-ng-click="selectCron(_cron);"
-													data-ng-class="{ 'list-group-item-info' : cron && cron == _cron }">
-													{{_cron.name}}
-												</a>
+											<div class="list-group" data-ng-show="0 < crons.length">
+
+												<div 	class="list-group-item cron-droppable"
+														data-ng-repeat="cron in crons" data-cron="{{cron.id}}">
+
+													{{cron.name}}
+
+													<ul data-ng-show="cron.actions && cron.actions.length">
+														<li data-ng-repeat="action in cron.actions">
+															{{action.name}} <a href="#" data-ng-click="unlink(cron, action);">x</a>
+														</li>
+													</ul>
+
+												</div>
 
 											</div>
 
@@ -418,13 +425,16 @@
 
 											<div class="panel-heading">Actions</div>
 
-											<div class="list-group">
+											<div class="panel-body" data-ng-show="0 >= actions.length">
+												Aucune action enregistrée
+											</div>
 
-												<a href="#" class="list-group-item" data-ng-repeat="_action in actions"
-													data-ng-click="selectAction(_action);"
-													data-ng-class="{ 'list-group-item-info' : action && action == _action }">
-													{{_action.name}}
-												</a>
+											<div class="list-group" data-ng-show="0 < actions.length">
+
+												<div 	class="list-group-item action-draggable"
+														data-ng-repeat="action in actions" data-action="{{action.id}}">
+													{{action.name}}
+												</div>
 
 											</div>
 
@@ -462,34 +472,40 @@
 								Aucune action enregistrée.
 							</div>
 
-							<ul class="list-group" data-ng-show="0 < actions.length">
+							<div data-ng-show="0 < actions.length">
 
-								<li class="list-group-item" data-ng-repeat="action in actions">
+								<button type="button" class="btn btn-primary" data-ng-click="linkToCron();">
+									<span class="glyphicon glyphicon-calendar"></span> Lier à une tâche plannifiée
+								</button>
 
-									<div class="clearfix">
+								<br /><br />
 
-										<h5 class="pull-left">"{{action.name}}", sur {{action.child.name}}</h5>
+								<ul class="list-group">
 
-										<div class="btn-group pull-right">
-											<button type="button" class="btn btn-primary glyphicon glyphicon-play"
-													data-ng-click="execute(action);"
-													data-toggle="tooltip" data-placement="auto" title="Exécuter l'action">
-											</button>
-											<button type="button" class="btn btn-primary glyphicon glyphicon-calendar"
-													data-ng-click="linkToCron(action);"
-													data-toggle="tooltip" data-placement="auto" title="Lier l'action à une tâche plannifiée">
-											</button>
-											<button type="button" class="btn btn-primary glyphicon glyphicon-trash"
-													data-ng-click="delete(action);"
-													data-toggle="tooltip" data-placement="auto" title="Supprimer l'action">
-											</button>
+									<li class="list-group-item" data-ng-repeat="action in actions">
+
+										<div class="clearfix">
+
+											<h5 class="pull-left">"{{action.name}}", sur {{action.child.name}}</h5>
+
+											<div class="btn-group pull-right">
+												<button type="button" class="btn btn-primary glyphicon glyphicon-play"
+														data-ng-click="execute(action);"
+														data-toggle="tooltip" data-placement="auto" title="Exécuter l'action">
+												</button>
+												<button type="button" class="btn btn-primary glyphicon glyphicon-trash"
+														data-ng-click="delete(action);"
+														data-toggle="tooltip" data-placement="auto" title="Supprimer l'action">
+												</button>
+											</div>
+
 										</div>
 
-									</div>
+									</li>
 
-								</li>
+								</ul>
 
-							</ul>
+							</div>
 
 						</div>
 
@@ -559,7 +575,7 @@
 
 						<div class="modal-body">
 
-							<button class="btn btn-primary" data-ng-click="addViaGithub();">
+							<button type="button" class="btn btn-primary" data-ng-click="addViaGithub();">
 								<span class="glyphicon glyphicon-plus"></span> Ajouter via Github
 							</button>
 
@@ -609,6 +625,7 @@
 		<!-- JS -->
 
 			<script type="text/javascript" src="/libs/jquery.js"></script>
+			<script type="text/javascript" src="/libs/interact.js"></script>
 			<script type="text/javascript" src="/libs/bootstrap.js"></script>
 			<script type="text/javascript" src="/libs/socketio.js"></script>
 			<script type="text/javascript" src="/libs/angular.js"></script>

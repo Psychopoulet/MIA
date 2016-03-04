@@ -1,78 +1,157 @@
 app.controller('ControllerLinkCronsActions', ['$scope', '$popup', function($scope, $popup) {
 
-	$scope.cron = null;
-	$scope.crons = [];
+	// attrs
 
-	$scope.action = null;
-	$scope.actions = [];
+		// private
 
-	$scope.cronsactions = [];
+			var bgc, transition, opacity;
 
-	$scope.selectCron = function(cron) {
+		// public
 
-		if ($scope.cron == cron) {
-			$scope.cron = null;
-		}
-		else {
-			$scope.cron = cron;
-		}
+			$scope.crons = $scope.actions = $scope.cronsactions = [];
 
-		return false;
-		
-	};
+	// meths
 
-	$scope.selectAction = function(action) {
+		// private
 
-		if ($scope.action == action) {
-			$scope.action = null;
-		}
-		else {
-			$scope.action = action;
-		}
-		
-		return false;
-		
-	};
+			function _setActionsToCrons() {
 
-	$scope.link = function(cron, action) {
-		socket.emit('cronaction.link', { cron: cron, action: action });
-	};
+				angular.forEach($scope.crons, function(cron, i) {
 
-	$scope.unlink = function(cron, action) {
-		socket.emit('cronaction.unlink', { cron: cron, action: action });
-	};
+					$scope.crons[i].actions = [];
 
-	$scope.linked = function(cron, action) {
+					angular.forEach($scope.cronsactions, function(cronaction) {
 
-		var result = false;
+						if (cron.id === cronaction.cron.id) {
+							$scope.crons[i].actions.push(cronaction.action);
+						}
 
-			for (var i = 0; i < $scope.cronsactions.length; ++i) {
+					});
 
-				if ($scope.cronsactions[i].cron.id == cron.id && $scope.cronsactions[i].action.id == action.id) {
-					result = true;
-					break;
+				});
+
+			}
+
+		// public
+
+			$scope.link = function(cron, action) {
+				socket.emit('cronaction.link', { cron: cron, action: action });
+			};
+
+			$scope.unlink = function(cron, action) {
+				socket.emit('cronaction.unlink', { cron: cron, action: action });
+			};
+
+	// events
+
+		socket.on('logged', function() {
+			socket.emit('cronsactions');
+		})
+		.on('crons', function(crons) {
+
+			$scope.$apply(function () {
+				$scope.crons = crons;
+				_setActionsToCrons();
+			});
+
+		})
+		.on('actions', function(actions) {
+			$scope.$apply(function () { $scope.actions = actions; });
+		})
+		.on('cronsactions', function(cronsactions) {
+
+			$scope.$apply(function () {
+				$scope.cronsactions = cronsactions;
+				_setActionsToCrons();
+			});
+
+		})
+		.on('cronsactions.error', $popup.alert);
+
+	// interface
+
+		interact('.cron-droppable').dropzone({
+			accept: '.action-draggable',
+			overlap: 0.3,
+			ondragenter: function (e) {
+				bgc = e.target.style.backgroundColor;
+				e.target.style.backgroundColor = '#29e';
+			},
+			ondragleave: function (e) {
+				e.target.style.backgroundColor = bgc;
+				bgc = null;
+			},
+			ondrop: function (e) {
+
+				var cron, action;
+
+				e.target.style.backgroundColor = bgc;
+				bgc = null;
+
+				if (e.target.dataset.cron && e.relatedTarget.dataset.action) {
+
+					for (var i = 0; i < $scope.crons.length; ++i) {
+
+						if ($scope.crons[i].id == e.target.dataset.cron) {
+							cron = $scope.crons[i];
+							break;
+						}
+
+					}
+
+					for (var i = 0; i < $scope.actions.length; ++i) {
+
+						if ($scope.actions[i].id == e.relatedTarget.dataset.action) {
+							action = $scope.actions[i];
+							break;
+						}
+
+					}
+
+					if (cron && action) {
+						$scope.link(cron, action);
+					}
+
 				}
 
 			}
 
-		return result;
-	};
+		});
 
-	socket.on('logged', function() {
-		socket.emit('cronsactions');
-	})
-	.on('crons', function(crons) {
-		$scope.crons = crons;
-		$scope.$apply();
-	})
-	.on('actions', function(actions) {
-		$scope.actions = actions;
-		$scope.$apply();
-	})
-	.on('cronsactions', function(cronsactions) {
-		$scope.cronsactions = cronsactions;
-		$scope.$apply();
-	})
-	.on('cronsactions.error', $popup.alert);
+		interact('.action-draggable').draggable({
+			autoScroll: true,
+			onmove: function (e) {
+
+				var x = (parseFloat(e.target.dataset.x) || 0) + e.dx,
+					y = (parseFloat(e.target.dataset.y) || 0) + e.dy;
+
+				e.target.style.webkitTransform = e.target.style.transform = 'translate3D(' + x + 'px, ' + y + 'px, 0)';
+
+				e.target.dataset.x = x;
+				e.target.dataset.y = y;
+
+			},
+			onstart: function (e) {
+
+				transition = e.target.style.transition;
+				opacity = e.target.style.opacity;
+
+				e.target.style.transition = '0s';
+				e.target.style.opacity = '0.4';
+
+			},
+
+			onend: function (e) {
+
+				e.target.style.transition = transition;
+				e.target.style.opacity = opacity;
+
+				e.target.style.webkitTransform = e.target.style.transform = 'translate3D(0, 0, 0)';
+
+				transition = opacity = e.target.dataset.x = e.target.dataset.y = null;
+
+			}
+
+		});
 
 }]);
