@@ -4,11 +4,12 @@ app.controller('ControllerLinkCronsActions', ['$scope', '$popup', function($scop
 
 		// private
 
-			var bgc, transition, opacity;
+			var bgc, transition, opacity,
+				_cronsActions = [];
 
 		// public
 
-			$scope.crons = $scope.actions = $scope.cronsactions = [];
+			$scope.crons = $scope.actions = [];
 
 	// meths
 
@@ -20,7 +21,7 @@ app.controller('ControllerLinkCronsActions', ['$scope', '$popup', function($scop
 
 					$scope.crons[i].actions = [];
 
-					angular.forEach($scope.cronsactions, function(cronaction) {
+					angular.forEach(_cronsActions, function(cronaction) {
 
 						if (cron.id === cronaction.cron.id) {
 							$scope.crons[i].actions.push(cronaction.action);
@@ -61,7 +62,7 @@ app.controller('ControllerLinkCronsActions', ['$scope', '$popup', function($scop
 		.on('cronsactions', function(cronsactions) {
 
 			$scope.$apply(function () {
-				$scope.cronsactions = cronsactions;
+				_cronsActions = cronsactions;
 				_setActionsToCrons();
 			});
 
