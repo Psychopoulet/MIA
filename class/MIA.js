@@ -15,7 +15,7 @@
 			
 			var that = this,
 				childssockets = Container.get('childssockets'),
-				websockets = Container.get('websockets');
+				clientssockets = Container.get('websockets');
 				
 		// methodes
 
@@ -80,7 +80,7 @@
 									clients[i].connected = false;
 								});
 
-								websockets.getSockets().forEach(function(socket) {
+								clientssockets.getSockets().forEach(function(socket) {
 
 									var isAllowed = false;
 
@@ -105,7 +105,7 @@
 
 									}
 
-									websockets.emit('clients', clients);
+									clientssockets.emit('clients', clients);
 
 								});
 
@@ -167,7 +167,7 @@
 
 								});
 
-								websockets.emit('childs', childs);
+								clientssockets.emit('childs', childs);
 
 							}
 							catch (e) {
@@ -198,7 +198,7 @@
 
 							// events
 
-							websockets.onDisconnect(function(socket) {
+							clientssockets.onDisconnect(function(socket) {
 
 								try {
 
@@ -250,7 +250,7 @@
 
 								socket.token = socket.id;
 
-								websockets.setTokenToSocketById(socket.id, socket.id);
+								clientssockets.setTokenToSocketById(socket.id, socket.id);
 
 								_sendClients();
 								_sendChilds();
@@ -258,6 +258,11 @@
 								socket.on('login', function (p_stData) {
 
 									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('login');
+											Container.get('logs').log(p_stData);
+										}
 
 										if (p_stData && p_stData.token) {
 
@@ -281,7 +286,7 @@
 
 													socket.token = currentClient.token;
 
-													websockets.fireLogin(socket, currentClient);
+													clientssockets.fireLogin(socket, currentClient);
 
 													socket.emit('logged', currentClient);
 
@@ -314,7 +319,7 @@
 
 															socket.token = currentClient.token;
 
-															websockets.fireLogin(socket, currentClient);
+															clientssockets.fireLogin(socket, currentClient);
 
 															socket.emit('logged', currentClient);
 
@@ -323,25 +328,25 @@
 
 														})
 														.catch(function(err) {
-															Container.get('logs').err('-- [conf] ' + ((err.message) ? err.message : err));
+															Container.get('logs').err('-- [database/clients/add] ' + ((err.message) ? err.message : err));
 															socket.emit('login.error', "Impossible de vous connecter.");
 														});
 
 													})
 													.catch(function(err) {
-														Container.get('logs').err('-- [conf] ' + ((err.message) ? err.message : err));
+														Container.get('logs').err('-- [database/status/getOneByCode] ' + ((err.message) ? err.message : err));
 														socket.emit('login.error', "Impossible de vous connecter.");
 													});
 
 												})
 												.catch(function(err) {
-													Container.get('logs').err('-- [conf] ' + ((err.message) ? err.message : err));
+													Container.get('logs').err('-- [database/users/lastInserted] ' + ((err.message) ? err.message : err));
 													socket.emit('login.error', "Impossible de vous connecter.");
 												});
 
 											})
 											.catch(function(err) {
-												Container.get('logs').err('-- [MIA] ' + ((err.message) ? err.message : err));
+												Container.get('logs').err('-- [database/users/exists] ' + ((err.message) ? err.message : err));
 												socket.emit('login.error', "Impossible de vous connecter.");
 											});
 
@@ -365,11 +370,16 @@
 								_sendClients();
 								_sendChilds();
 
-								socket.on('client.allow', function (p_stClient) {
+								socket.on('client.allow', function (client) {
 
 									try {
 
-										if (!p_stClient || !p_stClient.token) {
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('client.allow');
+											Container.get('logs').log(client);
+										}
+
+										if (!client || !client.token) {
 											socket.emit('client.allow.error', 'Les informations sur ce client sont incorrectes.');
 										}
 										else {
@@ -381,31 +391,31 @@
 													Container.get('clients').add({
 														user : user,
 														status : status,
-														token : p_stClient.token,
+														token : client.token,
 														name : 'Nouveau client'
 													}).then(function(currentClient) {
 
-														websockets.fireLogin(websockets.getSocket(currentClient.token), currentClient);
+														clientssockets.fireLogin(clientssockets.getSocket(currentClient.token), currentClient);
 
-														websockets.emitTo(currentClient.token, 'logged', currentClient);
+														clientssockets.emitTo(currentClient.token, 'logged', currentClient);
 
 														_sendClients();
 
 													})
 													.catch(function(err) {
-														Container.get('logs').err('-- [conf] ' + ((err.message) ? err.message : err));
+														Container.get('logs').err('-- [database/clients/add] ' + ((err.message) ? err.message : err));
 														socket.emit('client.allow.error', "Impossible d'enregistrer cet enfant.");
 													});
 
 												})
 												.catch(function(err) {
-													Container.get('logs').err('-- [conf] ' + ((err.message) ? err.message : err));
+													Container.get('logs').err('-- [database/users/lastInserted] ' + ((err.message) ? err.message : err));
 													socket.emit('client.allow.error', "Impossible d'enregistrer cet enfant.");
 												});
 
 											})
 											.catch(function(err) {
-												Container.get('logs').err('-- [conf] ' + ((err.message) ? err.message : err));
+												Container.get('logs').err('-- [database/status/getOneByCode] ' + ((err.message) ? err.message : err));
 												socket.emit('client.allow.error', "Impossible d'enregistrer cet enfant.");
 											});
 
@@ -418,18 +428,23 @@
 									}
 
 								})
-								.on('client.rename', function (p_stClient) {
+								.on('client.rename', function (client) {
 
 									try {
 
-										if (!p_stClient || !p_stClient.token || !p_stClient.name) {
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('client.rename');
+											Container.get('logs').log(client);
+										}
+
+										if (!client || !client.token || !client.name) {
 											socket.emit('client.rename.error', 'Les informations sur ce client sont incorrectes.');
 										}
 										else {
 
-											Container.get('clients').rename(p_stClient.token, p_stClient.name).then(_sendClients)
+											Container.get('clients').rename(client.token, client.name).then(_sendClients)
 											.catch(function(err) {
-												Container.get('logs').err('-- [conf] ' + ((err.message) ? err.message : err));
+												Container.get('logs').err('-- [database/clients/rename] ' + ((err.message) ? err.message : err));
 												socket.emit('child.rename.error', 'Impossible de renommer ce client.');
 											});
 
@@ -442,25 +457,31 @@
 									}
 
 								})
-								.on('client.delete', function (p_stClient) {
+								.on('client.delete', function (client) {
 
 									try {
 
-										if (!p_stClient || !p_stClient.token) {
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('client.delete');
+											Container.get('logs').log(client);
+										}
+
+										if (!client || !client.token) {
 											socket.emit('client.delete.error', 'Les informations sur ce client sont incorrectes.');
 										}
 										else {
 
-											Container.get('clients').delete(p_stClient.token).then(function() {
-												
-												childssockets	.emitTo(p_stClient.token, 'client.deleted')
-																.disconnect(p_stClient.token);
+											var token = client.token;
+
+											Container.get('clients').delete(token).then(function() {
+
+												clientssockets.emitTo(token, 'client.deleted').disconnect(token);
 
 												_sendClients();
 
 											})
-											.catch(function(e) {
-												Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+											.catch(function(err) {
+												Container.get('logs').err('-- [database/clients/delete] ' + ((err.message) ? err.message : err));
 												socket.emit('client.delete.error', 'Impossible de supprimer ce client.');
 											});
 
@@ -476,11 +497,16 @@
 
 								// childs
 
-								.on('child.allow', function (p_stChild) {
+								.on('child.allow', function (child) {
 
 									try {
 
-										if (!p_stChild || !p_stChild.token) {
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('child.allow');
+											Container.get('logs').log(child);
+										}
+
+										if (!child || !child.token) {
 											socket.emit('child.allow.error', 'Les informations sur cet enfant sont incorrectes.');
 										}
 										else {
@@ -489,7 +515,7 @@
 
 												Container.get('childs').add({
 													status : status,
-													token : p_stChild.token,
+													token : child.token,
 													name : 'Nouvel enfant'
 												}).then(function(currentChild) {
 
@@ -501,13 +527,13 @@
 
 												})
 												.catch(function(err) {
-													Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+													Container.get('logs').err('-- [database/childs/add] ' + ((e.message) ? e.message : e));
 													socket.emit('child.allow.error', "Impossible d'autoriser cet enfant.");
 												});
 
 											})
 											.catch(function(err) {
-												Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+												Container.get('logs').err('-- [database/status/getOneByCode] ' + ((e.message) ? e.message : e));
 												socket.emit('child.allow.error', "Impossible d'autoriser cet enfant.");
 											});
 
@@ -520,18 +546,23 @@
 									}
 
 								})
-								.on('child.rename', function (p_stChild) {
+								.on('child.rename', function (child) {
 
 									try {
 
-										if (!p_stChild || !p_stChild.token || !p_stChild.name) {
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('child.rename');
+											Container.get('logs').log(child);
+										}
+
+										if (!child || !child.token || !child.name) {
 											socket.emit('child.rename.error', 'Les informations sur cet enfant sont incorrectes.');
 										}
 										else {
 
-											Container.get('childs').rename(p_stChild.token, p_stChild.name).then(_sendChilds)
-											.catch(function(e) {
-												Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+											Container.get('childs').rename(child.token, child.name).then(_sendChilds)
+											.catch(function(err) {
+												Container.get('logs').err('-- [database/childs/rename] ' + ((err.message) ? err.message : err));
 												socket.emit('child.rename.error', 'Impossible de renommer cet enfant.');
 											});
 
@@ -544,25 +575,29 @@
 									}
 
 								})
-								.on('child.delete', function (p_stChild) {
+								.on('child.delete', function (child) {
 
 									try {
 
-										if (!p_stChild || !p_stChild.token) {
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('child.delete');
+											Container.get('logs').log(child);
+										}
+
+										if (!child || !child.token) {
 											socket.emit('child.delete.error', 'Les informations sur cet enfant sont incorrectes.');
 										}
 										else {
 
-											Container.get('childs').delete(p_stChild.token).then(function() {
+											Container.get('childs').delete(child.token).then(function() {
 												
-												childssockets	.emitTo(p_stChild.token, 'child.deleted')
-																.disconnect(p_stChild.token);
+												childssockets.emitTo(child.token, 'child.deleted').disconnect(child.token);
 
 												_sendChilds();
 
 											})
-											.catch(function(e) {
-												Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+											.catch(function(err) {
+												Container.get('logs').err('-- [database/childs/delete] ' + ((err.message) ? err.message : err));
 												socket.emit('child.delete.error', 'Impossible de supprimer cet enfant.');
 											});
 
@@ -576,48 +611,15 @@
 
 								})
 
-								/*// user
-
-								.on('user.update', function (p_stData) {
-
-									try {
-
-										if (!p_stData.login) {
-											socket.emit('user.update.error', 'Login manquant.');
-										}
-										else if (!p_stData.password) {
-											socket.emit('user.update.error', 'Mot de passe manquant.');
-										}
-										else {
-
-											Container.get('conf').set('user', {
-												login : p_stData.login,
-												password : p_stData.password
-											});
-
-											Container.get('conf').save().then(function() {
-												websockets.emit('user.updated');
-											})
-											.catch(function(e) {
-												Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
-												socket.emit('user.update.error', 'Impossible de sauvegarder la configuration.');
-											});
-
-										}
-
-									}
-									catch (e) {
-										Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
-										socket.emit('user.update.error', "Impossible de mettre à jour l'utilisateur.");
-									}
-
-								})*/
-
 								// plugins
 
 								.on('plugins', function() {
 
 									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('plugins');
+										}
 
 										socket.emit('plugins', Container.get('plugins').plugins);
 
@@ -1161,11 +1163,16 @@
 								
 								// childs
 
-								socket.on('login', function (p_stData) {
+								socket.on('login', function (data) {
 
 									try {
 
-										if (p_stData && p_stData.token) {
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('login');
+											Container.get('logs').log(data);
+										}
+
+										if (data && data.token) {
 
 											Container.get('childs').getAll().then(function(childs) {
 
@@ -1173,7 +1180,7 @@
 
 												for (var i = 0; i < childs.length; ++i) {
 
-													if (p_stData.token === childs[i].token) {
+													if (data.token === childs[i].token) {
 														currentChild = childs[i];
 														break;
 													}
@@ -1218,28 +1225,28 @@
 
 								socket.on('media.sound.error', function (error) {
 									Container.get('logs').err('play sound - ' + error);
-									websockets.emit('media.sound.error', error);
+									clientssockets.emit('media.sound.error', error);
 								})
 								.on('media.sound.played', function (data) {
 									Container.get('logs').log('media.sound.played');
-									websockets.emit('media.sound.played', data);
+									clientssockets.emit('media.sound.played', data);
 								})
 								.on('media.sound.downloaded', function (data) {
 									Container.get('logs').log('media.sound.downloaded');
-									websockets.emit('media.sound.downloaded', data);
+									clientssockets.emit('media.sound.downloaded', data);
 								})
 
 								.on('media.video.error', function (error) {
 									Container.get('logs').err('play video - ' + error);
-									websockets.emit('media.video.error', error);
+									clientssockets.emit('media.video.error', error);
 								})
 								.on('media.video.played', function (data) {
 									Container.get('logs').log('media.video.played');
-									websockets.emit('media.video.played', data);
+									clientssockets.emit('media.video.played', data);
 								})
 								.on('media.video.downloaded', function (data) {
 									Container.get('logs').log('media.video.downloaded');
-									websockets.emit('media.video.downloaded', data);
+									clientssockets.emit('media.video.downloaded', data);
 								});
 
 							});
@@ -1281,7 +1288,7 @@
 											Container.get('logs').success("-- [plugins] : '" + plugin.name + "' (v" + plugin.version + ') updated');
 										})
 										.on('uninstalled', function(plugin) {
-											Container.get('logs').success("-- [plugins] : '" + plugin.name + "' uninstalled ---");
+											Container.get('logs').success("-- [plugins] : '" + plugin.name + "' uninstalled");
 										})
 
 								.loadAll(Container).then(function() {
@@ -1292,7 +1299,7 @@
 
 										// server http socket
 
-										websockets.start().then(function() {
+										clientssockets.start().then(function() {
 
 											// server childs
 											

@@ -1,53 +1,19 @@
-jQuery(document).ready(function() {
-	
+app.controller('ControllerLogin', ['$scope', '$popup', '$cookies', function($scope, $popup, $cookies) {
+
 	"use strict";
 
-	var login_form = jQuery('#login_form');
+	// attrs
 
-	// cookies
+	$scope.inProgress = false;
 
-		function _createCookie(name, value, days) {
+	// events
 
-			var date, expires = '';
+	socket.on('connect', function() {
 
-			if (days) {
-				date = new Date();
-				date.setTime(date.getTime() + (days*24*60*60*1000));
-				expires = "; expires=" + date.toGMTString();
-			}
-
-			document.cookie = name + "=" + value + expires + "; path=/";
-
-		}
-
-		function _readCookie(name) {
-
-			var nameEQ = name + "=", ca = document.cookie.split(';'), sResult = '';
-
-			for(var i = 0; i < ca.length; ++i) {
-
-				var c = ca[i];
-
-				while (' ' == c.charAt(0)) {
-					c = c.substring(1,c.length);
-				}
-
-				if (0 == c.indexOf(nameEQ)) {
-					sResult = c.substring(nameEQ.length,c.length);
-				}
-
-			}
-
-			return sResult;
-
-		}
-
-	// socket
-
-		// connection
-
-		socket.on('connect', function() {
-
+		console.log('connect');
+			
+		$scope.$apply(function() {
+			
 			var token = '';
 
 			jQuery('.only-disconnected, .only-logged').addClass('hidden');
@@ -60,17 +26,17 @@ jQuery(document).ready(function() {
 				}
 				if (!token) {
 
-					token = _readCookie('token');
+					token = $cookies.get('token');
 
 					if (token) {
-						_createCookie('token', token, 360);
+						$cookies.put('token', token);
 					}
 
 				}
 
 				if (token) {
 
-					login_form.find('input, button, select, checkbox').attr('disabled', 'disabled').addClass('disabled');
+					$scope.inProgress = true;
 
 					socket.emit('login', {
 						token : token
@@ -78,39 +44,33 @@ jQuery(document).ready(function() {
 
 				}
 
-		})
-		.on('disconnect', function () {
+		});
 
-			login_form.find('input, button, select, checkbox').removeAttr('disabled', 'disabled').removeClass('disabled');
+	})
+	.on('disconnect', function () {
+
+		$scope.$apply(function() {
+			
+			$scope.inProgress = false;
 
 			jQuery('.only-logged, .only-connected').addClass('hidden');
 			jQuery('.only-disconnected').removeClass('hidden');
 
-		})
+		});
 
-		// login
+	})
+	
+	.on('logged', function (data) {
 
-		.on('login.error', function (err) {
-			login_form.find('input, button, select, checkbox').removeAttr('disabled', 'disabled').removeClass('disabled');
-			alert(err);
-		})
-		.on('client.deleted', function (err) {
-
-			if (localStorage) {
-				localStorage.removeItem('token');
-			}
-			else {
-				_createCookie('token', '', -1);
-			}
+		$scope.$apply(function() {
 			
-		})
-		.on('logged', function (data) {
+			$scope.inProgress = false;
 
 			if (localStorage) {
 				localStorage.setItem('token', data.token);
 			}
 			else {
-				_createCookie('token', data.token, 360);
+				$cookies.put('token', data.token);
 			}
 
 			jQuery('.only-disconnected, .only-connected').addClass('hidden');
@@ -118,29 +78,50 @@ jQuery(document).ready(function() {
 
 		});
 
-	// form
+	})
+	.on('client.deleted', function (err) {
 
-		login_form.submit(function () {
+		$scope.$apply(function() {
 
-			login_form.find('input, button, select, checkbox').attr('disabled', 'disabled').addClass('disabled');
+			$scope.inProgress = false;
 
-			socket.emit('login', {
-				login : jQuery('#login_login').val(),
-				password : jQuery('#login_password').val()
-			});
-
-			return false;
-
-		});
-
-		jQuery('#login_allow').click(function () {
-
-			login_form.find('input, button, select, checkbox').attr('disabled', 'disabled').addClass('disabled');
-
-			socket.emit('login');
-
-			return false;
+			if (localStorage) {
+				localStorage.removeItem('token');
+			}
+			else {
+				$cookies.remove('token');
+			}
+		
+			jQuery('.only-connected, .only-logged').addClass('hidden');
+			jQuery('.only-disconnected').removeClass('hidden');
 
 		});
 
-});
+	})
+	.on('login.error', function (err) {
+
+		$scope.$apply(function() {
+			
+			$scope.inProgress = false;
+			$popup.alert(err);
+
+		});
+
+	});
+
+	// interface
+
+	$scope.login = function() {
+
+		$scope.inProgress = true;
+
+		socket.emit('login', {
+			login : $scope.login,
+			password : $scope.password
+		});
+
+		return false;
+
+	};
+
+}]);

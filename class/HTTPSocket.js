@@ -69,16 +69,16 @@
 					
 				}
 
-				this.emit = function (p_sOrder, p_vData) {
-					m_clSocketServer.sockets.emit(p_sOrder, p_vData);
+				this.emit = function (order, data) {
+					m_clSocketServer.sockets.emit(order, data);
 				};
 				
-				this.emitTo = function (p_sToken, p_sOrder, p_vData) {
+				this.emitTo = function (token, order, data) {
 
 					for (var key in m_clSocketServer.sockets.sockets) {
 
-						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === p_sToken) {
-							m_clSocketServer.sockets.sockets[key].emit(p_sOrder, p_vData);
+						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
+							m_clSocketServer.sockets.sockets[key].emit(order, data);
 							break;
 						}
 
@@ -88,12 +88,12 @@
 					
 				};
 
-				this.setTokenToSocketById = function (p_sId, p_sToken) {
+				this.setTokenToSocketById = function (id, token) {
 
 					for (var key in m_clSocketServer.sockets.sockets) {
 
-						if (m_clSocketServer.sockets.sockets[key].id === p_sId) {
-							m_clSocketServer.sockets.sockets[key].token = p_sToken;
+						if (m_clSocketServer.sockets.sockets[key].id === id) {
+							m_clSocketServer.sockets.sockets[key].token = token;
 							break;
 						}
 
@@ -103,11 +103,11 @@
 					
 				};
 				
-				this.disconnect = function (p_sToken) {
+				this.disconnect = function (token) {
 
 					for (var key in m_clSocketServer.sockets.sockets) {
 
-						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === p_sToken) {
+						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
 							m_clSocketServer.sockets.sockets[key].disconnect();
 							break;
 						}
@@ -130,13 +130,13 @@
 
 				};
 				
-				this.getSocket = function (p_sToken) {
+				this.getSocket = function (token) {
 
 					var result = null;
 
 						for (var key in m_clSocketServer.sockets.sockets) {
 
-							if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === p_sToken) {
+							if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
 								result = m_clSocketServer.sockets.sockets[key];
 								break;
 							}
