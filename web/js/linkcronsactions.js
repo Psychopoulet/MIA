@@ -4,7 +4,7 @@ app.controller('ControllerLinkCronsActions', ['$scope', '$popup', function($scop
 
 		// private
 
-			var bgc, transition, opacity,
+			var transition, opacity,
 				_cronsActions = [];
 
 		// public
@@ -75,19 +75,16 @@ app.controller('ControllerLinkCronsActions', ['$scope', '$popup', function($scop
 			accept: '.action-draggable',
 			overlap: 0.3,
 			ondragenter: function (e) {
-				bgc = e.target.style.backgroundColor;
-				e.target.style.backgroundColor = '#29e';
+				jQuery(e.target).addClass('list-group-item-success');
 			},
 			ondragleave: function (e) {
-				e.target.style.backgroundColor = bgc;
-				bgc = null;
+				jQuery(e.target).removeClass('list-group-item-success');
 			},
 			ondrop: function (e) {
 
 				var cron, action;
 
-				e.target.style.backgroundColor = bgc;
-				bgc = null;
+				jQuery(e.target).removeClass('list-group-item-success');
 
 				if (e.target.dataset.cron && e.relatedTarget.dataset.action) {
 

@@ -10,8 +10,6 @@ app.controller('ControllerLogin', ['$scope', '$popup', '$cookies', function($sco
 
 	socket.on('connect', function() {
 
-		console.log('connect');
-			
 		$scope.$apply(function() {
 			
 			var token = '';
@@ -60,17 +58,17 @@ app.controller('ControllerLogin', ['$scope', '$popup', '$cookies', function($sco
 
 	})
 	
-	.on('logged', function (data) {
+	.on('logged', function (client) {
 
 		$scope.$apply(function() {
 			
 			$scope.inProgress = false;
 
 			if (localStorage) {
-				localStorage.setItem('token', data.token);
+				localStorage.setItem('token', client.token);
 			}
 			else {
-				$cookies.put('token', data.token);
+				$cookies.put('token', client.token);
 			}
 
 			jQuery('.only-disconnected, .only-connected').addClass('hidden');
