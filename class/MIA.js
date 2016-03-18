@@ -117,13 +117,13 @@
 						})
 						.catch(function(err) {
 							err = (err.message) ? err.message : err;
-							Container.get('logs').err('-- [MIA] ' + ((err.message) ? err.message : err));
+							Container.get('logs').err('-- [database/clients/getAll] ' + ((err.message) ? err.message : err));
 						});
 
 					})
 					.catch(function(err) {
 						err = (err.message) ? err.message : err;
-						Container.get('logs').err('-- [MIA] ' + ((err.message) ? err.message : err));
+						Container.get('logs').err('-- [database/status/getOneByCode] ' + ((err.message) ? err.message : err));
 					});
 
 				}
@@ -177,13 +177,29 @@
 						})
 						.catch(function(err) {
 							err = (err.message) ? err.message : err;
-							Container.get('logs').err('-- [MIA] ' + ((err.message) ? err.message : err));
+							Container.get('logs').err('-- [database/childs/getAll] ' + ((err.message) ? err.message : err));
 						});
 
 					})
 					.catch(function(err) {
 						err = (err.message) ? err.message : err;
-						Container.get('logs').err('-- [MIA] ' + ((err.message) ? err.message : err));
+						Container.get('logs').err('-- [database/status/getOneByCode] ' + ((err.message) ? err.message : err));
+					});
+
+				}
+
+				function _sendUsers() {
+
+					Container.get('users').lastInserted().then(function(user) {
+
+						delete user.password;
+
+						clientssockets.emit('users', [user]);
+
+					})
+					.catch(function(err) {
+						err = (err.message) ? err.message : err;
+						Container.get('logs').err('-- [database/users/lastInserted] ' + ((err.message) ? err.message : err));
 					});
 
 				}
@@ -218,7 +234,8 @@
 									socket.removeAllListeners('child.rename');
 									socket.removeAllListeners('child.delete');
 
-									// socket.removeAllListeners('user.update');
+									socket.removeAllListeners('user.update.login');
+									socket.removeAllListeners('user.update.password');
 
 									socket.removeAllListeners('plugins');
 									socket.removeAllListeners('plugin.add.github');
@@ -600,6 +617,59 @@
 												Container.get('logs').err('-- [database/childs/delete] ' + ((err.message) ? err.message : err));
 												socket.emit('child.delete.error', 'Impossible de supprimer cet enfant.');
 											});
+
+										}
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+										socket.emit('child.delete.error', "Impossible de suppprimer cet enfant.");
+									}
+
+								})
+
+								// user
+
+								.on('user.update.login', function (login) {
+
+									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('user.update.login');
+											Container.get('logs').log(login);
+										}
+
+										if (!login) {
+											socket.emit('user.error', "Le login n'est pas renseigné.");
+										}
+										else {
+
+											_sendUsers();
+
+										}
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+										socket.emit('user.update.error', 'Impossible de retrouver cet utilisateur.');
+									}
+
+								})
+
+								.on('user.update.password', function (passwords) {
+
+									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('user.update.password');
+										}
+
+										if (!passwords || !passwords.password || !passwords.confirm) {
+											socket.emit('user.error', 'Les mots de passe ne sont pas renseigné.');
+										}
+										else {
+
+											_sendUsers();
 
 										}
 

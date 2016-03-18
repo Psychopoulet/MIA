@@ -50,8 +50,7 @@
 					<div class="collapse navbar-collapse">
 
 						<ul class="nav navbar-nav only-logged hidden">
-							<li><a id="navUsers" href="#"><span class="glyphicon glyphicon-user"></span> Utilisateurs</a></li>
-							<li><a id="navConfiguration" href="#"><span class="glyphicon glyphicon-cog"></span> Configuration</a></li>
+							<li><a id="navUsers" href="#"><span class="glyphicon glyphicon-user"></span> Utilisateur</a></li>
 							<li><a id="navCrons" href="#"><span class="glyphicon glyphicon-calendar"></span> Tâches plannifiées</a></li>
 							<li><a id="navActions" href="#"><span class="glyphicon glyphicon-fire"></span> Actions</a></li>
 							<li><a id="navPlugins" href="#"><span class="glyphicon glyphicon-paperclip"></span> Plugins</a></li>
@@ -255,25 +254,67 @@
 			<!-- modales -->
 
 
-			<div id="modalConfiguration" class="modal fade only-logged hidden" data-ng-controller="ControllerConfiguration">
+			<div id="modalUser" class="modal fade only-logged hidden" data-ng-controller="ControllerUser">
 
 				<div class="modal-dialog">
 
-					<div class="modal-content">
+					<form class="modal-content">
 
 						<div class="modal-header">
-							<h4 class="modal-title"><span class="glyphicon glyphicon-cog"></span> Configuration</h4>
+							<h4 class="modal-title"><span class="glyphicon glyphicon-user"></span> Utilisateur</h4>
 						</div>
 
 						<div class="modal-body">
-							configuration...
+
+							<div class="form-group">
+
+								<label for="formUserLogin">Login</label>
+
+								<div class="input-group">
+
+									<input id="formUserLogin" type="text" class="form-control" placeholder="Login" data-ng-model="user.login">
+
+									<span class="input-group-btn">
+
+										<button type="button" class="btn btn-primary"
+												data-ng-click="editLogin(user.login);">
+											Modifier
+										</button>
+
+									</span>
+
+								</div>
+
+							</div>
+
+							<div class="form-group">
+
+								<label for="formUserPassword">Mot de passe</label>
+
+								<div class="input-group">
+
+									<input id="formUserPassword" type="password" class="form-control" placeholder="Mot de passe" data-ng-model="user.password">
+
+									<span class="input-group-btn">
+
+										<button type="button" class="btn btn-primary"
+												data-ng-click="editPassword(user.password);">
+											Modifier
+										</button>
+
+									</span>
+
+								</div>
+
+							</div>
+
 						</div>
 
 						<div class="modal-footer">
 							<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
 						</div>
 
-					</div>
+					</form>
 
 				</div>
 
@@ -620,30 +661,6 @@
 								</li>
 
 							</ul>
-
-						</div>
-
-						<div class="modal-footer">
-							<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
-						</div>
-
-					</div>
-
-				</div>
-
-			</div>
-			
-			<div id="modalUsers" class="modal fade only-logged hidden" data-ng-controller="ControllerUsers">
-
-				<div class="modal-dialog">
-
-					<div class="modal-content">
-
-						<div class="modal-header">
-							<h4 class="modal-title"><span class="glyphicon glyphicon-user"></span> Utilisateurs</h4>
-						</div>
-
-						<div class="modal-body">
 
 						</div>
 
