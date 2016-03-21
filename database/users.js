@@ -168,4 +168,42 @@ module.exports = class DBUsers {
 
 	}
 
+	update (user) {
+
+		var that = this;
+
+		return new Promise(function(resolve, reject) {
+
+			if (!user) {
+				reject('Aucun utilisateur renseigné.');
+			}
+			else if (!user.login) {
+				reject('Aucun login renseigné.');
+			}
+			else if (!user.password) {
+				reject('Aucun mot de passe renseigné.');
+			}
+			else {
+
+				that.db.run("UPDATE users SET login = :login, password = :password WHERE id = :id;", {
+					':login': user.login,
+					':password': _cryptPassword(user.password),
+					':id': user.id
+				}, function(err) {
+
+					if (err) {
+						reject((err.message) ? err.message : err);
+					}
+					else {
+						that.lastInserted().then(resolve).catch(reject);
+					}
+
+				});
+
+			}
+
+		});
+
+	}
+
 };

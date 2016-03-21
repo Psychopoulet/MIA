@@ -644,14 +644,33 @@
 										}
 										else {
 
-											_sendUsers();
+											Container.get('users').lastInserted().then(function(user) {
+
+												user.login = login;
+
+												Container.get('users').update(user).then(function() {
+
+													socket.emit('user.update.login');
+													_sendUsers();
+
+												})
+												.catch(function(err) {
+													Container.get('logs').err('-- [database/users/update] ' + ((err.message) ? err.message : err));
+													socket.emit('user.error', 'Impossible de modifier cet utilisateur.');
+												});
+												
+											})
+											.catch(function(err) {
+												Container.get('logs').err('-- [database/users/lastInserted] ' + ((err.message) ? err.message : err));
+												socket.emit('user.error', 'Impossible de récupérer cet utilisateur.');
+											});
 
 										}
 
 									}
 									catch (e) {
 										Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
-										socket.emit('user.update.error', 'Impossible de retrouver cet utilisateur.');
+										socket.emit('user.error', 'Impossible de retrouver cet utilisateur.');
 									}
 
 								})
@@ -665,18 +684,37 @@
 										}
 
 										if (!passwords || !passwords.password || !passwords.confirm) {
-											socket.emit('user.error', 'Les mots de passe ne sont pas renseigné.');
+											socket.emit('user.error', 'Les mots de passe ne sont pas renseignés.');
+										}
+										else if (passwords.password != passwords.confirm) {
+											socket.emit('user.error', 'Les mots de passe ne sont pas identiques.');
 										}
 										else {
 
-											_sendUsers();
+											Container.get('users').lastInserted().then(function(user) {
+
+												user.password = passwords.password;
+
+												Container.get('users').update(user).then(function() {
+													socket.emit('user.update.password');
+												})
+												.catch(function(err) {
+													Container.get('logs').err('-- [database/users/update] ' + ((err.message) ? err.message : err));
+													socket.emit('user.error', 'Impossible de modifier cet utilisateur.');
+												});
+												
+											})
+											.catch(function(err) {
+												Container.get('logs').err('-- [database/users/lastInserted] ' + ((err.message) ? err.message : err));
+												socket.emit('user.error', 'Impossible de récupérer cet utilisateur.');
+											});
 
 										}
 
 									}
 									catch (e) {
 										Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
-										socket.emit('child.delete.error', "Impossible de suppprimer cet enfant.");
+										socket.emit('user.error', "Impossible de suppprimer cet enfant.");
 									}
 
 								})

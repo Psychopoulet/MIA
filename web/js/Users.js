@@ -7,8 +7,23 @@ app.controller('ControllerUser', ['$scope', '$popup', function($scope, $popup) {
 
     socket.on('user.error', $popup.alert)
     .on('users', function (users) {
-        console.log(users);
         $scope.$apply(function () { $scope.users = users; });
+    })
+    .on('user.update.login', function () {
+
+        $popup.alert({
+            type : 'success',
+            message : "Login modifié."
+        });
+
+    })
+    .on('user.update.password', function () {
+
+        $popup.alert({
+            type : 'success',
+            message : "Mot de passe modifié."
+        });
+
     })
     .on('logged', function (client) {
 
@@ -59,7 +74,7 @@ app.controller('ControllerUser', ['$scope', '$popup', function($scope, $popup) {
                         
                         $popup.alert({
                             type : 'danger',
-                            message : "Le mot de passe est incorrect."
+                            message : "Le mot de passe de confirmaton est incorrect."
                         });
 
                     }
