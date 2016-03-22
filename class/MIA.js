@@ -233,14 +233,6 @@
 									socket.removeAllListeners('child.allow');
 									socket.removeAllListeners('child.rename');
 									socket.removeAllListeners('child.delete');
-
-									socket.removeAllListeners('user.update.login');
-									socket.removeAllListeners('user.update.password');
-
-									socket.removeAllListeners('plugins');
-									socket.removeAllListeners('plugin.add.github');
-									socket.removeAllListeners('plugin.update.github');
-									socket.removeAllListeners('plugin.delete');
 									
 									socket.removeAllListeners('actions');
 									socket.removeAllListeners('action.execute');
@@ -256,6 +248,16 @@
 									socket.removeAllListeners('cronsactions');
 									socket.removeAllListeners('cronaction.link');
 									socket.removeAllListeners('cronaction.unlink');
+
+									socket.removeAllListeners('user.update.login');
+									socket.removeAllListeners('user.update.password');
+
+									socket.removeAllListeners('plugins');
+									socket.removeAllListeners('plugin.add.github');
+									socket.removeAllListeners('plugin.update.github');
+									socket.removeAllListeners('plugin.delete');
+
+									socket.removeAllListeners('logs');
 
 								}
 								catch (e) {
@@ -624,196 +626,6 @@
 									catch (e) {
 										Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
 										socket.emit('child.delete.error', "Impossible de suppprimer cet enfant.");
-									}
-
-								})
-
-								// user
-
-								.on('user.update.login', function (login) {
-
-									try {
-
-										if (Container.get('conf').get('debug')) {
-											Container.get('logs').log('user.update.login');
-											Container.get('logs').log(login);
-										}
-
-										if (!login) {
-											socket.emit('user.error', "Le login n'est pas renseigné.");
-										}
-										else {
-
-											Container.get('users').lastInserted().then(function(user) {
-
-												user.login = login;
-
-												Container.get('users').update(user).then(function() {
-
-													socket.emit('user.update.login');
-													_sendUsers();
-
-												})
-												.catch(function(err) {
-													Container.get('logs').err('-- [database/users/update] ' + ((err.message) ? err.message : err));
-													socket.emit('user.error', 'Impossible de modifier cet utilisateur.');
-												});
-												
-											})
-											.catch(function(err) {
-												Container.get('logs').err('-- [database/users/lastInserted] ' + ((err.message) ? err.message : err));
-												socket.emit('user.error', 'Impossible de récupérer cet utilisateur.');
-											});
-
-										}
-
-									}
-									catch (e) {
-										Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
-										socket.emit('user.error', 'Impossible de retrouver cet utilisateur.');
-									}
-
-								})
-
-								.on('user.update.password', function (passwords) {
-
-									try {
-
-										if (Container.get('conf').get('debug')) {
-											Container.get('logs').log('user.update.password');
-										}
-
-										if (!passwords || !passwords.password || !passwords.confirm) {
-											socket.emit('user.error', 'Les mots de passe ne sont pas renseignés.');
-										}
-										else if (passwords.password != passwords.confirm) {
-											socket.emit('user.error', 'Les mots de passe ne sont pas identiques.');
-										}
-										else {
-
-											Container.get('users').lastInserted().then(function(user) {
-
-												user.password = passwords.password;
-
-												Container.get('users').update(user).then(function() {
-													socket.emit('user.update.password');
-												})
-												.catch(function(err) {
-													Container.get('logs').err('-- [database/users/update] ' + ((err.message) ? err.message : err));
-													socket.emit('user.error', 'Impossible de modifier cet utilisateur.');
-												});
-												
-											})
-											.catch(function(err) {
-												Container.get('logs').err('-- [database/users/lastInserted] ' + ((err.message) ? err.message : err));
-												socket.emit('user.error', 'Impossible de récupérer cet utilisateur.');
-											});
-
-										}
-
-									}
-									catch (e) {
-										Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
-										socket.emit('user.error', "Impossible de suppprimer cet enfant.");
-									}
-
-								})
-
-								// plugins
-
-								.on('plugins', function() {
-
-									try {
-
-										if (Container.get('conf').get('debug')) {
-											Container.get('logs').log('plugins');
-										}
-
-										socket.emit('plugins', Container.get('plugins').plugins);
-
-									}
-									catch (e) {
-										Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
-										socket.emit('plugins.error', "Impossible de récupérer les plugins.");
-									}
-
-								})
-								.on('plugin.add.github', function(url) {
-
-									try {
-
-										if (Container.get('conf').get('debug')) {
-											Container.get('logs').log('plugin.add.github');
-											Container.get('logs').log(url);
-										}
-
-										Container.get('plugins').installViaGithub(url, Container).then(function(plugin) {
-											socket.emit('plugin.added', plugin);
-											socket.emit('plugins', Container.get('plugins').plugins);
-										}).catch(function(err) {
-											socket.emit('plugins.error', err);
-											socket.emit('plugins', Container.get('plugins').plugins);
-										});
-
-									}
-									catch (e) {
-										Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
-										socket.emit('plugins.error', "Impossible d'ajouter le plugin.");
-									}
-
-								})
-								.on('plugin.update.github', function(plugin) {
-
-									try {
-
-										if (Container.get('conf').get('debug')) {
-											Container.get('logs').log('plugin.update.github');
-											Container.get('logs').log(plugin);
-										}
-
-										Container.get('plugins').update(plugin, Container).then(function(plugin) {
-											socket.emit('plugin.updated', plugin);
-											socket.emit('plugins', Container.get('plugins').plugins);
-										}).catch(function(err) {
-											socket.emit('plugins.error', err);
-											socket.emit('plugins', Container.get('plugins').plugins);
-										});
-
-									}
-									catch (e) {
-										Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
-										socket.emit('plugins.error', "Impossible de mettre à jour le plugin.");
-									}
-
-								})
-								.on('plugin.delete', function(plugin) {
-
-									try {
-
-										if (Container.get('conf').get('debug')) {
-											Container.get('logs').log('plugin.delete');
-											Container.get('logs').log(plugin);
-										}
-
-										if (!plugin || !plugin.directory) {
-											Container.get('logs').err('-- [plugins] : dossier de plugin inexistant.');
-											socket.emit('plugins.error', "Impossible de suppprimer le plugin.");
-										}
-										else {
-
-											Container.get('plugins').uninstall(plugin, Container).then(function() {
-												socket.emit('plugins', Container.get('plugins').plugins);
-											}).catch(function(err) {
-												socket.emit('plugins.error', err);
-												socket.emit('plugins', Container.get('plugins').plugins);
-											});
-
-										}
-
-									}
-									catch (e) {
-										Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
-										socket.emit('plugins.error', "Impossible de suppprimer le plugin.");
 									}
 
 								})
@@ -1227,6 +1039,222 @@
 									catch (e) {
 										Container.get('logs').err('-- [cronsactions] ' + ((e.message) ? e.message : e));
 										socket.emit('cronsactions.error', "Impossible de délier cette tâche plannifiée et cette action.");
+									}
+
+								})
+
+								// user
+
+								.on('user.update.login', function (login) {
+
+									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('user.update.login');
+											Container.get('logs').log(login);
+										}
+
+										if (!login) {
+											socket.emit('user.error', "Le login n'est pas renseigné.");
+										}
+										else {
+
+											Container.get('users').lastInserted().then(function(user) {
+
+												user.login = login;
+
+												Container.get('users').update(user).then(function() {
+
+													socket.emit('user.update.login');
+													_sendUsers();
+
+												})
+												.catch(function(err) {
+													Container.get('logs').err('-- [database/users/update] ' + ((err.message) ? err.message : err));
+													socket.emit('user.error', 'Impossible de modifier cet utilisateur.');
+												});
+												
+											})
+											.catch(function(err) {
+												Container.get('logs').err('-- [database/users/lastInserted] ' + ((err.message) ? err.message : err));
+												socket.emit('user.error', 'Impossible de récupérer cet utilisateur.');
+											});
+
+										}
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+										socket.emit('user.error', 'Impossible de retrouver cet utilisateur.');
+									}
+
+								})
+
+								.on('user.update.password', function (passwords) {
+
+									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('user.update.password');
+										}
+
+										if (!passwords || !passwords.password || !passwords.confirm) {
+											socket.emit('user.error', 'Les mots de passe ne sont pas renseignés.');
+										}
+										else if (passwords.password != passwords.confirm) {
+											socket.emit('user.error', 'Les mots de passe ne sont pas identiques.');
+										}
+										else {
+
+											Container.get('users').lastInserted().then(function(user) {
+
+												user.password = passwords.password;
+
+												Container.get('users').update(user).then(function() {
+													socket.emit('user.update.password');
+												})
+												.catch(function(err) {
+													Container.get('logs').err('-- [database/users/update] ' + ((err.message) ? err.message : err));
+													socket.emit('user.error', 'Impossible de modifier cet utilisateur.');
+												});
+												
+											})
+											.catch(function(err) {
+												Container.get('logs').err('-- [database/users/lastInserted] ' + ((err.message) ? err.message : err));
+												socket.emit('user.error', 'Impossible de récupérer cet utilisateur.');
+											});
+
+										}
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
+										socket.emit('user.error', "Impossible de suppprimer cet enfant.");
+									}
+
+								})
+
+								// plugins
+
+								.on('plugins', function() {
+
+									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('plugins');
+										}
+
+										socket.emit('plugins', Container.get('plugins').plugins);
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
+										socket.emit('plugins.error', "Impossible de récupérer les plugins.");
+									}
+
+								})
+								.on('plugin.add.github', function(url) {
+
+									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('plugin.add.github');
+											Container.get('logs').log(url);
+										}
+
+										Container.get('plugins').installViaGithub(url, Container).then(function(plugin) {
+											socket.emit('plugin.added', plugin);
+											socket.emit('plugins', Container.get('plugins').plugins);
+										}).catch(function(err) {
+											socket.emit('plugins.error', err);
+											socket.emit('plugins', Container.get('plugins').plugins);
+										});
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
+										socket.emit('plugins.error', "Impossible d'ajouter le plugin.");
+									}
+
+								})
+								.on('plugin.update.github', function(plugin) {
+
+									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('plugin.update.github');
+											Container.get('logs').log(plugin);
+										}
+
+										Container.get('plugins').update(plugin, Container).then(function(plugin) {
+											socket.emit('plugin.updated', plugin);
+											socket.emit('plugins', Container.get('plugins').plugins);
+										}).catch(function(err) {
+											socket.emit('plugins.error', err);
+											socket.emit('plugins', Container.get('plugins').plugins);
+										});
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
+										socket.emit('plugins.error', "Impossible de mettre à jour le plugin.");
+									}
+
+								})
+								.on('plugin.delete', function(plugin) {
+
+									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('plugin.delete');
+											Container.get('logs').log(plugin);
+										}
+
+										if (!plugin || !plugin.directory) {
+											Container.get('logs').err('-- [plugins] : dossier de plugin inexistant.');
+											socket.emit('plugins.error', "Impossible de suppprimer le plugin.");
+										}
+										else {
+
+											Container.get('plugins').uninstall(plugin, Container).then(function() {
+												socket.emit('plugins', Container.get('plugins').plugins);
+											}).catch(function(err) {
+												socket.emit('plugins.error', err);
+												socket.emit('plugins', Container.get('plugins').plugins);
+											});
+
+										}
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [plugins] ' + ((e.message) ? e.message : e));
+										socket.emit('plugins.error', "Impossible de suppprimer le plugin.");
+									}
+
+								})
+
+								// logs
+
+								.on('logs', function() {
+
+									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('logs');
+										}
+
+										Container.get('logs').getLogs().then(function(logs) {
+											socket.emit('logs', logs);
+										})
+										.catch(function(err) {
+											Container.get('logs').err('-- [logs] ' + ((err.message) ? err.message : err));
+											socket.emit('logs.error', "Impossible de récupérer les logs.");
+										});
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [logs] ' + ((e.message) ? e.message : e));
+										socket.emit('logs.error', "Impossible de récupérer les logs.");
 									}
 
 								});

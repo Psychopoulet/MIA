@@ -54,6 +54,7 @@
 							<li><a id="navCrons" href="#"><span class="glyphicon glyphicon-calendar"></span> Tâches plannifiées</a></li>
 							<li><a id="navActions" href="#"><span class="glyphicon glyphicon-fire"></span> Actions</a></li>
 							<li><a id="navPlugins" href="#"><span class="glyphicon glyphicon-paperclip"></span> Plugins</a></li>
+							<li><a id="navLogs" href="#"><span class="glyphicon glyphicon-list"></span> Logs</a></li>
 						</ul>
 
 						<div class="navbar-form navbar-right">
@@ -661,6 +662,32 @@
 								</li>
 
 							</ul>
+
+						</div>
+
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+				
+			<div id="modalLogs" class="modal fade only-logged hidden" data-ng-controller="ControllerLogs">
+
+				<div class="modal-dialog">
+
+					<div class="modal-content">
+
+						<div class="modal-header">
+							<h4 class="modal-title"><span class="glyphicon glyphicon-list"></span> Logs</h4>
+						</div>
+
+						<div class="modal-body">
+
+							{{logs}}
 
 						</div>
 

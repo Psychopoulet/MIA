@@ -45,8 +45,7 @@
 
 			Container.get('conf').load().then(resolve)
 			.catch(function(e) {
-				Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
-				reject();
+				reject((e.message) ? e.message : e);
 			});
 
 		});
@@ -116,6 +115,47 @@
 
 	}
 
+	function _deleteOldLogs(Logs) {
+
+		return new Promise(function(resolve, reject) {
+
+			Logs.getLogs().then(function(logs) {
+
+				var date = new Date(),
+					sYear = date.getFullYear(), sMonth = date.getMonth() + 1, sDay = date.getDate();
+
+					sYear = sYear + '';
+					sMonth = (9 < sMonth) ? sMonth + '' : '0' + sMonth;
+					sDay = (9 < sDay) ? sDay + '' : '0' + sDay;
+
+				for (var _year in logs) {
+
+					for (var _month in logs[_year]) {
+
+						for (var _day in logs[_year][_month]) {
+
+							if (_year != sYear || _month != sMonth) {
+
+								Logs.remove(_year, _month, logs[_year][_month][_day]).catch(function(err) {
+									Logs.err((err.message) ? err.message : err);
+								});
+
+							}
+
+						}
+
+					}
+
+				}
+
+				resolve();
+
+			}).catch(reject);
+
+		});
+
+	}
+
 // run
 
 	try {
@@ -138,37 +178,44 @@
 		_loadConf().then(function() {
 
 			Container.get('logs').showInConsole = Container.get('conf').get('debug');
-			Container.get('logs').showInFiles = !(Container.get('conf').get('debug'));
+			Container.get('logs').showInFiles = true;
 
-			_loadDatabase().then(function() {
+			_deleteOldLogs(Container.get('logs')).then(function() {
 
-				if (Container.get('conf').has('pid')) {
+				_loadDatabase().then(function() {
 
-					try {
+					if (Container.get('conf').has('pid')) {
 
-						process.kill(Container.get('conf').get('pid'));
-						Container.get('logs').success('[END PROCESS ' + Container.get('conf').get('pid') + ']');
+						try {
+
+							process.kill(Container.get('conf').get('pid'));
+							Container.get('logs').success('[END PROCESS ' + Container.get('conf').get('pid') + ']');
+
+						}
+						catch (e) { }
 
 					}
-					catch (e) { }
 
-				}
+					Container.get('conf').set('pid', process.pid).save().then(function() {
 
-				Container.get('conf').set('pid', process.pid).save().then(function() {
+						Container.get('logs').success('[START PROCESS ' + process.pid + ']');
 
-					Container.get('logs').success('[START PROCESS ' + process.pid + ']');
+						new MIA(Container).start()
+							.catch(function (err) { Container.get('logs').err(((err.message) ? err.message : err)); });
 
-					new MIA(Container).start()
-						.catch(function (err) { Container.get('logs').err(((err.message) ? err.message : err)); });
-
+					})
+					.catch(function(err) {
+						Container.get('logs').err('-- [process] ' + ((err.message) ? err.message : err));
+					});
+				
 				})
 				.catch(function(err) {
-					Container.get('logs').err('-- [process] ' + ((err.message) ? err.message : err));
+					Container.get('logs').err('-- [database] ' + ((err.message) ? err.message : err));
 				});
-			
+
 			})
 			.catch(function(err) {
-				Container.get('logs').err('-- [database] ' + ((err.message) ? err.message : err));
+				Container.get('logs').err('-- [logs] ' + ((err.message) ? err.message : err));
 			});
 	
 		})
