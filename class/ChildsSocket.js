@@ -1,10 +1,10 @@
 
+"use strict";
+
 // dépendances
 	
-	var
-		path = require('path'),
-		q = require('q');
-		
+	const path = require('path');
+	
 // module
 	
 	module.exports = function (Container) {
@@ -13,75 +13,109 @@
 		
 		// attributes
 			
-			var
-				that = this,
-				logs = Container.get('logs'),
-				m_clLog = new logs(path.join(__dirname, '..', 'logs', 'childsocket')),
+			var that = this,
 				m_clSocketServer,
 				m_tabOnConnection = [],
 				m_tabOnLog = [],
 				m_tabOnDisconnect = [];
 				
 		// methodes
+
+			// private
+
+				function _initServer() {
+
+					return new Promise(function(resolve, reject) {
+
+						var sDirSSL = path.join(__dirname, '..', 'ssl')
+
+						try {
+
+							if (!Container.get('conf').get('ssl')) {
+								Container.get('logs').success('-- [child socket server] started on port ' + Container.get('conf').get('childrenport'));
+								resolve(require('socket.io').listen(Container.get('conf').get('childrenport')));
+							}
+							else {
+
+								Container.get('openssl').createCertificate(
+									path.join(sDirSSL, 'server.key'),
+									path.join(sDirSSL, 'server.csr'),
+									path.join(sDirSSL, 'server.crt')
+								).then(function(keys) {
+
+									var server = require('https').createServer({
+										key: keys.privateKey,
+										cert: keys.certificate
+									});
+
+									server.listen(Container.get('conf').get('childrenport'), function() {
+										Container.get('logs').success('-- [child socket server] with ssl started on port ' + Container.get('conf').get('childrenport'));
+										resolve(require('socket.io')(server));
+									});
+
+								})
+								.catch(function(err) {
+									Container.get('logs').err('-- [SimpleSSL] : ' ((e.message) ? e.message : e));
+									reject((e.message) ? e.message : e);
+								});
+
+							}
+
+						}
+						catch (e) {
+							reject(((e.message) ? e.message : e));
+						}
+
+					});
+
+				}
 			
 			// public
 				
 				this.start = function () {
-					
-					var deferred = q.defer(), nChildrenPort = Container.get('conf').get('childrenport');
+
+					return new Promise(function(resolve, reject) {
 
 						try {
 
-							m_clSocketServer = require('socket.io').listen(nChildrenPort);
+							_initServer().then(function(server) {
 
-							m_clSocketServer.sockets.on('connection', function (socket) {
+								m_clSocketServer = server;
 
-								m_clLog.success('-- [child socket client] ' + socket.id + ' connected');
-								
-								socket.on('disconnect', function () {
+								m_clSocketServer.sockets.on('connection', function (socket) {
+
+									Container.get('logs').success('-- [child socket client] ' + socket.id + ' connected');
 									
-									m_clLog.info('-- [child socket client] ' + socket.id + ' disconnected');
-									
-									m_tabOnDisconnect.forEach(function (fOnDisconnect) {
-										fOnDisconnect(socket);
+									socket.on('disconnect', function () {
+										
+										Container.get('logs').info('-- [child socket client] ' + socket.id + ' disconnected');
+										
+										m_tabOnDisconnect.forEach(function (fOnDisconnect) {
+											fOnDisconnect(socket);
+										});
+
 									});
 
+									m_tabOnConnection.forEach(function (fOnConnection) {
+										fOnConnection(socket);
+									});
+									
 								});
 
-								m_tabOnConnection.forEach(function (fOnConnection) {
-									fOnConnection(socket);
-								});
-								
-							});
+								resolve();
 
-							m_clLog.success('-- [child socket server] started on port ' + nChildrenPort);
-							
-							deferred.resolve();
+							})
+							.catch(reject);
 
 						}
 						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
+							reject((e.message) ? e.message : e);
 						}
-						
-					return deferred.promise;
+
+					});
 
 				};
 				
-				this.stop = function () {
-
-					var deferred = q.defer();
-
-						try {
-							deferred.resolve();
-						}
-						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
-						}
-						
-					return deferred.promise;
-
-				};
-
 				this.emit = function (p_sOrder, p_vData) {
 					m_clSocketServer.sockets.emit(p_sOrder, p_vData);
 				};

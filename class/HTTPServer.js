@@ -1,14 +1,12 @@
 
+"use strict";
+
 // dépendances
 
-	var
-		os = require('os'),
-		dns = require('dns'),
-		path = require('path'),
-		fs = require('fs'),
-		q = require('q'),
-		mkdirp = require('mkdirp'),
-		express = require('express')();
+	const 	os = require('os'),
+			dns = require('dns'),
+			path = require('path'),
+			fs = require('simplefs');
 		
 // module
 	
@@ -18,18 +16,13 @@
 		
 		// attributes
 			
-			var
-				m_sDirWeb = path.join(__dirname, '..', 'web'),
-				m_sDirSSL = path.join(__dirname, '..', 'ssl'),
-				m_clServer = false,
-				m_clPlugins = Container.get('plugins'),
-				logs = Container.get('logs'),
-				m_clLog = new logs(path.join(__dirname, '..', 'logs', 'httpserver')),
+			var m_sDirWeb = path.join(__dirname, '..', 'web'),
+					m_sDirTemplates = path.join(m_sDirWeb, 'templates'),
+					m_sDirBuffers = path.join(m_sDirWeb, 'buffers'),
+						m_sIndexBufferFile = path.join(m_sDirBuffers, 'index.html'),
+						m_sPluginsJavascriptsBufferFile = path.join(m_sDirBuffers, 'plugins.js'),
 
-				m_bPluginsBuffersCreated = false,
-				m_sPluginsBuffersPath = path.join(__dirname, '..', 'web', 'buffers'),
-				m_sPluginsWidgetsBufferFile = path.join(m_sPluginsBuffersPath, 'plugins.html'),
-				m_sPluginsJavascriptsBufferFile = path.join(m_sPluginsBuffersPath, 'plugins.js');
+				m_bBuffersCreated = false;
 				
 		// methodes
 
@@ -83,23 +76,23 @@
 
 					function _readFile(p_sFilePath) {
 
-						var deferred = q.defer();
+						return new Promise(function(resolve, reject) {
 
 							try {
 
-								if (!fs.existsSync(p_sFilePath)) {
-									m_clLog.err('-- [HTTP server] The ' + p_sFilePath + ' file does not exist');
-									deferred.reject('-- [HTTP server] The ' + p_sFilePath + ' file does not exist');
+								if (!fs.fileExists(p_sFilePath)) {
+									Container.get('logs').err('-- [HTTP server] The ' + p_sFilePath + ' file does not exist');
+									reject('-- [HTTP server] The ' + p_sFilePath + ' file does not exist');
 								}
 								else {
 
 									fs.readFile(p_sFilePath, 'utf8', function (err, data) {
 
 										if (err) {
-											deferred.reject(err);
+											reject(err);
 										}
 										else {
-											deferred.resolve(data);
+											resolve(data);
 										}
 
 									});
@@ -108,16 +101,16 @@
 								
 							}
 							catch (e) {
-								deferred.reject((e.message) ? e.message : e);
+								reject((e.message) ? e.message : e);
 							}
-							
-						return deferred.promise;
+
+						});
 						
 					}
 					
 					function _readAllFiles(p_sDirectory) {
-q
-						var deferred = q.defer();
+
+						return new Promise(function(resolve, reject) {
 
 							try {
 
@@ -126,7 +119,7 @@ q
 									var bResult = true, sResult = '';
 
 									if (err) {
-										deferred.reject(err);
+										reject(err);
 									}
 									else {
 
@@ -134,17 +127,17 @@ q
 
 											p_sFile = path.join(p_sDirectory, p_sFile);
 
-											if (fs.lstatSync(p_sFile).isFile()) {
+											if (fs.fileExists(p_sFile)) {
 												sResult += fs.readFileSync(p_sFile, 'utf8');
 											}
 
 										});
 
 										if (bResult) {
-											deferred.resolve(sResult);
+											resolve(sResult);
 										}
 										else {
-											deferred.reject(sResult);
+											reject(sResult);
 										}
 
 									}
@@ -153,225 +146,168 @@ q
 
 							}
 							catch (e) {
-								deferred.reject((e.message) ? e.message : e);
+								reject((e.message) ? e.message : e);
 							}
-							
-						return deferred.promise;
+
+						});
 
 					}
 					
 					function _createBuffers() {
-q
-						var deferred = q.defer();
+
+						return new Promise(function(resolve, reject) {
 
 							try {
 
-								if (!Container.get('conf').get('debug') && m_bPluginsBuffersCreated) {
-									deferred.resolve();
+								if (!Container.get('conf').get('debug') && m_bBuffersCreated) {
+									resolve();
+								}
+								else if (!fs.mkdirp(path.dirname(m_sIndexBufferFile))) {
+									reject('Impossible to create the html file');
 								}
 								else {
 
-									mkdirp(path.dirname(m_sPluginsWidgetsBufferFile), function (err) {
+									// on efface les vieilles versions
 
-										if (err) {
-										deferred.reject(err);
-										}
-										else {
+									if (fs.fileExists(m_sIndexBufferFile)) {
+										fs.unlinkSync(m_sIndexBufferFile);
+									}
 
-											try {
-												if (fs.lstatSync(m_sPluginsWidgetsBufferFile).isFile()) {
-													fs.unlinkSync(m_sPluginsWidgetsBufferFile);
-												}
-											}
-											catch(e) {}
+									if (fs.fileExists(m_sPluginsJavascriptsBufferFile)) {
+										fs.unlinkSync(m_sPluginsJavascriptsBufferFile);
+									}
 
-											fs.writeFileSync(m_sPluginsWidgetsBufferFile, '', 'utf8');
+									// on recréer les fichiers
 
-											try {
-												if (fs.lstatSync(m_sPluginsJavascriptsBufferFile).isFile()) {
-													fs.unlinkSync(m_sPluginsJavascriptsBufferFile);
-												}
-											}
-											catch(e) {}
+									fs.writeFileSync(m_sIndexBufferFile, '', 'utf8');
+									fs.writeFileSync(m_sPluginsJavascriptsBufferFile, '', 'utf8');
 
-											fs.writeFileSync(m_sPluginsJavascriptsBufferFile, '', 'utf8');
+									// on les rempli
 
-											m_clPlugins.getData().then(function (p_tabData) {
+									var sPluginsWidgets = '';
 
-												p_tabData.forEach(function(plugin) {
+									Container.get('plugins').plugins.forEach(function(plugin) {
 
-													if (plugin.web) {
+										if (plugin.widget) {
 
-														if (plugin.web.templates && plugin.web.templates.widget && plugin.web.widgetcontroller) {
-
-															fs.appendFileSync(
-																m_sPluginsWidgetsBufferFile,
-
-																'<div class="col-xs-12 col-md-6">' +
-
-																	'<div class="panel panel-default" data-ng-controller="' + plugin.web.widgetcontroller + '">' +
-
-																		'<div class="panel-heading">' +
-																			'<h4 class="panel-title">' + plugin.name + '</h4>' +
-																		'</div>' +
-
-																		'<div class="panel-body">' +
-
-																			fs.readFileSync(plugin.web.templates.widget, 'utf8')
-																				.replace('{{plugin.name}}', plugin.name)
-																				.replace('{{plugin.description}}', plugin.description)
-																				.replace('{{plugin.version}}', plugin.version) +
-
-																		'</div>' +
-
-																	'</div>' +
-
-																'</div>',
-
-																'utf8'
-															);
-															
-														}
-
-														if (plugin.web.javascripts && 0 < plugin.web.javascripts.length) {
-
-															plugin.web.javascripts.forEach(function(javascript) {
-
-																fs.appendFileSync(
-																	m_sPluginsJavascriptsBufferFile,
-																	fs.readFileSync(javascript, 'utf8'),
-																	'utf8'
-																);
-
-															});
-
-														}
-
-													}
-
-												});
-
-												m_bPluginsBuffersCreated = true;
-
-												deferred.resolve();
-
-											})
-											.catch(deferred.reject);
+											sPluginsWidgets += fs.readFileSync(plugin.widget, 'utf8')
+																.replace(/{{plugin.name}}/g, plugin.name)
+																.replace(/{{plugin.description}}/g, plugin.description)
+																.replace(/{{plugin.version}}/g, plugin.version);
 
 										}
-									
+
+										if (plugin.javascripts && 0 < plugin.javascripts.length) {
+
+											plugin.javascripts.forEach(function(javascript) {
+
+												fs.appendFileSync(
+													m_sPluginsJavascriptsBufferFile,
+													fs.readFileSync(javascript, 'utf8'),
+													'utf8'
+												);
+
+											});
+
+										}
+
 									});
+
+									_readFile(path.join(m_sDirTemplates, 'index.html')).then(function (index) {
+
+										dns.lookup(os.hostname(), function (err, ip, fam) {
+
+											fs.appendFileSync(
+												m_sIndexBufferFile,
+												index	.replace('{{ip}}', (err) ? '?.?.?.?' : ip)
+														.replace('{{widgets}}', sPluginsWidgets),
+												'utf8'
+											);
+
+											m_bBuffersCreated = true;
+											resolve();
+									
+										});
+
+									})
+									.catch(reject);
 
 								}
 
 							}
 							catch (e) {
-								deferred.reject((e.message) ? e.message : e);
+								reject((e.message) ? e.message : e);
 							}
-							
-						return deferred.promise;
+
+						});
 
 					}
 
 					function _initServer() {
 
-						var deferred = q.defer();
+						return new Promise(function(resolve, reject) {
+
+							var sDirSSL = path.join(__dirname, '..', 'ssl');
 
 							try {
 
 								if (!Container.get('conf').get('ssl')) {
-									deferred.resolve(require('http').createServer(express));
+									resolve(require('http').createServer(Container.get('express')));
 								}
 								else {
 
 									Container.get('openssl').createCertificate(
-										path.join(m_sDirSSL, 'server.key'),
-										path.join(m_sDirSSL, 'server.csr'),
-										path.join(m_sDirSSL, 'server.crt')
-									).then(function(data) {
+										path.join(sDirSSL, 'server.key'),
+										path.join(sDirSSL, 'server.csr'),
+										path.join(sDirSSL, 'server.crt')
+									).then(function(keys) {
 
-										deferred.resolve(
+										resolve(
 
 											require('https').createServer({
-												key: data.privateKey,
-												cert: data.certificate
-											}, express)
+												key: keys.privateKey,
+												cert: keys.certificate
+											}, Container.get('express'))
 
 										);
 
 									})
-									.catch(function(e) {
-
-										m_clLog.err('-- [HTTP server] openssl : ' ((e.message) ? e.message : e));
-
-										deferred.resolve(
-											require('http').createServer(express)
-										);
-
+									.catch(function(err) {
+										reject('-- [HTTPS server] openssl : ' + ((err.message) ? err.message : err));
 									});
 
 								}
 
 							}
 							catch (e) {
-								deferred.reject((e.message) ? e.message : e);
+								reject((e.message) ? e.message : e);
 							}
-							
-						return deferred.promise;
+
+						});
 
 					}
 					
 			// public
 
-				this.getServer = function () {
-					return m_clServer;
-				};
-				
 				this.start = function () {
 
-					var deferred = q.defer(), nWebPort = Container.get('conf').get('webport');
+					return new Promise(function(resolve, reject) {
+
+						var nWebPort = Container.get('conf').get('webport');
 
 						try {
 
-							_initServer().then(function (p_clServer) {
+							_initServer().then(function (server) {
 
-								m_clServer = p_clServer;
+								Container.set('http', server).get('express').get('/', function (req, res) {
 
-								express.get('/', function (req, res) {
-
-									_readFile(path.join(m_sDirWeb, 'templates', 'index.html')).then(function (index) {
-
-										
-										dns.lookup(os.hostname(), function (err, ip, fam) {
-
-											if (err) {
-												_500(res, index.replace('{{widgets}}', err).replace('{{ip}}', '0.0.0.0'));
-											}
-											else {
-											
-												_createBuffers().then(function() {
-
-													_readFile(m_sPluginsWidgetsBufferFile).then(function(sHTML) {
-														_sendHTMLResponse(res, 200, index.replace('{{widgets}}', sHTML).replace('{{ip}}', ip));
-													})
-													.catch(function (err) {
-														_500(res, index.replace('{{widgets}}', err).replace('{{ip}}', ip));
-													});
-
-												})
-												.catch(function(err) {
-													_500(res, index.replace('{{widgets}}', err).replace('{{ip}}', ip));
-												});
-
-											}
-
-										});
-
+									_createBuffers().then(function() {
+										res.sendFile(m_sIndexBufferFile);
 									})
-									.catch(function (err) {
-										_500(res, err);
+									.catch(function(err) {
+										_500(res, (err.message) ? err.message : err)
 									});
-										
+
 								})
 
 								// js
@@ -448,6 +384,9 @@ q
 										});
 
 									})
+									.get('/libs/interact.js', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'interactjs', 'interact.js'));
+									})
 									.get('/libs/bootstrap.js', function (req, res) {
 
 										_readAllFiles(path.join(m_sDirWeb, 'libs', 'bootstrap', 'js')).then(function (data) {
@@ -481,40 +420,30 @@ q
 										_404(req, res);
 									});
 
-								m_clServer.listen(nWebPort, function () {
-									m_clLog.success('-- [HTTP server] started on port ' + nWebPort);
+								server.listen(nWebPort, function () {
+
+									if (Container.get('conf').get('ssl')) {
+										Container.get('logs').success('-- [HTTP server] with ssl started on port ' + nWebPort);
+									}
+									else {
+										Container.get('logs').success('-- [HTTP server] started on port ' + nWebPort);
+									}
+
+									resolve();
+									
 								});
 
-								deferred.resolve();
-								
 							})
-							.catch(deferred.reject);
+							.catch(reject);
 
 						}
 						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
+							reject((e.message) ? e.message : e);
 						}
-						
-					return deferred.promise;
+
+					});
 
 				};
 				
-				this.stop = function () {
-
-					var deferred = q.defer();
-
-						try {
-
-							deferred.resolve();
-					
-						}
-						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
-						}
-						
-					return deferred.promise;
-
-				};
-
 	};
 	

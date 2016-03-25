@@ -3,7 +3,10 @@
 *.csr
 *.crt
 conf.json
+database/MIA.sqlite3
 node_modules/
+plugins/
 ssl/
 web/buffers/
+logs/
 *backup.json

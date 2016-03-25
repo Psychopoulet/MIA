@@ -1,9 +1,9 @@
 
+"use strict";
+
 // dépendances
 	
-	var
-		path = require('path'),
-		q = require('q');
+	const path = require('path');
 
 // module
 	
@@ -13,10 +13,7 @@
 		
 		// attributes
 			
-			var
-				that = this,
-				logs = Container.get('logs'),
-				m_clLog = new logs(path.join(__dirname, '..', 'logs', 'httpsocket')),
+			var that = this,
 				m_clSocketServer,
 				m_tabOnConnection = [],
 				m_tabOnLog = [],
@@ -28,19 +25,19 @@
 				
 				this.start = function () {
 
-					var deferred = q.defer();
+					return new Promise(function(resolve, reject) {
 
 						try {
 
-							m_clSocketServer = require('socket.io').listen(Container.get('webserver').getServer());
+							m_clSocketServer = require('socket.io').listen(Container.get('http'));
 
 							m_clSocketServer.sockets.on('connection', function (socket) {
 
-								m_clLog.success('-- [HTTP socket client] ' + socket.id + ' connected');
+								Container.get('logs').success('-- [HTTP socket client] ' + socket.id + ' connected');
 								
 								socket.on('disconnect', function () {
 									
-									m_clLog.info('-- [HTTP socket client] ' + socket.id + ' disconnected');
+									Container.get('logs').info('-- [HTTP socket client] ' + socket.id + ' disconnected');
 
 									m_tabOnDisconnect.forEach(function (fOnDisconnect) {
 										fOnDisconnect(socket);
@@ -53,45 +50,35 @@
 								});
 								
 							});
-							
-							m_clLog.success('-- [HTTP socket server] started on port ' + Container.get('conf').get('webport'));
 
-							deferred.resolve();
+							if (Container.get('conf').get('ssl')) {
+								Container.get('logs').success('-- [HTTP socket server] with ssl started on port ' + Container.get('conf').get('webport'));
+							}
+							else {
+								Container.get('logs').success('-- [HTTP socket server] started on port ' + Container.get('conf').get('webport'));
+							}
+
+							resolve();
 
 						}
 						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
+							reject((e.message) ? e.message : e);
 						}
-						
-					return deferred.promise;
+
+					});
 					
 				}
 
-				this.stop = function () {
-
-					var deferred = q.defer();
-
-						try {
-							deferred.resolve();
-						}
-						catch (e) {
-							deferred.reject((e.message) ? e.message : e);
-						}
-						
-					return deferred.promise;
-
+				this.emit = function (order, data) {
+					m_clSocketServer.sockets.emit(order, data);
 				};
 				
-				this.emit = function (p_sOrder, p_vData) {
-					m_clSocketServer.sockets.emit(p_sOrder, p_vData);
-				};
-				
-				this.emitTo = function (p_sToken, p_sOrder, p_vData) {
+				this.emitTo = function (token, order, data) {
 
 					for (var key in m_clSocketServer.sockets.sockets) {
 
-						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === p_sToken) {
-							m_clSocketServer.sockets.sockets[key].emit(p_sOrder, p_vData);
+						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
+							m_clSocketServer.sockets.sockets[key].emit(order, data);
 							break;
 						}
 
@@ -101,12 +88,12 @@
 					
 				};
 
-				this.setTokenToSocketById = function (p_sId, p_sToken) {
+				this.setTokenToSocketById = function (id, token) {
 
 					for (var key in m_clSocketServer.sockets.sockets) {
 
-						if (m_clSocketServer.sockets.sockets[key].id === p_sId) {
-							m_clSocketServer.sockets.sockets[key].token = p_sToken;
+						if (m_clSocketServer.sockets.sockets[key].id === id) {
+							m_clSocketServer.sockets.sockets[key].token = token;
 							break;
 						}
 
@@ -116,11 +103,11 @@
 					
 				};
 				
-				this.disconnect = function (p_sToken) {
+				this.disconnect = function (token) {
 
 					for (var key in m_clSocketServer.sockets.sockets) {
 
-						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === p_sToken) {
+						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
 							m_clSocketServer.sockets.sockets[key].disconnect();
 							break;
 						}
@@ -143,13 +130,13 @@
 
 				};
 				
-				this.getSocket = function (p_sToken) {
+				this.getSocket = function (token) {
 
 					var result = null;
 
 						for (var key in m_clSocketServer.sockets.sockets) {
 
-							if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === p_sToken) {
+							if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
 								result = m_clSocketServer.sockets.sockets[key];
 								break;
 							}

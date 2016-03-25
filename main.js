@@ -2,39 +2,229 @@
 
 // dépendances
 
-	var
-		path = require('path'),
-		simplecontainer = require('simplecontainer'),
-		simpleconfig = require('simpleconfig'),
-		
-		ChildsSocket = require(path.join(__dirname, 'class', 'ChildsSocket.js')),
-		HTTPServer = require(path.join(__dirname, 'class', 'HTTPServer.js')),
-		HTTPSocket = require(path.join(__dirname, 'class', 'HTTPSocket.js')),
-		Logs = require(path.join(__dirname, 'class', 'Logs.js')),
-		OpenSSL = require(path.join(__dirname, 'class', 'OpenSSL.js')),
-		Plugins = require(path.join(__dirname, 'class', 'Plugins.js')),
-		MIA = require(path.join(__dirname, 'class', 'MIA.js'));
+	const 	path = require('path'),
+			fs = require('simplefs'),
+			sqlite3 = require('sqlite3').verbose(),
+
+			SimpleContainer = require('simplecontainer'),
+			SimpleConfig = require('simpleconfig'),
+			SimpleLogs = require('simplelogs'),
+			SimpleSSL = require('simplessl'),
+			SimplePluginsManager = require('simplepluginsmanager'),
+			
+			ChildsSocket = require(path.join(__dirname, 'class', 'ChildsSocket.js')),
+			HTTPServer = require(path.join(__dirname, 'class', 'HTTPServer.js')),
+			HTTPSocket = require(path.join(__dirname, 'class', 'HTTPSocket.js')),
+			MIA = require(path.join(__dirname, 'class', 'MIA.js')),
+
+			Actions = require(path.join(__dirname, 'database', 'actions.js')),
+			ActionsTypes = require(path.join(__dirname, 'database', 'actionstypes.js')),
+			Childs = require(path.join(__dirname, 'database', 'childs.js')),
+			Clients = require(path.join(__dirname, 'database', 'clients.js')),
+			Crons = require(path.join(__dirname, 'database', 'crons.js')),
+			CronsActions = require(path.join(__dirname, 'database', 'cronsactions.js')),
+			Status = require(path.join(__dirname, 'database', 'status.js')),
+			Users = require(path.join(__dirname, 'database', 'users.js'));
+
+// private
+
+	function _loadConf() {
+
+		return new Promise(function(resolve, reject) {
+
+			if (!Container.get('conf').fileExists()) {
+
+				Container.get('conf')	.set('webport', 1337).set('childrenport', 1338)
+										.set('debug', false)
+										.set('ssl', true)
+										.save().catch(function(e) {
+											Container.get('logs').err('-- [conf] ' + ((e.message) ? e.message : e));
+										});
+
+			}
+
+			Container.get('conf').load().then(resolve)
+			.catch(function(e) {
+				reject((e.message) ? e.message : e);
+			});
+
+		});
+
+	}
+
+	function _loadDatabase() {
+
+		return new Promise(function(resolve, reject) {
+
+			var db = new sqlite3.Database(path.join(__dirname, 'database', 'MIA.sqlite3'));
+			// var db = new sqlite3.Database(':memory:');
+
+			db.serialize(function() {
+
+				var actions = new Actions(db),
+					actionstypes = new ActionsTypes(db),
+					childs = new Childs(db),
+					clients = new Clients(db),
+					crons = new Crons(db),
+					cronsactions = new CronsActions(db),
+					status = new Status(db),
+					users = new Users(db);
+
+				Container	.set('actions', actions)
+							.set('actionstypes', actionstypes)
+							.set('childs', childs)
+							.set('clients', clients)
+							.set('crons', crons)
+							.set('cronsactions', cronsactions)
+							.set('status', status)
+							.set('users', users);
+
+				status.create().then(function() {
+
+					users.create().then(function() {
+
+						clients.create().then(function() {
+
+							childs.create().then(function() {
+
+								crons.create().then(function() {
+
+									actionstypes.create().then(function() {
+
+										actions.create().then(function() {
+
+											cronsactions.create().then(resolve).catch(reject);
+										
+										}).catch(reject);
+									
+									}).catch(reject);
+
+								}).catch(reject);
+				
+							}).catch(reject);
+
+						}).catch(reject);
+
+					}).catch(reject);
+
+				}).catch(reject);
+
+			});
+	
+		});
+
+	}
+
+	function _deleteOldLogs(Logs) {
+
+		return new Promise(function(resolve, reject) {
+
+			Logs.getLogs().then(function(logs) {
+
+				var date = new Date(),
+					sYear = date.getFullYear(), sMonth = date.getMonth() + 1, sDay = date.getDate();
+
+					sYear = sYear + '';
+					sMonth = (9 < sMonth) ? sMonth + '' : '0' + sMonth;
+					sDay = (9 < sDay) ? sDay + '' : '0' + sDay;
+
+				for (var _year in logs) {
+
+					for (var _month in logs[_year]) {
+
+						for (var _day in logs[_year][_month]) {
+
+							if (_year != sYear || _month != sMonth) {
+
+								Logs.remove(_year, _month, logs[_year][_month][_day]).catch(function(err) {
+									Logs.err((err.message) ? err.message : err);
+								});
+
+							}
+
+						}
+
+					}
+
+				}
+
+				resolve();
+
+			}).catch(reject);
+
+		});
+
+	}
 
 // run
 
 	try {
-		
-		var Container = new simplecontainer();
 
-		Container	.set('conf', new simpleconfig(path.join(__dirname, 'conf.json')))
-					.set('openssl', new OpenSSL())
-					.set('plugins', new Plugins())
-					.set('logs', Logs)
+		var Container = new SimpleContainer();
+
+		Container	.set('conf', new SimpleConfig(path.join(__dirname, 'conf.json')))
+					.set('logs', new SimpleLogs(path.join(__dirname, 'logs')))
+					.set('http', null)
+					.set('express', require('express')())
+					.set('openssl', new SimpleSSL())
+					.set('plugins', new SimplePluginsManager(path.join(__dirname, 'plugins')))
 
 					.set('childssockets', new ChildsSocket(Container))
 					.set('webserver', new HTTPServer(Container))
 					.set('websockets', new HTTPSocket(Container));
 
-		new MIA(Container).start()
-			.catch(function (err) { new Logs(__dirname).err(err); });
-			
+		Container.get('conf').spaces = true;
+
+		_loadConf().then(function() {
+
+			Container.get('logs').showInConsole = Container.get('conf').get('debug');
+			Container.get('logs').showInFiles = true;
+
+			_deleteOldLogs(Container.get('logs')).then(function() {
+
+				_loadDatabase().then(function() {
+
+					if (Container.get('conf').has('pid')) {
+
+						try {
+
+							process.kill(Container.get('conf').get('pid'));
+							Container.get('logs').success('[END PROCESS ' + Container.get('conf').get('pid') + ']');
+
+						}
+						catch (e) { }
+
+					}
+
+					Container.get('conf').set('pid', process.pid).save().then(function() {
+
+						Container.get('logs').success('[START PROCESS ' + process.pid + ']');
+
+						new MIA(Container).start()
+							.catch(function (err) { Container.get('logs').err(((err.message) ? err.message : err)); });
+
+					})
+					.catch(function(err) {
+						Container.get('logs').err('-- [process] ' + ((err.message) ? err.message : err));
+					});
+				
+				})
+				.catch(function(err) {
+					Container.get('logs').err('-- [database] ' + ((err.message) ? err.message : err));
+				});
+
+			})
+			.catch(function(err) {
+				Container.get('logs').err('-- [logs] ' + ((err.message) ? err.message : err));
+			});
+	
+		})
+		.catch(function(err) {
+			Container.get('logs').err('-- [conf] ' + ((err.message) ? err.message : err));
+		});
+
 	}
 	catch (e) {
-		new Logs(__dirname).err('Global script failed : ' + ((e.message) ? e.message : e));
+		console.log('Global script failed : ' + ((e.message) ? e.message : e));
 	}
 	
