@@ -1409,22 +1409,22 @@
 									// load
 
 										.on('loaded', function(plugin) {
-											Container.get('logs').success("-- [plugins] : " + plugin.name + ' (v' + plugin.version + ') loaded');
+											Container.get('logs').success("-- [plugins] : " + plugin.name + " (v" + plugin.version + ") loaded");
 										})
 										.on('unloaded', function(plugin) {
-											Container.get('logs').log("-- [plugins] : " + plugin.name + "' (v" + plugin.version + ") unloaded");
+											Container.get('logs').info("-- [plugins] : " + plugin.name + "' (v" + plugin.version + ") unloaded");
 										})
 
 									// write
 
 										.on('installed', function(plugin) {
-											Container.get('logs').success("-- [plugins] : '" + plugin.name + "' (v" + plugin.version + ') installed');
+											Container.get('logs').success("-- [plugins] : '" + plugin.name + "' (v" + plugin.version + ") installed");
 										})
 										.on('updated', function(plugin) {
-											Container.get('logs').success("-- [plugins] : '" + plugin.name + "' (v" + plugin.version + ') updated');
+											Container.get('logs').success("-- [plugins] : '" + plugin.name + "' (v" + plugin.version + ") updated");
 										})
 										.on('uninstalled', function(plugin) {
-											Container.get('logs').success("-- [plugins] : '" + plugin.name + "' uninstalled");
+											Container.get('logs').success("-- [plugins] : '" + plugin.name + "' (v" + plugin.version + ") uninstalled");
 										})
 
 								.loadAll(Container).then(function() {
