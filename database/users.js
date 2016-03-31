@@ -29,7 +29,8 @@ module.exports = class DBUsers {
 				"CREATE TABLE IF NOT EXISTS users (" +
 					" id INTEGER PRIMARY KEY AUTOINCREMENT," +
 					" login VARCHAR(50) NOT NULL," +
-					" password VARCHAR(100) NOT NULL" +
+					" password VARCHAR(100) NOT NULL," +
+					" email VARCHAR(250) NOT NULL DEFAULT ''" +
 			");", [], function(err) {
 
 				if (err) {
@@ -77,9 +78,10 @@ module.exports = class DBUsers {
 			}
 			else {
 
-				that.db.run("INSERT INTO users (login, password) VALUES (:login, :password);", {
+				that.db.run("INSERT INTO users (login, password, email) VALUES (:login, :password, :email);", {
 					':login': user.login,
-					':password': _cryptPassword(user.password)
+					':password': _cryptPassword(user.password),
+					':email': (user.email) ? user.email : ''
 				}, function(err) {
 
 					if (err) {
@@ -132,7 +134,7 @@ module.exports = class DBUsers {
 
 		return new Promise(function(resolve, reject) {
 
-			that.db.get("SELECT id, login, password FROM users ORDER BY id DESC LIMIT 0,1;", [], function(err, row) {
+			that.db.get("SELECT id, login, password, email FROM users ORDER BY id DESC LIMIT 0,1;", [], function(err, row) {
 				
 				if (err) {
 					reject((err.message) ? err.message : err);
@@ -153,7 +155,7 @@ module.exports = class DBUsers {
 
 		return new Promise(function(resolve, reject) {
 
-			that.db.all("SELECT id, login, password FROM users;", [], function(err, rows) {
+			that.db.all("SELECT id, login, password, email FROM users;", [], function(err, rows) {
 
 				if (err) {
 					reject((err.message) ? err.message : err);
@@ -185,9 +187,10 @@ module.exports = class DBUsers {
 			}
 			else {
 
-				that.db.run("UPDATE users SET login = :login, password = :password WHERE id = :id;", {
+				that.db.run("UPDATE users SET login = :login, password = :password, email = :email WHERE id = :id;", {
 					':login': user.login,
 					':password': _cryptPassword(user.password),
+					':email': (user.email) ? user.email : '',
 					':id': user.id
 				}, function(err) {
 
