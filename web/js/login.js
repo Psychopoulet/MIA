@@ -109,7 +109,7 @@ app.controller('ControllerLogin', ['$scope', '$popup', '$cookies', function($sco
 
 	// interface
 
-	$scope.login = function() {
+	$scope.log = function() {
 
 		$scope.inProgress = true;
 
