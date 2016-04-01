@@ -8,6 +8,16 @@ app.controller('ControllerLogs', ['$scope', '$popup', function($scope, $popup) {
 	.on('logs', function(logs) {
         $scope.$apply(function () { $scope.logs = logs; });
 	})
+	.on('log', function(content) {
+        
+		$popup.alert({
+			title: 'Log',
+			message: content,
+			size: 'large',
+			maxheight: 500
+		});
+
+	})
 	.on('logs.error', function(err) {
 
 		$popup.alert({
@@ -17,6 +27,16 @@ app.controller('ControllerLogs', ['$scope', '$popup', function($scope, $popup) {
 		});
 
 	});
+
+	$scope.seeLog = function(year, month, day) {
+
+		socket.emit('log', {
+			year: year,
+			month: month,
+			day: day
+		});
+
+	};
 
 }]);
 

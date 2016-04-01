@@ -19,6 +19,16 @@
 		<!-- CSS -->
 
 			<link rel="stylesheet" type="text/css" href="/libs/bootstrap.css">
+
+			<style>
+				.SimpleLogsList .SimpleLogsLine .SimpleLogsTime {
+					padding-right: 10px;
+					padding-bottom: 5px;
+				}
+				.SimpleLogsList .SimpleLogsMessage {
+					padding-bottom: 5px;
+				}
+			</style>
 			
 	</head>
 
@@ -653,7 +663,31 @@
 
 						<div class="modal-body">
 
-							{{logs}}
+							<div class="panel panel-default" data-ng-repeat="(yearName, yearContent) in logs">
+
+								<div class="panel-heading">
+									<h4 class="panel-title">Année : {{yearName}}</h4>
+								</div>
+
+								<div class="panel-body">
+
+									<div class="panel panel-default" data-ng-repeat="(monthName, monthContent) in yearContent">
+
+										<div class="panel-heading">
+											<h4 class="panel-title">Mois : {{monthName}}</h4>
+										</div>
+
+										<div class="panel-body">
+											<div data-ng-repeat="day in monthContent">
+												<a href="#" data-ng-click="seeLog(yearName, monthName, day);">{{day}}</a>
+											<br /></div>
+										</div>
+
+									</div>
+
+								</div>
+
+							</div>
 
 						</div>
 

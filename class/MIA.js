@@ -1257,6 +1257,50 @@
 										socket.emit('logs.error', "Impossible de récupérer les logs.");
 									}
 
+								})
+
+								.on('log', function(log) {
+
+									try {
+
+										if (Container.get('conf').get('debug')) {
+											Container.get('logs').log('log');
+										}
+
+										if (!log) {
+											Container.get('logs').err("-- [logs] : date manquante.");
+											socket.emit('logs.error', "Impossible de voir le log : date manquante.");
+										}
+										else if (!log.year) {
+											Container.get('logs').err("-- [logs] : donnée 'year' manquante.");
+											socket.emit('logs.error', "Impossible de voir le log : donnée 'year' manquante.");
+										}
+										else if (!log.month) {
+											Container.get('logs').err("-- [logs] : donnée 'month' manquante.");
+											socket.emit('logs.error', "Impossible de voir le log : donnée 'month' manquante.");
+										}
+										else if (!log.day) {
+											Container.get('logs').err("-- [logs] : donnée 'day' manquante.");
+											socket.emit('logs.error', "Impossible de voir le log : donnée 'day' manquante.");
+										}
+										else {
+
+											Container.get('logs').read(log.year, log.month, log.day).then(function(content) {
+												socket.emit('log', content);
+											})
+											.catch(function(err) {
+												Container.get('logs').err('-- [logs] ' + ((err.message) ? err.message : err));
+												socket.emit('logs.error', "Impossible de lire le log.");
+											});
+											
+										}
+
+									}
+									catch (e) {
+										Container.get('logs').err('-- [logs] ' + ((e.message) ? e.message : e));
+										socket.emit('logs.error', "Impossible de récupérer les logs.");
+									}
+
 								});
 
 							});
