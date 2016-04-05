@@ -12,13 +12,14 @@
 			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 			<meta name="HandheldFriendly" content="True" />
 			<meta name="MobileOptimized" content="320" />
-			<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+			<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" />
 
 			<meta name="google" content="notranslate" />
 			
 		<!-- CSS -->
 
 			<link rel="stylesheet" type="text/css" href="/libs/bootstrap.css">
+			<link rel="stylesheet" type="text/css" href="/libs/font-awesome.css">
 
 			<style>
 				.SimpleLogsList .SimpleLogsLine .SimpleLogsTime {
@@ -49,37 +50,33 @@
 
 		<!-- menu -->
 
-			<div class="row">
+			<nav class="navbar navbar-light bg-faded">
 
-				<nav class="navbar navbar-default">
+				<div class="navbar-header">
+					<div class="navbar-brand">MIA <small>({{ip}})</small></div>
+				</div>
 
-					<div class="navbar-header">
-						<div class="navbar-brand">MIA <small>({{ip}})</small></div>
-					</div>
+				<div class="collapse navbar-collapse">
 
-					<div class="collapse navbar-collapse">
+					<ul class="nav navbar-nav only-logged hidden">
+						<li><a id="navUsers" href="#"><span class="fa fa-user"></span> Utilisateur</a></li>
+						<li><a id="navCrons" href="#"><span class="fa fa-calendar"></span> Tâches plannifiées</a></li>
+						<li><a id="navActions" href="#"><span class="fa fa-fire"></span> Actions</a></li>
+						<li><a id="navPlugins" href="#"><span class="fa fa-paperclip"></span> Plugins</a></li>
+						<li><a id="navLogs" href="#"><span class="fa fa-list"></span> Logs</a></li>
+					</ul>
 
-						<ul class="nav navbar-nav only-logged hidden">
-							<li><a id="navUsers" href="#"><span class="glyphicon glyphicon-user"></span> Utilisateur</a></li>
-							<li><a id="navCrons" href="#"><span class="glyphicon glyphicon-calendar"></span> Tâches plannifiées</a></li>
-							<li><a id="navActions" href="#"><span class="glyphicon glyphicon-fire"></span> Actions</a></li>
-							<li><a id="navPlugins" href="#"><span class="glyphicon glyphicon-paperclip"></span> Plugins</a></li>
-							<li><a id="navLogs" href="#"><span class="glyphicon glyphicon-list"></span> Logs</a></li>
-						</ul>
-
-						<div class="navbar-form navbar-right">
-							
-							<span class="label label-danger only-disconnected">déconnecté</span>
-							<span class="label label-warning only-connected hidden">connecté</span>
-							<span class="label label-success only-logged hidden">enregistré</span>
-
-						</div>
+					<div class="navbar-form navbar-right">
+						
+						<span class="label label-danger only-disconnected">déconnecté</span>
+						<span class="label label-warning only-connected hidden">connecté</span>
+						<span class="label label-success only-logged hidden">enregistré</span>
 
 					</div>
 
-				</nav>
-
-			</div>
+				</div>
+				
+			</nav>
 
 		<!-- content -->
 
@@ -87,19 +84,19 @@
 
 				<div class="col-xs-12 only-disconnected">
 
-					<div class="panel panel-danger">
-						<div class="panel-heading">MIA déconnectée. Veuillez attendre la reconnexion.</div>
+					<div class="card card-danger">
+						<div class="card-header">MIA déconnectée. Veuillez attendre la reconnexion.</div>
 					</div>
 
 				</div>
 
 				<div class="col-xs-12 only-connected hidden" data-ng-controller="ControllerLogin">
 
-					<form id="login_form" action="#" method="POST" class="panel panel-default" data-ng-submit="log();">
+					<form id="login_form" action="#" method="POST" class="card" data-ng-submit="log();">
 
-						<div class="panel-heading">Login</div>
+						<div class="card-header">Login</div>
 
-						<div class="panel-body">
+						<div class="card-block">
 
 							<div class="form-group">
 								(note : vous pouvez aussi attendre une autorisation d'une personne déjà autentifiée)
@@ -137,10 +134,10 @@
 
 					<div data-ng-controller="ControllerClients">
 						
-						<div class="panel panel-default">
+						<div class="card">
 
-							<div class="panel-heading">
-								<h4 class="panel-title"><span class="glyphicon glyphicon-user"></span> Clients</h4>
+							<div class="card-header">
+								<span class="fa fa-user"></span> Clients
 							</div>
 
 							<ul class="list-group">
@@ -154,9 +151,9 @@
 										<h5 class="pull-left">{{client.name}}<span data-ng-show="client.user"> ({{client.user.login}})</span></h5>
 
 										<div class="btn-group pull-right">
-											<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="'ACCEPTED' != client.status.code" data-ng-click="allow(client);"></button>
-											<button type="button" class="btn glyphicon glyphicon-edit" data-ng-show="'ACCEPTED' == client.status.code" data-ng-click="rename(client);"></button>
-											<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(client);"></button>
+											<button type="button" class="btn fa fa-ok" data-ng-show="'ACCEPTED' != client.status.code" data-ng-click="allow(client);"></button>
+											<button type="button" class="btn fa fa-edit" data-ng-show="'ACCEPTED' == client.status.code" data-ng-click="rename(client);"></button>
+											<button type="button" class="btn fa fa-trash" data-ng-click="delete(client);"></button>
 										</div>
 
 									</div>
@@ -171,10 +168,10 @@
 
 					<div data-ng-controller="ControllerChilds">
 						
-						<div class="panel panel-default">
+						<div class="card">
 
-							<div class="panel-heading">
-								<h4 class="panel-title"><span class="glyphicon glyphicon-baby-formula"></span> Enfants</h4>
+							<div class="card-header">
+								<span class="fa fa-child"></span> Enfants
 							</div>
 
 							<ul class="list-group">
@@ -188,9 +185,9 @@
 										<h5 class="pull-left">{{child.name}}</h5>
 
 										<div class="btn-group pull-right">
-											<button type="button" class="btn glyphicon glyphicon-ok" data-ng-show="'ACCEPTED' != child.status.code" data-ng-click="allow(child);"></button>
-											<button type="button" class="btn glyphicon glyphicon-edit" data-ng-show="'ACCEPTED' == child.status.code" data-ng-click="rename(child);"></button>
-											<button type="button" class="btn glyphicon glyphicon-trash" data-ng-click="delete(child);"></button>
+											<button type="button" class="btn fa fa-ok" data-ng-show="'ACCEPTED' != child.status.code" data-ng-click="allow(child);"></button>
+											<button type="button" class="btn fa fa-edit" data-ng-show="'ACCEPTED' == child.status.code" data-ng-click="rename(child);"></button>
+											<button type="button" class="btn fa fa-trash" data-ng-click="delete(child);"></button>
 										</div>
 
 									</div>
@@ -207,13 +204,13 @@
 
 				<div class="col-xs-12 col-md-9 col-lg-10 only-logged hidden">
 
-					<div class="panel panel-default">
+					<div class="card">
 						
-						<div class="panel-heading">
-							<h4 class="panel-title"><span class="glyphicon glyphicon-paperclip"></span> Widgets plugins</h4>
+						<div class="card-header">
+							<span class="fa fa-paperclip"></span> Widgets plugins
 						</div>
 
-						<div class="panel-body">
+						<div class="card-block">
 							
 							<div class="row">
 
@@ -238,7 +235,7 @@
 					<form class="modal-content">
 
 						<div class="modal-header">
-							<h4 class="modal-title"><span class="glyphicon glyphicon-user"></span> Utilisateur</h4>
+							<h4 class="modal-title"><span class="fa fa-user"></span> Utilisateur</h4>
 						</div>
 
 						<div class="modal-body">
@@ -288,7 +285,7 @@
 						</div>
 
 						<div class="modal-footer">
-							<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
 						</div>
 
 					</form>
@@ -304,17 +301,17 @@
 					<div class="modal-content">
 
 						<div class="modal-header">
-							<h4 class="modal-title"><span class="glyphicon glyphicon-calendar"></span> Tâches plannifiées</h4>
+							<h4 class="modal-title"><span class="fa fa-calendar"></span> Tâches plannifiées</h4>
 						</div>
 
 						<div class="modal-body">
 							
 							<button type="button" class="btn btn-primary" data-ng-click="add();">
-								<span class="glyphicon glyphicon-plus"></span> Ajouter
+								<span class="fa fa-plus"></span> Ajouter
 							</button>
 
 							<button type="button" class="btn btn-primary" data-ng-click="linkToAction();" data-ng-show="0 < crons.length">
-								<span class="glyphicon glyphicon-fire"></span> Lier à une action
+								<span class="fa fa-fire"></span> Lier à une action
 							</button>
 
 							<br /><br />
@@ -332,7 +329,7 @@
 										<h5 class="pull-left">{{cron.name}}</h5>
 
 										<div class="btn-group pull-right">
-											<button type="button" class="btn btn-primary glyphicon glyphicon-trash"
+											<button type="button" class="btn btn-primary fa fa-trash"
 													data-ng-click="delete(cron);"
 													data-toggle="tooltip" data-placement="auto" title="Supprimer la tâche plannifiée">
 											</button>
@@ -347,7 +344,7 @@
 						</div>
 
 						<div class="modal-footer">
-							<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
 						</div>
 
 					</div>
@@ -363,7 +360,7 @@
 						<form class="modal-content">
 
 							<div class="modal-header">
-								<h4 class="modal-title"><span class="glyphicon glyphicon-fire"></span> {{cron.name}}</h4>
+								<h4 class="modal-title"><span class="fa fa-fire"></span> {{cron.name}}</h4>
 							</div>
 
 							<div class="modal-body">
@@ -382,7 +379,7 @@
 
 							<div class="modal-footer">
 								<button type="button" class="btn btn-primary" data-ng-click="add(cron);">Ajouter</button>
-								<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
 							</div>
 
 						</form>
@@ -399,7 +396,7 @@
 
 							<div class="modal-header">
 								<h4 class="modal-title">
-									<span class="glyphicon glyphicon-link"></span> Liens entre tâches plannifiées et actions
+									<span class="fa fa-link"></span> Liens entre tâches plannifiées et actions
 								</h4>
 							</div>
 
@@ -419,11 +416,11 @@
 
 									<div class="col-xs-6">
 
-										<div class="panel panel-default">
+										<div class="card">
 
-											<div class="panel-heading">Tâches plannifiées</div>
+											<div class="card-header">Tâches plannifiées</div>
 
-											<div class="panel-body" data-ng-show="0 >= crons.length">
+											<div class="card-block" data-ng-show="0 >= crons.length">
 												Aucune tâche plannifiée enregistrée
 											</div>
 
@@ -450,11 +447,11 @@
 
 									<div class="col-xs-6">
 										
-										<div class="panel panel-default">
+										<div class="card">
 
-											<div class="panel-heading">Actions</div>
+											<div class="card-header">Actions</div>
 
-											<div class="panel-body" data-ng-show="0 >= actions.length">
+											<div class="card-block" data-ng-show="0 >= actions.length">
 												Aucune action enregistrée
 											</div>
 
@@ -476,7 +473,7 @@
 							</div>
 
 							<div class="modal-footer">
-								<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
 							</div>
 
 						</form>
@@ -492,7 +489,7 @@
 					<div class="modal-content">
 
 						<div class="modal-header">
-							<h4 class="modal-title"><span class="glyphicon glyphicon-fire"></span> Actions</h4>
+							<h4 class="modal-title"><span class="fa fa-fire"></span> Actions</h4>
 						</div>
 
 						<div class="modal-body">
@@ -504,7 +501,7 @@
 							<div data-ng-show="0 < actions.length">
 
 								<button type="button" class="btn btn-primary" data-ng-click="linkToCron();">
-									<span class="glyphicon glyphicon-calendar"></span> Lier à une tâche plannifiée
+									<span class="fa fa-calendar"></span> Lier à une tâche plannifiée
 								</button>
 
 								<br /><br />
@@ -518,11 +515,11 @@
 											<h5 class="pull-left">"{{action.name}}", sur {{action.child.name}}</h5>
 
 											<div class="btn-group pull-right">
-												<button type="button" class="btn btn-primary glyphicon glyphicon-play"
+												<button type="button" class="btn btn-primary fa fa-play"
 														data-ng-click="execute(action);"
 														data-toggle="tooltip" data-placement="auto" title="Exécuter l'action">
 												</button>
-												<button type="button" class="btn btn-primary glyphicon glyphicon-trash"
+												<button type="button" class="btn btn-primary fa fa-trash"
 														data-ng-click="delete(action);"
 														data-toggle="tooltip" data-placement="auto" title="Supprimer l'action">
 												</button>
@@ -539,7 +536,7 @@
 						</div>
 
 						<div class="modal-footer">
-							<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
 						</div>
 
 					</div>
@@ -555,7 +552,7 @@
 						<form class="modal-content">
 
 							<div class="modal-header">
-								<h4 class="modal-title"><span class="glyphicon glyphicon-fire"></span> {{action.name}}</h4>
+								<h4 class="modal-title"><span class="fa fa-fire"></span> {{action.name}}</h4>
 							</div>
 
 							<div class="modal-body">
@@ -583,7 +580,7 @@
 
 							<div class="modal-footer">
 								<button type="button" class="btn btn-primary" data-ng-click="add(action);">Ajouter</button>
-								<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
 							</div>
 
 						</form>
@@ -599,13 +596,13 @@
 					<div class="modal-content">
 
 						<div class="modal-header">
-							<h4 class="modal-title"><span class="glyphicon glyphicon-paperclip"></span> Plugins</h4>
+							<h4 class="modal-title"><span class="fa fa-paperclip"></span> Plugins</h4>
 						</div>
 
 						<div class="modal-body">
 
 							<button type="button" class="btn btn-primary" data-ng-click="addViaGithub();">
-								<span class="glyphicon glyphicon-plus"></span> Ajouter via Github
+								<span class="fa fa-plus"></span> Ajouter via Github
 							</button>
 
 							<br /><br />
@@ -620,12 +617,12 @@
 
 										<div class="btn-group pull-right">
 
-											<button type="button" class="btn glyphicon glyphicon-cloud-download"
+											<button type="button" class="btn fa fa-cloud-download"
 													data-ng-show="plugin.github && '' != plugin.github"
 													data-ng-click="updateViaGithub(plugin);">
 											</button>
 
-											<button type="button" class="btn glyphicon glyphicon-trash"
+											<button type="button" class="btn fa fa-trash"
 													data-ng-click="delete(plugin);">
 											</button>
 										
@@ -642,7 +639,7 @@
 						</div>
 
 						<div class="modal-footer">
-							<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
 						</div>
 
 					</div>
@@ -658,26 +655,26 @@
 					<div class="modal-content">
 
 						<div class="modal-header">
-							<h4 class="modal-title"><span class="glyphicon glyphicon-list"></span> Logs</h4>
+							<h4 class="modal-title"><span class="fa fa-list"></span> Logs</h4>
 						</div>
 
 						<div class="modal-body">
 
-							<div class="panel panel-default" data-ng-repeat="(yearName, yearContent) in logs">
+							<div class="card" data-ng-repeat="(yearName, yearContent) in logs">
 
-								<div class="panel-heading">
-									<h4 class="panel-title">Année : {{yearName}}</h4>
+								<div class="card-header">
+									<h5 class="card-title">Année : {{yearName}}</h5>
 								</div>
 
-								<div class="panel-body">
+								<div class="card-block">
 
-									<div class="panel panel-default" data-ng-repeat="(monthName, monthContent) in yearContent">
+									<div class="card" data-ng-repeat="(monthName, monthContent) in yearContent">
 
-										<div class="panel-heading">
-											<h4 class="panel-title">Mois : {{monthName}}</h4>
+										<div class="card-header">
+											<h5 class="card-title">Mois : {{monthName}}</h5>
 										</div>
 
-										<div class="panel-body">
+										<div class="card-block">
 											<div data-ng-repeat="day in monthContent">
 												<a href="#" data-ng-click="seeLog(yearName, monthName, day);">{{day}}</a>
 											<br /></div>
@@ -692,7 +689,7 @@
 						</div>
 
 						<div class="modal-footer">
-							<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
 						</div>
 
 					</div>
@@ -703,6 +700,7 @@
 			
 		<!-- JS -->
 
+			<script type="text/javascript" src="/libs/tether.js"></script>
 			<script type="text/javascript" src="/libs/jquery.js"></script>
 			<script type="text/javascript" src="/libs/interact.js"></script>
 			<script type="text/javascript" src="/libs/bootstrap.js"></script>
@@ -713,7 +711,6 @@
 			<script type="text/javascript">
 				var socket = io.connect();
 				var app = angular.module('MIAApp', ['ngBootstrapPopup', 'ngCookies']);
-				jQuery(function () { jQuery('[data-toggle="tooltip"]').tooltip(); });
 			</script>
 			
 			<script src="/js/children.js"></script>

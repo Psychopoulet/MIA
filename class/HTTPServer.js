@@ -344,58 +344,46 @@
 									// css
 
 									.get('/libs/bootstrap.css', function (req, res) {
-
-										_readAllFiles(path.join(m_sDirWeb, 'libs', 'bootstrap', 'css')).then(function (data) {
-											_sendCSSResponse(res, 200, data);
-										})
-										.catch(function (error) {
-											_500(res, error);
-										});
-
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'bootstrap-v4', 'css', 'bootstrap.min.css'));
+									})
+									.get('/libs/font-awesome.css', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'font-awesome-4.5.0', 'css', 'font-awesome.min.css'));
 									})
 
 									// fonts
 
-									.get('/fonts/glyphicons-halflings-regular.eot', function (req, res) {
-										res.sendFile(path.join(m_sDirWeb, 'libs', 'bootstrap', 'fonts', 'glyphicons-halflings-regular.eot'));
+									.get('/fonts/FontAwesome.otf', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'font-awesome-4.5.0', 'fonts', 'FontAwesome.otf'));
 									})
-									.get('/fonts/glyphicons-halflings-regular.svg', function (req, res) {
-										res.sendFile(path.join(m_sDirWeb, 'libs', 'bootstrap', 'fonts', 'glyphicons-halflings-regular.svg'));
+									.get('/fonts/fontawesome-webfont.eot', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'font-awesome-4.5.0', 'fonts', 'fontawesome-webfont.eot'));
 									})
-									.get('/fonts/glyphicons-halflings-regular.ttf', function (req, res) {
-										res.sendFile(path.join(m_sDirWeb, 'libs', 'bootstrap', 'fonts', 'glyphicons-halflings-regular.ttf'));
+									.get('/fonts/fontawesome-webfont.svg', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'font-awesome-4.5.0', 'fonts', 'fontawesome-webfont.svg'));
 									})
-									.get('/fonts/glyphicons-halflings-regular.woff', function (req, res) {
-										res.sendFile(path.join(m_sDirWeb, 'libs', 'bootstrap', 'fonts', 'glyphicons-halflings-regular.woff'));
+									.get('/fonts/fontawesome-webfont.ttf', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'font-awesome-4.5.0', 'fonts', 'fontawesome-webfont.ttf'));
 									})
-									.get('/fonts/glyphicons-halflings-regular.woff2', function (req, res) {
-										res.sendFile(path.join(m_sDirWeb, 'libs', 'bootstrap', 'fonts', 'glyphicons-halflings-regular.woff2'));
+									.get('/fonts/fontawesome-webfont.woff', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'font-awesome-4.5.0', 'fonts', 'fontawesome-webfont.woff'));
+									})
+									.get('/fonts/fontawesome-webfont.woff2', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'font-awesome-4.5.0', 'fonts', 'fontawesome-webfont.woff2'));
 									})
 
 									// js
-										
+									
+									.get('/libs/tether.js', function (req, res) {
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'tether', 'tether.min.js'));
+									})
 									.get('/libs/jquery.js', function (req, res) {
-
-										_readAllFiles(path.join(m_sDirWeb, 'libs', 'jquery')).then(function (data) {
-											_sendJSResponse(res, 200, data);
-										})
-										.catch(function (error) {
-											_500(res, error);
-										});
-
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'jquery', 'jquery.min.js'));
 									})
 									.get('/libs/interact.js', function (req, res) {
-										res.sendFile(path.join(m_sDirWeb, 'libs', 'interactjs', 'interact.js'));
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'interactjs', 'interact.min.js'));
 									})
 									.get('/libs/bootstrap.js', function (req, res) {
-
-										_readAllFiles(path.join(m_sDirWeb, 'libs', 'bootstrap', 'js')).then(function (data) {
-											_sendJSResponse(res, 200, data);
-										})
-										.catch(function (error) {
-											_500(res, error);
-										});
-
+										res.sendFile(path.join(m_sDirWeb, 'libs', 'bootstrap-v4', 'js', 'bootstrap.min.js'));
 									})
 									.get('/libs/socketio.js', function (req, res) {
 										res.sendFile(path.join(m_sDirWeb, 'libs', 'socketio', 'socket.io.js'));
