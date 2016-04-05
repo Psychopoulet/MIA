@@ -30,6 +30,7 @@ app.controller('ControllerPlugins', ['$scope', '$popup', function($scope, $popup
 
 		$popup.prompt({
 			title : "Ajout de plugin",
+			size: 'medium',
 			prefix: "https://github.com/",
 			placeholder : "<compte>/<plugin>",
 			onconfirm: function(url) {

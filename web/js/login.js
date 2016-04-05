@@ -14,8 +14,8 @@ app.controller('ControllerLogin', ['$scope', '$popup', '$cookies', function($sco
 			
 			var token = '';
 
-			jQuery('.only-disconnected, .only-logged').addClass('hidden');
-			jQuery('.only-connected').removeClass('hidden');
+			jQuery('.only-disconnected, .only-logged').addClass('hidden-xs-up');
+			jQuery('.only-connected').removeClass('hidden-xs-up');
 
 			// check token
 
@@ -51,8 +51,8 @@ app.controller('ControllerLogin', ['$scope', '$popup', '$cookies', function($sco
 			
 			$scope.inProgress = false;
 
-			jQuery('.only-logged, .only-connected').addClass('hidden');
-			jQuery('.only-disconnected').removeClass('hidden');
+			jQuery('.only-logged, .only-connected').addClass('hidden-xs-up');
+			jQuery('.only-disconnected').removeClass('hidden-xs-up');
 
 		});
 
@@ -71,8 +71,8 @@ app.controller('ControllerLogin', ['$scope', '$popup', '$cookies', function($sco
 				$cookies.put('token', client.token);
 			}
 
-			jQuery('.only-disconnected, .only-connected').addClass('hidden');
-			jQuery('.only-logged').removeClass('hidden');
+			jQuery('.only-disconnected, .only-connected').addClass('hidden-xs-up');
+			jQuery('.only-logged').removeClass('hidden-xs-up');
 
 		});
 
@@ -90,8 +90,8 @@ app.controller('ControllerLogin', ['$scope', '$popup', '$cookies', function($sco
 				$cookies.remove('token');
 			}
 		
-			jQuery('.only-connected, .only-logged').addClass('hidden');
-			jQuery('.only-disconnected').removeClass('hidden');
+			jQuery('.only-connected, .only-logged').addClass('hidden-xs-up');
+			jQuery('.only-disconnected').removeClass('hidden-xs-up');
 
 		});
 
