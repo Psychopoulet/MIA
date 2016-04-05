@@ -26,13 +26,15 @@ app.controller('ControllerPlugins', ['$scope', '$popup', function($scope, $popup
 
 	});
 
-	$scope.addViaGithub = function(url) {
+	$scope.addViaGithub = function() {
 
 		$popup.prompt({
 			title : "Ajout de plugin",
-			placeholder : "https://github.com/<compte>/<plugin>",
+			size: 'medium',
+			prefix: "https://github.com/",
+			placeholder : "<compte>/<plugin>",
 			onconfirm: function(url) {
-				socket.emit('plugin.add.github', url);
+				socket.emit('plugin.add.github', "https://github.com/" + url);
 			}
 		});
 
@@ -43,7 +45,7 @@ app.controller('ControllerPlugins', ['$scope', '$popup', function($scope, $popup
 		$popup.confirm({
 			title : "Mise à jour de plugin",
 			message: "Voulez-vous mettre le plugin '" + plugin.name + "' à jour ?",
-			onyes: function(url) {
+			onyes: function() {
 				socket.emit('plugin.update.github', plugin);
 			}
 		});
