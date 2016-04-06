@@ -339,7 +339,7 @@
 
 								<div class="clearfix">
 
-									<h5 class="pull-left">{{cron.name}}</h5>
+									<div class="pull-left">{{cron.name}}</div>
 
 									<div class="btn-group pull-right">
 										<button type="button" class="btn btn-primary fa fa-trash"
@@ -525,7 +525,7 @@
 
 									<div class="clearfix">
 
-										<h5 class="pull-left">"{{action.name}}", sur {{action.child.name}}</h5>
+										<div class="pull-left">"{{action.name}}", sur {{action.child.name}}</div>
 
 										<div class="btn-group pull-right">
 											<button type="button" class="btn btn-primary fa fa-play"
@@ -675,9 +675,7 @@
 
 						<div class="card" data-ng-repeat="(yearName, yearContent) in logs">
 
-							<div class="card-header">
-								<h5 class="card-title">Année : {{yearName}}</h5>
-							</div>
+							<div class="card-header">Année : {{yearName}}</div>
 
 							<div class="card-block">
 
@@ -687,9 +685,7 @@
 									
 										<div class="card" data-ng-repeat="(monthName, monthContent) in yearContent">
 
-											<div class="card-header">
-												<h5 class="card-title">Mois : {{monthName}}</h5>
-											</div>
+											<div class="card-header">Mois : {{monthName}}</div>
 
 											<div class="card-block">
 
