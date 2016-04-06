@@ -1065,7 +1065,7 @@
 
 												Container.get('users').update(user).then(function() {
 
-													socket.emit('user.update.login');
+													socket.emit('user.update.login', login);
 													_sendUsers();
 
 												})

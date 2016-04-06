@@ -6,14 +6,16 @@ app.controller('ControllerUser', ['$scope', '$popup', function($scope, $popup) {
     $scope.user = {};
 
     socket.on('user.error', $popup.alert)
-    .on('users', function (users) {
-        $scope.$apply(function () { $scope.users = users; });
-    })
-    .on('user.update.login', function () {
+    .on('user.update.login', function (login) {
 
         $popup.alert({
             type : 'success',
             message : "Login modifié."
+        });
+
+        $scope.$apply(function() {
+            _user.login = login;
+            $scope.user.login = login;
         });
 
     })
