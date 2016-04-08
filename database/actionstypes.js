@@ -7,54 +7,9 @@ module.exports = class DBActionsTypes {
 		this.db = db;
 	}
 
-	create () {
-
-		var that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.run(
-				"CREATE TABLE IF NOT EXISTS actionstypes (" +
-					" id INTEGER PRIMARY KEY AUTOINCREMENT," +
-					" name VARCHAR(50) NOT NULL," +
-					" command VARCHAR(100) NOT NULL" +
-			");", [], function(err) {
-
-				if (err) {
-					reject('(create table actionstypes) ' + (err.message) ? err.message : err);
-				}
-				else {
-
-					that.getAll().then(function(actionstypes) {
-
-						if (0 < actionstypes.length) {
-							resolve(actionstypes);
-						}
-						else {
-
-							that.add({ name : 'Jouer un son', command : 'media.sound.play' }).then(function() {
-
-								that.add({ name : 'Jouer une vidéo', command : 'media.video.play' }).then(function() {
-									that.getAll().then(resolve).catch(reject);
-								}).catch(reject);
-
-							}).catch(reject);
-					
-						}
-
-					}).catch(reject);
-
-				}
-
-			});
-
-		});
-
-	}
-
 	add (actiontype) {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -91,7 +46,7 @@ module.exports = class DBActionsTypes {
 
 	lastInserted () {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -112,7 +67,7 @@ module.exports = class DBActionsTypes {
 
 	getAll () {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 

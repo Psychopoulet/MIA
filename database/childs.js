@@ -47,37 +47,9 @@ module.exports = class DBChilds {
 		this.db = db;
 	}
 
-	create () {
-
-		var that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.run(
-				"CREATE TABLE IF NOT EXISTS childs (" +
-					" id INTEGER PRIMARY KEY AUTOINCREMENT," +
-					" id_status INTEGER," +
-					" token VARCHAR(100) NOT NULL UNIQUE," +
-					" name VARCHAR(50) NOT NULL," +
-					" FOREIGN KEY(id_status) REFERENCES status(id) ON DELETE CASCADE ON UPDATE CASCADE" +
-			");", [], function(err) {
-
-				if (err) {
-					reject('(create table childs) ' + (err.message) ? err.message : err);
-				}
-				else {
-					that.getAll().then(resolve).catch(reject);
-				}
-
-			});
-
-		});
-
-	}
-
 	add (child) {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -121,7 +93,7 @@ module.exports = class DBChilds {
 
 	lastInserted () {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -142,7 +114,7 @@ module.exports = class DBChilds {
 
 	getAll () {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -172,15 +144,15 @@ module.exports = class DBChilds {
 
 	getOneByToken (token) {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
 			that.getAll().then(function(childs) {
 
-				var stResult;
+				let stResult;
 
-				for (var i = 0; i < childs.length; ++i) {
+				for (let i = 0; i < childs.length; ++i) {
 
 					if (childs[i].token === token) {
 						stResult = childs[i];
@@ -205,7 +177,7 @@ module.exports = class DBChilds {
 
 	rename (token, name) {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -226,7 +198,7 @@ module.exports = class DBChilds {
 
 	delete (token) {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 

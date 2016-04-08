@@ -9,60 +9,9 @@ module.exports = class DBStatus {
 		this.db = db;
 	}
 
-	create () {
-
-		var that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.run(
-				"CREATE TABLE IF NOT EXISTS status (" +
-					" id INTEGER PRIMARY KEY AUTOINCREMENT," +
-					" code VARCHAR(50) NOT NULL UNIQUE," +
-					" name VARCHAR(50) NOT NULL," +
-					" backgroundcolor VARCHAR(50) NOT NULL," +
-					" textcolor VARCHAR(50) NOT NULL" +
-			");", [], function(err) {
-
-				if (err) {
-					reject('(create table status) ' + (err.message) ? err.message : err);
-				}
-				else {
-
-					that.getAll().then(function(status) {
-
-						if (0 < status.length) {
-							resolve(status);
-						}
-						else {
-
-							that.add({ code : 'ACCEPTED', name : 'Accepté(e)', backgroundcolor : '#dff0d8', textcolor : '#3c763d' }).then(function() {
-
-								that.add({ code : 'BLOCKED', name : 'Bloqué(e)', backgroundcolor : 'red', textcolor : 'black' }).then(function() {
-									
-									that.add({ code : 'WAITING', name : 'En attente', backgroundcolor : '#fcf8e3', textcolor : '#8a6d3b' }).then(function() {
-										that.getAll().then(resolve).catch(reject);
-									}).catch(reject);
-
-								}).catch(reject);
-								
-							}).catch(reject);
-					
-						}
-
-					}).catch(reject);
-
-				}
-
-			});
-
-		});
-
-	}
-
 	add (status) {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -107,7 +56,7 @@ module.exports = class DBStatus {
 
 	lastInserted () {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -128,7 +77,7 @@ module.exports = class DBStatus {
 
 	getAll () {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -149,15 +98,15 @@ module.exports = class DBStatus {
 
 	getOneByCode (code) {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
 			that.getAll().then(function(status) {
 
-				var stResult;
+				let stResult;
 
-				for (var i = 0; i < status.length; ++i) {
+				for (let i = 0; i < status.length; ++i) {
 
 					if (status[i].code === code) {
 						stResult = status[i];

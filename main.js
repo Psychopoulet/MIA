@@ -28,7 +28,7 @@
 
 // private
 
-	function _loadConf() {
+	function _loadConf(Container) {
 
 		return new Promise(function(resolve, reject) {
 
@@ -52,16 +52,107 @@
 
 	}
 
-	function _loadDatabase() {
+	function _createDatabase() {
 
 		return new Promise(function(resolve, reject) {
 
-			var db = new sqlite3.Database(path.join(__dirname, 'database', 'MIA.sqlite3'));
-			// var db = new sqlite3.Database(':memory:');
+			let db = null,
+				dbFile = path.join(__dirname, 'database', 'MIA.sqlite3'),
+				createFile = path.join(__dirname, 'database', 'create.sql');
 
-			db.serialize(function() {
+			if (!fs.fileExists(createFile)) {
 
-				var actions = new Actions(db),
+				db = new sqlite3.Database(dbFile);
+
+				db.serialize(function() {
+					resolve(db);
+				});
+
+			}
+			else {
+
+				if (fs.fileExists(dbFile)) {
+					
+					db = new sqlite3.Database(dbFile);
+
+					db.serialize(function() {
+						resolve(db);
+					});
+					
+				}
+				else {
+
+					db = new sqlite3.Database(dbFile);
+
+					db.serialize(function() {
+						
+						fs.readFile(createFile, 'utf8', function (err, sql) {
+
+							if (err) {
+								reject((err.message) ? err.message : err);
+							}
+							else {
+
+								let queries = [];
+
+								sql.split(';').forEach(function(query) {
+
+									query = query.trim()
+												.replace(/--(.*)\s/g, "")
+												.replace(/\s/g, " ")
+												.replace(/  /g, " ");
+
+									if ('' != query) {
+										queries.push(query + ';');
+									}
+
+								});
+
+								function executeQueries(i) {
+
+									if (i >= queries.length) {
+										resolve(db);
+									}
+									else {
+
+										db.run(queries[i], [], function(err) {
+
+											if (err) {
+												reject((err.message) ? err.message : err);
+											}
+											else {
+												executeQueries(i + 1);
+											}
+
+										});
+
+									}
+
+								}
+
+								executeQueries(0);
+
+							}
+							
+						});
+
+					});
+
+				}
+
+			}
+
+		});
+
+	}
+
+	function _loadDatabase(Container) {
+
+		return new Promise(function(resolve, reject) {
+
+			_createDatabase().then(function(db) {
+
+				let actions = new Actions(db),
 					actionstypes = new ActionsTypes(db),
 					childs = new Childs(db),
 					clients = new Clients(db),
@@ -79,38 +170,10 @@
 							.set('status', status)
 							.set('users', users);
 
-				status.create().then(function() {
-
-					users.create().then(function() {
-
-						clients.create().then(function() {
-
-							childs.create().then(function() {
-
-								crons.create().then(function() {
-
-									actionstypes.create().then(function() {
-
-										actions.create().then(function() {
-
-											cronsactions.create().then(resolve).catch(reject);
-										
-										}).catch(reject);
-									
-									}).catch(reject);
-
-								}).catch(reject);
-				
-							}).catch(reject);
-
-						}).catch(reject);
-
-					}).catch(reject);
-
-				}).catch(reject);
-
-			});
+				resolve();
 	
+			}).catch(reject);
+
 		});
 
 	}
@@ -121,18 +184,18 @@
 
 			Logs.getLogs().then(function(logs) {
 
-				var date = new Date(),
+				let date = new Date(),
 					sYear = date.getFullYear(), sMonth = date.getMonth() + 1, sDay = date.getDate();
 
 					sYear = sYear + '';
 					sMonth = (9 < sMonth) ? sMonth + '' : '0' + sMonth;
 					sDay = (9 < sDay) ? sDay + '' : '0' + sDay;
 
-				for (var _year in logs) {
+				for (let _year in logs) {
 
-					for (var _month in logs[_year]) {
+					for (let _month in logs[_year]) {
 
-						for (var _day in logs[_year][_month]) {
+						for (let _day in logs[_year][_month]) {
 
 							if (_year != sYear || _month != sMonth) {
 
@@ -160,7 +223,7 @@
 
 	try {
 
-		var Container = new SimpleContainer();
+		let Container = new SimpleContainer();
 
 		Container	.set('conf', new SimpleConfig(path.join(__dirname, 'conf.json')))
 					.set('logs', new SimpleLogs(path.join(__dirname, 'logs')))
@@ -175,14 +238,14 @@
 
 		Container.get('conf').spaces = true;
 
-		_loadConf().then(function() {
+		_loadConf(Container).then(function() {
 
 			Container.get('logs').showInConsole = Container.get('conf').get('debug');
 			Container.get('logs').showInFiles = true;
 
 			_deleteOldLogs(Container.get('logs')).then(function() {
 
-				_loadDatabase().then(function() {
+				_loadDatabase(Container).then(function() {
 
 					if (Container.get('conf').has('pid')) {
 

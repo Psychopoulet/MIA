@@ -19,51 +19,9 @@ module.exports = class DBUsers {
 		this.db = db;
 	}
 
-	create () {
-
-		var that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.run(
-				"CREATE TABLE IF NOT EXISTS users (" +
-					" id INTEGER PRIMARY KEY AUTOINCREMENT," +
-					" login VARCHAR(50) NOT NULL," +
-					" password VARCHAR(100) NOT NULL," +
-					" email VARCHAR(250) NOT NULL DEFAULT ''" +
-			");", [], function(err) {
-
-				if (err) {
-					reject('(create table users) ' + (err.message) ? err.message : err);
-				}
-				else {
-					
-					that.getAll().then(function(users) {
-
-						if (0 < users.length) {
-							resolve(users);
-						}
-						else {
-
-							that.add({ login: 'rasp', password: 'password' }).then(function() {
-								that.getAll().then(resolve).catch(reject);
-							}).catch(reject);
-
-						}
-
-					}).catch(reject);
-
-				}
-
-			});
-
-		});
-
-	}
-
 	add (user) {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -76,12 +34,15 @@ module.exports = class DBUsers {
 			else if (!user.password) {
 				reject('Aucun mot de passe renseigné.');
 			}
+			else if (!user.email) {
+				reject('Aucun email renseigné.');
+			}
 			else {
 
 				that.db.run("INSERT INTO users (login, password, email) VALUES (:login, :password, :email);", {
 					':login': user.login,
 					':password': _cryptPassword(user.password),
-					':email': (user.email) ? user.email : ''
+					':email': user.email
 				}, function(err) {
 
 					if (err) {
@@ -101,17 +62,17 @@ module.exports = class DBUsers {
 
 	exists (login, password) {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
 			that.getAll().then(function(users) {
 
-				var result = false;
+				let result = false;
 
 					password = _cryptPassword(password);
 
-					for (var i = 0; i < users.length; ++i) {
+					for (let i = 0; i < users.length; ++i) {
 
 						if (users[i].password === password) {
 							result = true;
@@ -130,7 +91,7 @@ module.exports = class DBUsers {
 
 	lastInserted () {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -151,7 +112,7 @@ module.exports = class DBUsers {
 
 	getAll () {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -172,7 +133,7 @@ module.exports = class DBUsers {
 
 	update (user) {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 

@@ -38,62 +38,9 @@ module.exports = class DBCrons {
 		this.db = db;
 	}
 
-	create () {
-
-		var that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.run(
-				"CREATE TABLE IF NOT EXISTS crons (" +
-					" id INTEGER PRIMARY KEY AUTOINCREMENT," +
-					" id_user INTEGER," +
-					" name VARCHAR(50) NOT NULL," +
-					" timer VARCHAR(50) NOT NULL," +
-					" FOREIGN KEY(id_user) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE" +
-			");", [], function(err) {
-
-				if (err) {
-					reject('(create table crons) ' + (err.message) ? err.message : err);
-				}
-				else {
-
-					that.getAll().then(function(crons) {
-
-						if (0 < crons.length) {
-							resolve(crons);
-						}
-						else {
-
-							var Users = require(require('path').join(__dirname, 'users')), users = new Users(that.db);
-
-							users.lastInserted().then(function(user) {
-
-								that.add({ name : 'Café !!', timer : '00 00 16 * * 1-5', user : user }).then(function() {
-
-									that.add({ name : 'Manger !!', timer : '00 30 12 * * 1-5', user : user }).then(function() {
-										that.getAll().then(resolve).catch(reject);
-									}).catch(reject);
-
-								}).catch(reject);
-
-							}).catch(reject);
-					
-						}
-
-					}).catch(reject);
-
-				}
-
-			});
-
-		});
-
-	}
-
 	add (cron) {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -137,7 +84,7 @@ module.exports = class DBCrons {
 
 	lastInserted() {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -158,7 +105,7 @@ module.exports = class DBCrons {
 
 	getAll() {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -188,7 +135,7 @@ module.exports = class DBCrons {
 
 	delete (cron) {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
