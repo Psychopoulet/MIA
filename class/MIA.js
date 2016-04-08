@@ -1455,6 +1455,9 @@
 										.on('loaded', function(plugin) {
 											Container.get('logs').success("-- [plugins] : " + plugin.name + " (v" + plugin.version + ") loaded");
 										})
+										.on('allloaded', function() {
+											Container.get('logs').success("-- [plugins] : all loaded");
+										})
 										.on('unloaded', function(plugin) {
 											Container.get('logs').info("-- [plugins] : " + plugin.name + "' (v" + plugin.version + ") unloaded");
 										})
