@@ -116,7 +116,7 @@
 
 								fs.readdir(p_sDirectory, function (err, files) {
 
-									var bResult = true, sResult = '';
+									let bResult = true, sResult = '';
 
 									if (err) {
 										reject(err);
@@ -184,7 +184,7 @@
 
 									// on les rempli
 
-									var sPluginsWidgets = '';
+									let sPluginsWidgets = '';
 
 									Container.get('plugins').plugins.forEach(function(plugin) {
 
@@ -247,7 +247,7 @@
 
 						return new Promise(function(resolve, reject) {
 
-							var sDirSSL = path.join(__dirname, '..', 'ssl');
+							let sDirSSL = path.join(__dirname, '..', 'ssl');
 
 							try {
 
@@ -293,7 +293,7 @@
 
 					return new Promise(function(resolve, reject) {
 
-						var nWebPort = Container.get('conf').get('webport');
+						let nWebPort = Container.get('conf').get('webport');
 
 						try {
 

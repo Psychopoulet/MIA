@@ -82,9 +82,9 @@
 
 								clientssockets.getSockets().forEach(function(socket) {
 
-									var isAllowed = false;
+									let isAllowed = false;
 
-									for (var i = 0; i < clients.length; ++i) {
+									for (let i = 0; i < clients.length; ++i) {
 
 										if (socket.token == clients[i].token) {
 											clients[i].connected = true;
@@ -142,9 +142,9 @@
 
 								childssockets.getSockets().forEach(function(socket) {
 
-									var isAllowed = false;
+									let isAllowed = false;
 
-									for (var i = 0; i < childs.length; ++i) {
+									for (let i = 0; i < childs.length; ++i) {
 
 										if (socket.token == childs[i].token) {
 											childs[i].connected = true;
@@ -287,9 +287,9 @@
 
 											Container.get('clients').getAll().then(function(clients) {
 
-												var currentClient = false;
+												let currentClient = false;
 
-												for (var i = 0; i < clients.length; ++i) {
+												for (let i = 0; i < clients.length; ++i) {
 
 													if (p_stData.token === clients[i].token) {
 														currentClient = clients[i];
@@ -490,7 +490,7 @@
 										}
 										else {
 
-											var token = client.token;
+											let token = client.token;
 
 											Container.get('clients').delete(token).then(function() {
 
@@ -1356,9 +1356,9 @@
 
 											Container.get('childs').getAll().then(function(childs) {
 
-												var currentChild = false;
+												let currentChild = false;
 
-												for (var i = 0; i < childs.length; ++i) {
+												for (let i = 0; i < childs.length; ++i) {
 
 													if (data.token === childs[i].token) {
 														currentChild = childs[i];
