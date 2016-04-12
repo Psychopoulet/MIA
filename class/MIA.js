@@ -1329,6 +1329,9 @@
 										socket.removeAllListeners('media.video.played');
 										socket.removeAllListeners('media.video.downloaded');
 
+										socket.removeAllListeners('tts.error');
+										socket.removeAllListeners('tts.read');
+
 								}
 								catch (e) {
 									Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
@@ -1427,6 +1430,17 @@
 								.on('media.video.downloaded', function (data) {
 									Container.get('logs').log('media.video.downloaded');
 									clientssockets.emit('media.video.downloaded', data);
+								})
+
+								.on('tts.error', function (error) {
+									Container.get('logs').err('tts.error');
+									Container.get('logs').err(error);
+									clientssockets.emit('tts.error', error);
+								})
+								.on('tts.read', function (data) {
+									Container.get('logs').log('tts.read');
+									Container.get('logs').log(data);
+									clientssockets.emit('tts.read', data);
 								});
 
 							});

@@ -70,7 +70,8 @@ INSERT INTO users (login, password, email) VALUES
 
 INSERT INTO actionstypes (name, command) VALUES
 ('Jouer un son', 'media.sound.play'),
-('Jouer une vidéo', 'media.video.play');
+('Jouer une vidéo', 'media.video.play'),
+('Lire un texte', 'tts');
 
 INSERT INTO crons (id_user, name, timer) VALUES
 (1, 'Café !!', '00 00 16 * * 1-5'),
