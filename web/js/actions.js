@@ -23,6 +23,23 @@ app.service('$actions', ['$q', '$popup', function($q, $popup) {
 
 	};
 
+	this.getActionTypeByCommand = function(command) {
+
+		var result = null;
+
+			for (var i = 0; i < that.actionstypes; ++i) {
+
+				if (that.actionstypes[i].command == command) {
+					result = that.actionstypes[i].command;
+					break;
+				}
+
+			}
+
+		return result;
+
+	};
+
 	socket.on('actionstypes', function(actionstypes) {
 		that.actionstypes = actionstypes;
 	})

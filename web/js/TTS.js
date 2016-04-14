@@ -4,10 +4,6 @@ app.controller('ControllerTTS', ['$scope', '$actions', '$popup', function($scope
 
 	// attributes
 
-		// private
-
-			var tabActionsTypes = [];
-
 		// public
 
 			$scope.childs = [];
@@ -23,31 +19,14 @@ app.controller('ControllerTTS', ['$scope', '$actions', '$popup', function($scope
 		};
 
 		$scope.createAction = function (child, text) {
-
-			for (var i = 0; i < tabActionsTypes.length; ++i) {
-
-				if (tabActionsTypes[i].command == 'tts') {
-					$actions.add('Lire un texte', child, tabActionsTypes[i], text);
-					break;
-				}
-
-			}
-
+			$actions.add('Lire un texte', child, $actions.getActionTypeByCommand('tts'), text);
 		};
 
 	// constructor
 
 		// events
 
-			// actionstypes
-
-			socket.on('actionstypes', function(actionstypes) {
-				$scope.$apply(function() { tabActionsTypes = actionstypes; });
-			})
-
-			// childs
-
-		    .on('childs', function (childs) {
+			socket.on('childs', function (childs) {
 		        $scope.$apply(function () { $scope.childs = childs; });
 		    });
 
