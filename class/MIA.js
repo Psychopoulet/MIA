@@ -3,7 +3,7 @@
 	
 	const 	path = require('path'),
 			spawn = require('child_process').spawn,
-			cronjob = require('cron').CronJob; // https://github.com/ncb000gt/node-cron/blob/master/README.md
+			cronjob = require('cron').CronJob;
 		
 // module
 	
@@ -1499,27 +1499,12 @@
 										})
 
 								.loadAll(Container).then(function() {
-
-									// server http
-
-									Container.get('webserver').start().then(function() {
-
-										// server http socket
-
-										clientssockets.start().then(function() {
-
-											// server childs
-											
-											childssockets.start().then(resolve).catch(reject);
-												
-										})
-										.catch(reject);
-
-									})
-									.catch(reject);
-
-								})
-								.catch(reject);
+									return Container.get('webserver').start(); // server http
+								}).then(function() {
+									return clientssockets.start(); // server http socket
+								}).then(function() {
+									return childssockets.start(); // server childs
+								}).then(resolve).catch(reject);
 
 						}
 						catch (e) {

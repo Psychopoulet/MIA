@@ -60,87 +60,85 @@
 				dbFile = path.join(__dirname, 'database', 'MIA.sqlite3'),
 				createFile = path.join(__dirname, 'database', 'create.sql');
 
-			if (!fs.fileExists(createFile)) {
+			fs.pdirExists(createFile).then(function(exists) {
 
-				db = new sqlite3.Database(dbFile);
-
-				db.serialize(function() {
-					resolve(db);
-				});
-
-			}
-			else {
-
-				if (fs.fileExists(dbFile)) {
-					
+				if (!exists) {
 					db = new sqlite3.Database(dbFile);
-
-					db.serialize(function() {
-						resolve(db);
-					});
-					
+					db.serialize(function() { resolve(db); });
 				}
 				else {
 
-					db = new sqlite3.Database(dbFile);
+					fs.pdirExists(dbFile).then(function(exists) {
 
-					db.serialize(function() {
-						
-						fs.readFile(createFile, 'utf8', function (err, sql) {
+						if (exists) {
+							db = new sqlite3.Database(dbFile);
+							db.serialize(function() { resolve(db); });
+						}
+						else {
 
-							if (err) {
-								reject((err.message) ? err.message : err);
-							}
-							else {
+							db = new sqlite3.Database(dbFile);
 
-								let queries = [];
+							db.serialize(function() {
+								
+								fs.readFile(createFile, 'utf8', function (err, sql) {
 
-								sql.split(';').forEach(function(query) {
-
-									query = query.trim()
-												.replace(/--(.*)\s/g, "")
-												.replace(/\s/g, " ")
-												.replace(/  /g, " ");
-
-									if ('' != query) {
-										queries.push(query + ';');
-									}
-
-								});
-
-								function executeQueries(i) {
-
-									if (i >= queries.length) {
-										resolve(db);
+									if (err) {
+										reject((err.message) ? err.message : err);
 									}
 									else {
 
-										db.run(queries[i], [], function(err) {
+										let queries = [];
 
-											if (err) {
-												reject((err.message) ? err.message : err);
-											}
-											else {
-												executeQueries(i + 1);
+										sql.split(';').forEach(function(query) {
+
+											query = query.trim()
+														.replace(/--(.*)\s/g, "")
+														.replace(/\s/g, " ")
+														.replace(/  /g, " ");
+
+											if ('' != query) {
+												queries.push(query + ';');
 											}
 
 										});
 
+										function executeQueries(i) {
+
+											if (i >= queries.length) {
+												resolve(db);
+											}
+											else {
+
+												db.run(queries[i], [], function(err) {
+
+													if (err) {
+														reject((err.message) ? err.message : err);
+													}
+													else {
+														executeQueries(i + 1);
+													}
+
+												});
+
+											}
+
+										}
+
+										executeQueries(0);
+
 									}
+									
+								});
 
-								}
+							});
 
-								executeQueries(0);
+						}
 
-							}
-							
-						});
-
-					});
+					}).catch(reject);
 
 				}
 
-			}
+			}).catch(reject);
 
 		});
 

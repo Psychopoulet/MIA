@@ -80,25 +80,29 @@
 
 							try {
 
-								if (!fs.fileExists(p_sFilePath)) {
-									Container.get('logs').err('-- [HTTP server] The ' + p_sFilePath + ' file does not exist');
-									reject('-- [HTTP server] The ' + p_sFilePath + ' file does not exist');
-								}
-								else {
+								fs.pfileExists(p_sFilePath).then(function(exists) {
 
-									fs.readFile(p_sFilePath, 'utf8', function (err, data) {
+									if (!exists) {
+										Container.get('logs').err('-- [HTTP server] Le fichier ' + p_sFilePath + " n'existe pas");
+										reject('-- [HTTP server] Le fichier ' + p_sFilePath + " n'existe pas");
+									}
+									else {
 
-										if (err) {
-											reject(err);
-										}
-										else {
-											resolve(data);
-										}
+										fs.readFile(p_sFilePath, 'utf8', function (err, data) {
 
-									});
+											if (err) {
+												reject(err);
+											}
+											else {
+												resolve(data);
+											}
 
-								}
+										});
+
+									}
 								
+								}).catch(reject);
+
 							}
 							catch (e) {
 								reject((e.message) ? e.message : e);
@@ -123,22 +127,44 @@
 									}
 									else {
 
+										let i = files.length;
+
 										files.forEach(function (p_sFile) {
 
 											p_sFile = path.join(p_sDirectory, p_sFile);
 
-											if (fs.fileExists(p_sFile)) {
-												sResult += fs.readFileSync(p_sFile, 'utf8');
-											}
+											fs.pfileExists(p_sFile).then(function(exists) {
+
+												if (exists) {
+
+													fs.readFile(p_sFile, 'utf8', function (err, data) {
+
+														i--;
+
+														if (err) {
+															if (0 === i) { reject(err); }
+														}
+														else if (0 === i) {
+															resolve(sResult + data);
+														}
+														else {
+															sResult += data;
+														}
+
+													});
+
+												}
+												else if (0 === i) {
+													i--;
+													resolve(sResult);
+												}
+
+											}).catch(function(err) {
+												i--;
+												if (0 === i) { reject(err); }
+											});
 
 										});
-
-										if (bResult) {
-											resolve(sResult);
-										}
-										else {
-											reject(sResult);
-										}
 
 									}
 
@@ -163,7 +189,7 @@
 									resolve();
 								}
 								else if (!fs.mkdirp(path.dirname(m_sIndexBufferFile))) {
-									reject('Impossible to create the html file');
+									reject('Impossible de créer le fichier HTML.');
 								}
 								else {
 
@@ -318,7 +344,7 @@
 											res.sendFile(m_sPluginsJavascriptsBufferFile);
 										})
 										.catch(function() {
-											_sendJSResponse(res, 500, 'Impossible to buffer plugins\'s scripts')
+											_sendJSResponse(res, 500, 'Impossible de générer les scripts des plugins')
 										});
 
 									})
@@ -411,10 +437,10 @@
 								server.listen(nWebPort, function () {
 
 									if (Container.get('conf').get('ssl')) {
-										Container.get('logs').success('-- [HTTP server] with ssl started on port ' + nWebPort);
+										Container.get('logs').success('-- [HTTP server] avec SSL démarré sur le port ' + nWebPort);
 									}
 									else {
-										Container.get('logs').success('-- [HTTP server] started on port ' + nWebPort);
+										Container.get('logs').success('-- [HTTP server] démarré sur le port ' + nWebPort);
 									}
 
 									resolve();
