@@ -7,7 +7,140 @@
 			dns = require('dns'),
 			path = require('path'),
 			fs = require('simplefs');
-		
+
+// private
+
+	if (!fs.punlink) {
+
+		fs.punlink = function(file) {
+
+			return new Promise(function(resolve, reject) {
+
+				try {
+
+					fs.pfileExists(file).then(function(exists) {
+
+						if (!exists) {
+							resolve();
+						}
+						else {
+							
+							fs.unlink(file, function(err) {
+
+								if (err) {
+									reject((err.message) ? err.message : err);
+								}
+								else {
+									resolve();
+								}
+
+							});
+
+						}
+
+					}).catch(reject);
+
+				}
+				catch(e) {
+					reject(((e.message) ? e.message : e));
+				}
+
+			});
+
+		};
+
+	}
+
+	if (!fs.pwriteFile) {
+
+		fs.pwriteFile = function(file, message, options) {
+
+			return new Promise(function(resolve, reject) {
+
+				try {
+
+					fs.writeFile(file, message, (options) ? options : null, function(err) {
+
+						if (err) {
+							reject((err.message) ? err.message : err);
+						}
+						else {
+							resolve();
+						}
+
+					});
+
+				}
+				catch(e) {
+					reject(((e.message) ? e.message : e));
+				}
+
+			});
+
+		};
+
+	}
+
+	if (!fs.pappendFile) {
+
+		fs.pappendFile = function(file, message, options) {
+
+			return new Promise(function(resolve, reject) {
+
+				try {
+
+					fs.appendFile(file, message, (options) ? options : null, function(err) {
+
+						if (err) {
+							reject((err.message) ? err.message : err);
+						}
+						else {
+							resolve();
+						}
+
+					});
+
+				}
+				catch(e) {
+					reject(((e.message) ? e.message : e));
+				}
+
+			});
+
+		};
+
+	}
+
+	if (!fs.preadFile) {
+
+		fs.preadFile = function(file, options) {
+
+			return new Promise(function(resolve, reject) {
+
+				try {
+
+					fs.readFile(file, (options) ? options : null, function(err, data) {
+
+						if (err) {
+							reject((err.message) ? err.message : err);
+						}
+						else {
+							resolve(data);
+						}
+
+					});
+
+				}
+				catch(e) {
+					reject(((e.message) ? e.message : e));
+				}
+
+			});
+
+		};
+
+	}
+
 // module
 	
 	module.exports = function (Container) {
@@ -74,44 +207,6 @@
 
 				// files
 
-					function _readFile(p_sFilePath) {
-
-						return new Promise(function(resolve, reject) {
-
-							try {
-
-								fs.pfileExists(p_sFilePath).then(function(exists) {
-
-									if (!exists) {
-										Container.get('logs').err('-- [HTTP server] Le fichier ' + p_sFilePath + " n'existe pas");
-										reject('-- [HTTP server] Le fichier ' + p_sFilePath + " n'existe pas");
-									}
-									else {
-
-										fs.readFile(p_sFilePath, 'utf8', function (err, data) {
-
-											if (err) {
-												reject(err);
-											}
-											else {
-												resolve(data);
-											}
-
-										});
-
-									}
-								
-								}).catch(reject);
-
-							}
-							catch (e) {
-								reject((e.message) ? e.message : e);
-							}
-
-						});
-						
-					}
-					
 					function _readAllFiles(p_sDirectory) {
 
 						return new Promise(function(resolve, reject) {
@@ -144,11 +239,14 @@
 														if (err) {
 															if (0 === i) { reject(err); }
 														}
-														else if (0 === i) {
-															resolve(sResult + data);
-														}
 														else {
-															sResult += data;
+
+															sResult += data + "\r\n";
+
+															if (0 === i) {
+																resolve(sResult);
+															}
+
 														}
 
 													});
@@ -188,75 +286,83 @@
 								if (!Container.get('conf').get('debug') && m_bBuffersCreated) {
 									resolve();
 								}
-								else if (!fs.mkdirp(path.dirname(m_sIndexBufferFile))) {
-									reject('Impossible de créer le fichier HTML.');
-								}
 								else {
 
 									// on efface les vieilles versions
 
-									if (fs.fileExists(m_sIndexBufferFile)) {
-										fs.unlinkSync(m_sIndexBufferFile);
-									}
-
-									if (fs.fileExists(m_sPluginsJavascriptsBufferFile)) {
-										fs.unlinkSync(m_sPluginsJavascriptsBufferFile);
-									}
+									fs.pmkdirp(path.dirname(m_sIndexBufferFile)).then(function() {
+										return fs.punlink(m_sIndexBufferFile);
+									}).then(function() {
+										return fs.punlink(m_sPluginsJavascriptsBufferFile);
+									})
 
 									// on recréer les fichiers
 
-									fs.writeFileSync(m_sIndexBufferFile, '', 'utf8');
-									fs.writeFileSync(m_sPluginsJavascriptsBufferFile, '', 'utf8');
+									.then(function() {
+										return fs.pwriteFile(m_sIndexBufferFile, '', 'utf8');
+									}).then(function() {
+										return fs.pwriteFile(m_sPluginsJavascriptsBufferFile, '', 'utf8');
+									}).then(function() {
 
-									// on les rempli
+										// on les rempli
 
-									let sPluginsWidgets = '';
+										let sPluginsWidgets = '';
 
-									Container.get('plugins').plugins.forEach(function(plugin) {
+										Container.get('plugins').plugins.forEach(function(plugin) {
 
-										if (plugin.widget) {
+											if (plugin.widget) {
 
-											sPluginsWidgets += fs.readFileSync(plugin.widget, 'utf8')
-																.replace(/{{plugin.name}}/g, plugin.name)
-																.replace(/{{plugin.description}}/g, plugin.description)
-																.replace(/{{plugin.version}}/g, plugin.version);
+												sPluginsWidgets += fs.readFileSync(plugin.widget, 'utf8')
+																	.replace(/{{plugin.name}}/g, plugin.name)
+																	.replace(/{{plugin.description}}/g, plugin.description)
+																	.replace(/{{plugin.version}}/g, plugin.version);
 
-										}
+											}
 
-										if (plugin.javascripts && 0 < plugin.javascripts.length) {
+											if (plugin.javascripts && 0 < plugin.javascripts.length) {
 
-											plugin.javascripts.forEach(function(javascript) {
+												plugin.javascripts.forEach(function(javascript) {
 
-												fs.appendFileSync(
-													m_sPluginsJavascriptsBufferFile,
-													fs.readFileSync(javascript, 'utf8'),
+													fs.preadFile(javascript, 'utf8').then(function(data) {
+
+														fs.pappendFile(m_sPluginsJavascriptsBufferFile, data + "\r\n", 'utf8').then(function() {
+
+														}).catch(function(err) {
+
+														});
+
+													}).catch(function(err) {
+
+													});
+
+												});
+
+											}
+
+										});
+
+										fs.preadFile(path.join(m_sDirTemplates, 'index.html'), 'utf8').then(function (index) {
+
+											dns.lookup(os.hostname(), function (err, ip, fam) {
+
+												fs.pappendFile(
+													m_sIndexBufferFile,
+													index	.replace('{{ip}}', (err) ? '?.?.?.?' : ip)
+															.replace('{{widgets}}', sPluginsWidgets) + "\r\n",
 													'utf8'
-												);
+												).then(function() {
+
+													m_bBuffersCreated = true;
+													resolve();
+										
+												}).catch(reject);
 
 											});
 
-										}
+										})
+										.catch(reject);
 
-									});
-
-									_readFile(path.join(m_sDirTemplates, 'index.html')).then(function (index) {
-
-										dns.lookup(os.hostname(), function (err, ip, fam) {
-
-											fs.appendFileSync(
-												m_sIndexBufferFile,
-												index	.replace('{{ip}}', (err) ? '?.?.?.?' : ip)
-														.replace('{{widgets}}', sPluginsWidgets),
-												'utf8'
-											);
-
-											m_bBuffersCreated = true;
-											resolve();
-									
-										});
-
-									})
-									.catch(reject);
+									}).catch(reject);
 
 								}
 
