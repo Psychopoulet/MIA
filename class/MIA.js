@@ -1330,6 +1330,8 @@
 										socket.removeAllListeners('media.video.downloaded');
 
 										socket.removeAllListeners('tts.error');
+										socket.removeAllListeners('tts.defaultvoice');
+										socket.removeAllListeners('tts.voices');
 										socket.removeAllListeners('tts.read');
 
 								}
@@ -1437,10 +1439,18 @@
 									Container.get('logs').err(error);
 									clientssockets.emit('tts.error', error);
 								})
-								.on('tts.read', function (data) {
+								.on('tts.defaultvoice', function (defaultVoice) {
+									Container.get('logs').log('tts.defaultvoice');
+									clientssockets.emit('tts.defaultvoice', defaultVoice);
+								})
+								.on('tts.voices', function (voices) {
+									Container.get('logs').log('tts.voices');
+									clientssockets.emit('tts.voices', voices);
+								})
+								.on('tts.read', function (text) {
 									Container.get('logs').log('tts.read');
-									Container.get('logs').log(data);
-									clientssockets.emit('tts.read', data);
+									Container.get('logs').log(text);
+									clientssockets.emit('tts.read', text);
 								});
 
 							});
