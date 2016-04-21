@@ -26,8 +26,23 @@
 					padding-right: 10px;
 					padding-bottom: 5px;
 				}
-				.SimpleLogsList .SimpleLogsMessage {
+				.SimpleLogsList .SimpleLogsLine .SimpleLogsMessage {
 					padding-bottom: 5px;
+				}
+				.SimpleLogsList .SimpleLogsLine .SimpleLogsMessage.log {
+					color: black;
+				}
+				.SimpleLogsList .SimpleLogsLine .SimpleLogsMessage.info {
+					color: blue;
+				}
+				.SimpleLogsList .SimpleLogsLine .SimpleLogsMessage.success {
+					color: green;
+				}
+				.SimpleLogsList .SimpleLogsLine .SimpleLogsMessage.error {
+					color: red;
+				}
+				.SimpleLogsList .SimpleLogsLine .SimpleLogsMessage.warning {
+					color: orange;
 				}
 			</style>
 			
@@ -61,9 +76,9 @@
 					<li class="nav-item">
 						<a id="navLogs" href="#" class="nav-link"><span class="fa fa-list"></span> Logs</a>
 					</li>
-					<li class="nav-item">
+					<!--<li class="nav-item">
 						<a id="navTTS" href="#" class="nav-link"><span class="fa fa-microphone"></span> TTS</a>
-					</li>
+					</li>-->
 				</ul>
 				
 			</div>
