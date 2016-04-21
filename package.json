@@ -21,7 +21,7 @@
     "simpleconfig": "^1.2.5",
     "simplelogs": "^2.0.1",
     "simplessl": "^1.3.2",
-    "simplepluginsmanager": "^2.0.6"
+    "simplepluginsmanager": "^2.1.0"
 
   },
   "devDependencies": {},
