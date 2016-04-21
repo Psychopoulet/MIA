@@ -3,7 +3,7 @@
 	
 	const 	path = require('path'),
 			spawn = require('child_process').spawn,
-			cronjob = require('cron').CronJob; // https://github.com/ncb000gt/node-cron/blob/master/README.md
+			cronjob = require('cron').CronJob;
 		
 // module
 	
@@ -82,9 +82,9 @@
 
 								clientssockets.getSockets().forEach(function(socket) {
 
-									var isAllowed = false;
+									let isAllowed = false;
 
-									for (var i = 0; i < clients.length; ++i) {
+									for (let i = 0; i < clients.length; ++i) {
 
 										if (socket.token == clients[i].token) {
 											clients[i].connected = true;
@@ -142,9 +142,9 @@
 
 								childssockets.getSockets().forEach(function(socket) {
 
-									var isAllowed = false;
+									let isAllowed = false;
 
-									for (var i = 0; i < childs.length; ++i) {
+									for (let i = 0; i < childs.length; ++i) {
 
 										if (socket.token == childs[i].token) {
 											childs[i].connected = true;
@@ -287,9 +287,9 @@
 
 											Container.get('clients').getAll().then(function(clients) {
 
-												var currentClient = false;
+												let currentClient = false;
 
-												for (var i = 0; i < clients.length; ++i) {
+												for (let i = 0; i < clients.length; ++i) {
 
 													if (p_stData.token === clients[i].token) {
 														currentClient = clients[i];
@@ -490,7 +490,7 @@
 										}
 										else {
 
-											var token = client.token;
+											let token = client.token;
 
 											Container.get('clients').delete(token).then(function() {
 
@@ -1065,7 +1065,7 @@
 
 												Container.get('users').update(user).then(function() {
 
-													socket.emit('user.update.login');
+													socket.emit('user.update.login', login);
 													_sendUsers();
 
 												})
@@ -1329,6 +1329,11 @@
 										socket.removeAllListeners('media.video.played');
 										socket.removeAllListeners('media.video.downloaded');
 
+										socket.removeAllListeners('tts.error');
+										socket.removeAllListeners('tts.defaultvoice');
+										socket.removeAllListeners('tts.voices');
+										socket.removeAllListeners('tts.read');
+
 								}
 								catch (e) {
 									Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
@@ -1356,9 +1361,9 @@
 
 											Container.get('childs').getAll().then(function(childs) {
 
-												var currentChild = false;
+												let currentChild = false;
 
-												for (var i = 0; i < childs.length; ++i) {
+												for (let i = 0; i < childs.length; ++i) {
 
 													if (data.token === childs[i].token) {
 														currentChild = childs[i];
@@ -1427,6 +1432,25 @@
 								.on('media.video.downloaded', function (data) {
 									Container.get('logs').log('media.video.downloaded');
 									clientssockets.emit('media.video.downloaded', data);
+								})
+
+								.on('tts.error', function (error) {
+									Container.get('logs').err('tts.error');
+									Container.get('logs').err(error);
+									clientssockets.emit('tts.error', error);
+								})
+								.on('tts.defaultvoice', function (defaultVoice) {
+									Container.get('logs').log('tts.defaultvoice');
+									clientssockets.emit('tts.defaultvoice', defaultVoice);
+								})
+								.on('tts.voices', function (voices) {
+									Container.get('logs').log('tts.voices');
+									clientssockets.emit('tts.voices', voices);
+								})
+								.on('tts.read', function (text) {
+									Container.get('logs').log('tts.read');
+									Container.get('logs').log(text);
+									clientssockets.emit('tts.read', text);
 								});
 
 							});
@@ -1455,6 +1479,9 @@
 										.on('loaded', function(plugin) {
 											Container.get('logs').success("-- [plugins] : " + plugin.name + " (v" + plugin.version + ") loaded");
 										})
+										.on('allloaded', function() {
+											Container.get('logs').success("-- [plugins] : all loaded");
+										})
 										.on('unloaded', function(plugin) {
 											Container.get('logs').info("-- [plugins] : " + plugin.name + "' (v" + plugin.version + ") unloaded");
 										})
@@ -1472,27 +1499,12 @@
 										})
 
 								.loadAll(Container).then(function() {
-
-									// server http
-
-									Container.get('webserver').start().then(function() {
-
-										// server http socket
-
-										clientssockets.start().then(function() {
-
-											// server childs
-											
-											childssockets.start().then(resolve).catch(reject);
-												
-										})
-										.catch(reject);
-
-									})
-									.catch(reject);
-
-								})
-								.catch(reject);
+									return Container.get('webserver').start(); // server http
+								}).then(function() {
+									return clientssockets.start(); // server http socket
+								}).then(function() {
+									return childssockets.start(); // server childs
+								}).then(resolve).catch(reject);
 
 						}
 						catch (e) {

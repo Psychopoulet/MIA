@@ -75,7 +75,7 @@
 				
 				this.emitTo = function (token, order, data) {
 
-					for (var key in m_clSocketServer.sockets.sockets) {
+					for (let key in m_clSocketServer.sockets.sockets) {
 
 						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
 							m_clSocketServer.sockets.sockets[key].emit(order, data);
@@ -90,7 +90,7 @@
 
 				this.setTokenToSocketById = function (id, token) {
 
-					for (var key in m_clSocketServer.sockets.sockets) {
+					for (let key in m_clSocketServer.sockets.sockets) {
 
 						if (m_clSocketServer.sockets.sockets[key].id === id) {
 							m_clSocketServer.sockets.sockets[key].token = token;
@@ -105,7 +105,7 @@
 				
 				this.disconnect = function (token) {
 
-					for (var key in m_clSocketServer.sockets.sockets) {
+					for (let key in m_clSocketServer.sockets.sockets) {
 
 						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
 							m_clSocketServer.sockets.sockets[key].disconnect();
@@ -120,9 +120,9 @@
 				
 				this.getSockets = function () {
 
-					var tabResult = [];
+					let tabResult = [];
 
-						for (var key in m_clSocketServer.sockets.sockets) {
+						for (let key in m_clSocketServer.sockets.sockets) {
 							tabResult.push(m_clSocketServer.sockets.sockets[key]);
 						}
 
@@ -132,9 +132,9 @@
 				
 				this.getSocket = function (token) {
 
-					var result = null;
+					let result = null;
 
-						for (var key in m_clSocketServer.sockets.sockets) {
+						for (let key in m_clSocketServer.sockets.sockets) {
 
 							if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
 								result = m_clSocketServer.sockets.sockets[key];

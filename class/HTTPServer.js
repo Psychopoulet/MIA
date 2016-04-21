@@ -7,7 +7,9 @@
 			dns = require('dns'),
 			path = require('path'),
 			fs = require('simplefs');
-		
+
+// private
+
 // module
 	
 	module.exports = function (Container) {
@@ -74,75 +76,21 @@
 
 				// files
 
-					function _readFile(p_sFilePath) {
+					function _readAllFiles(dir) {
 
 						return new Promise(function(resolve, reject) {
 
 							try {
 
-								if (!fs.fileExists(p_sFilePath)) {
-									Container.get('logs').err('-- [HTTP server] The ' + p_sFilePath + ' file does not exist');
-									reject('-- [HTTP server] The ' + p_sFilePath + ' file does not exist');
-								}
-								else {
+								fs.readdirProm(dir).then(function (files) {
 
-									fs.readFile(p_sFilePath, 'utf8', function (err, data) {
-
-										if (err) {
-											reject(err);
-										}
-										else {
-											resolve(data);
-										}
-
+									files.forEach(function(file, i) {
+										files[i] = path.join(dir, file);
 									});
 
-								}
-								
-							}
-							catch (e) {
-								reject((e.message) ? e.message : e);
-							}
+									return fs.concatFilesProm(files, 'utf8', "\r\n");
 
-						});
-						
-					}
-					
-					function _readAllFiles(p_sDirectory) {
-
-						return new Promise(function(resolve, reject) {
-
-							try {
-
-								fs.readdir(p_sDirectory, function (err, files) {
-
-									var bResult = true, sResult = '';
-
-									if (err) {
-										reject(err);
-									}
-									else {
-
-										files.forEach(function (p_sFile) {
-
-											p_sFile = path.join(p_sDirectory, p_sFile);
-
-											if (fs.fileExists(p_sFile)) {
-												sResult += fs.readFileSync(p_sFile, 'utf8');
-											}
-
-										});
-
-										if (bResult) {
-											resolve(sResult);
-										}
-										else {
-											reject(sResult);
-										}
-
-									}
-
-								});
+								}).then(resolve).catch(reject);
 
 							}
 							catch (e) {
@@ -162,75 +110,110 @@
 								if (!Container.get('conf').get('debug') && m_bBuffersCreated) {
 									resolve();
 								}
-								else if (!fs.mkdirp(path.dirname(m_sIndexBufferFile))) {
-									reject('Impossible to create the html file');
-								}
 								else {
 
 									// on efface les vieilles versions
 
-									if (fs.fileExists(m_sIndexBufferFile)) {
-										fs.unlinkSync(m_sIndexBufferFile);
-									}
-
-									if (fs.fileExists(m_sPluginsJavascriptsBufferFile)) {
-										fs.unlinkSync(m_sPluginsJavascriptsBufferFile);
-									}
+									fs.mkdirpProm(path.dirname(m_sIndexBufferFile)).then(function() {
+										return fs.unlinkProm(m_sIndexBufferFile);
+									}).then(function() {
+										return fs.unlinkProm(m_sPluginsJavascriptsBufferFile);
+									})
 
 									// on recréer les fichiers
 
-									fs.writeFileSync(m_sIndexBufferFile, '', 'utf8');
-									fs.writeFileSync(m_sPluginsJavascriptsBufferFile, '', 'utf8');
+									.then(function() {
+										return fs.writeFileProm(m_sIndexBufferFile, '', 'utf8');
+									}).then(function() {
+										return fs.writeFileProm(m_sPluginsJavascriptsBufferFile, '', 'utf8');
+									}).then(function() {
 
-									// on les rempli
+										// on les rempli
 
-									var sPluginsWidgets = '';
+										let plugins = Container.get('plugins').plugins, sPluginsWidgets = '';
 
-									Container.get('plugins').plugins.forEach(function(plugin) {
+										function _bufferPluginWidget(plugin) {
 
-										if (plugin.widget) {
+											return new Promise(function(resolve, reject) {
 
-											sPluginsWidgets += fs.readFileSync(plugin.widget, 'utf8')
-																.replace(/{{plugin.name}}/g, plugin.name)
-																.replace(/{{plugin.description}}/g, plugin.description)
-																.replace(/{{plugin.version}}/g, plugin.version);
+												if (!plugin.widget) {
+													resolve('');
+												}
+												else {
+
+													fs.readFileProm(plugin.widget, 'utf8').then(function(content) {
+
+														resolve(content.replace(/{{plugin.name}}/g, plugin.name)
+																		.replace(/{{plugin.description}}/g, plugin.description)
+																		.replace(/{{plugin.version}}/g, plugin.version));
+
+													}).catch(reject);
+
+												}
+												
+											});
 
 										}
 
-										if (plugin.javascripts && 0 < plugin.javascripts.length) {
+										function _bufferPlugin(i) {
 
-											plugin.javascripts.forEach(function(javascript) {
+											return new Promise(function(resolve, reject) {
 
-												fs.appendFileSync(
-													m_sPluginsJavascriptsBufferFile,
-													fs.readFileSync(javascript, 'utf8'),
-													'utf8'
-												);
+												if (i >= plugins.length) {
+													resolve();
+												}
+												else {
+
+													_bufferPluginWidget(plugins[i]).then(function(widget) {
+
+														sPluginsWidgets += widget;
+
+														if (plugins[i].javascripts && 0 < plugins[i].javascripts.length) {
+
+															fs.concatFilesProm(plugins[i].javascripts, 'utf8', "\r\n").then(function(scripts) {
+																return fs.appendFileProm(m_sPluginsJavascriptsBufferFile, scripts, 'utf8');
+															}).then(function() {
+																return _bufferPlugin(i+1);
+															}).then(resolve).catch(reject);
+
+														}
+														else {
+															_bufferPlugin(i+1).then(resolve).catch(reject);
+														}
+
+													}).catch(reject);
+
+												}
 
 											});
 
 										}
 
-									});
+										_bufferPlugin(0).then(function() {
 
-									_readFile(path.join(m_sDirTemplates, 'index.html')).then(function (index) {
+											return fs.readFileProm(path.join(m_sDirTemplates, 'index.html'), 'utf8').then(function (index) {
 
-										dns.lookup(os.hostname(), function (err, ip, fam) {
+												dns.lookup(os.hostname(), function (err, ip, fam) {
 
-											fs.appendFileSync(
-												m_sIndexBufferFile,
-												index	.replace('{{ip}}', (err) ? '?.?.?.?' : ip)
-														.replace('{{widgets}}', sPluginsWidgets),
-												'utf8'
-											);
+													fs.appendFileProm(
+														m_sIndexBufferFile,
+														index	.replace('{{ip}}', (err) ? '?.?.?.?' : ip)
+																.replace('{{widgets}}', sPluginsWidgets) + "\r\n",
+														'utf8'
+													).then(function() {
 
-											m_bBuffersCreated = true;
-											resolve();
-									
-										});
+														m_bBuffersCreated = true;
+														resolve();
+											
+													}).catch(reject);
 
-									})
-									.catch(reject);
+												});
+
+											});
+
+										}).catch(reject);
+
+									}).catch(reject);
 
 								}
 
@@ -247,7 +230,7 @@
 
 						return new Promise(function(resolve, reject) {
 
-							var sDirSSL = path.join(__dirname, '..', 'ssl');
+							let sDirSSL = path.join(__dirname, '..', 'ssl');
 
 							try {
 
@@ -293,7 +276,7 @@
 
 					return new Promise(function(resolve, reject) {
 
-						var nWebPort = Container.get('conf').get('webport');
+						let nWebPort = Container.get('conf').get('webport');
 
 						try {
 
@@ -313,14 +296,7 @@
 								// js
 
 									.get('/js/plugins.js', function (req, res) {
-
-										_createBuffers().then(function() {
-											res.sendFile(m_sPluginsJavascriptsBufferFile);
-										})
-										.catch(function() {
-											_sendJSResponse(res, 500, 'Impossible to buffer plugins\'s scripts')
-										});
-
+										res.sendFile(m_sPluginsJavascriptsBufferFile);
 									})
 									.get('/js/children.js', function (req, res) {
 
@@ -408,13 +384,15 @@
 										_404(req, res);
 									});
 
+								server.timeout = 2 * 1000;
+
 								server.listen(nWebPort, function () {
 
 									if (Container.get('conf').get('ssl')) {
-										Container.get('logs').success('-- [HTTP server] with ssl started on port ' + nWebPort);
+										Container.get('logs').success('-- [HTTP server] avec SSL démarré sur le port ' + nWebPort);
 									}
 									else {
-										Container.get('logs').success('-- [HTTP server] started on port ' + nWebPort);
+										Container.get('logs').success('-- [HTTP server] démarré sur le port ' + nWebPort);
 									}
 
 									resolve();

@@ -9,36 +9,9 @@ module.exports = class DBCronsActions {
 		this.db = db;
 	}
 
-	create () {
-
-		var that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.run(
-				"CREATE TABLE IF NOT EXISTS actions_crons (" +
-					" id_action INTEGER NOT NULL," +
-					" id_cron INTEGER NOT NULL," +
-					" FOREIGN KEY(id_action) REFERENCES actions(id) ON DELETE CASCADE ON UPDATE CASCADE," +
-					" FOREIGN KEY(id_cron) REFERENCES crons(id) ON DELETE CASCADE ON UPDATE CASCADE" +
-			");", [], function(err) {
-
-				if (err) {
-					reject('(create table actions_crons) ' + (err.message) ? err.message : err);
-				}
-				else {
-					that.getAll().then(resolve).catch(reject);
-				}
-
-			});
-
-		});
-
-	}
-
 	link (cron, action) {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -58,9 +31,9 @@ module.exports = class DBCronsActions {
 
 				that.getAll().then(function(links) {
 
-					var bFound = false;
+					let bFound = false;
 
-					for (var i = 0; i < links.length; ++i) {
+					for (let i = 0; i < links.length; ++i) {
 
 						if (links[i].cron.id == cron.id && links[i].action.id == action.id) {
 							bFound = true;
@@ -101,11 +74,11 @@ module.exports = class DBCronsActions {
 
 	getAll() {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
-			var sSelectQuery = "" +
+			let sSelectQuery = "" +
 			" SELECT" +
 
 				" crons.id AS cron_id," +
@@ -155,7 +128,7 @@ module.exports = class DBCronsActions {
 
 	unlink (cron, action) {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 

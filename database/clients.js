@@ -58,39 +58,9 @@ module.exports = class DBClients {
 		this.db = db;
 	}
 
-	create () {
-
-		var that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.run(
-				"CREATE TABLE IF NOT EXISTS clients (" +
-					" id INTEGER PRIMARY KEY AUTOINCREMENT," +
-					" id_user INTEGER," +
-					" id_status INTEGER," +
-					" token VARCHAR(100) NOT NULL UNIQUE," +
-					" name VARCHAR(50) NOT NULL," +
-					" FOREIGN KEY(id_user) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE," +
-					" FOREIGN KEY(id_status) REFERENCES status(id) ON DELETE CASCADE ON UPDATE CASCADE" +
-			");", [], function(err) {
-
-				if (err) {
-					reject('(create table clients) ' + (err.message) ? err.message : err);
-				}
-				else {
-					that.getAll().then(resolve).catch(reject);
-				}
-
-			});
-
-		});
-
-	}
-
 	add (client) {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -141,7 +111,7 @@ module.exports = class DBClients {
 
 	lastInserted () {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -162,7 +132,7 @@ module.exports = class DBClients {
 
 	getAll () {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -192,15 +162,15 @@ module.exports = class DBClients {
 
 	getOneByToken (token) {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
 			that.getAll().then(function(clients) {
 
-				var stResult;
+				let stResult;
 
-				for (var i = 0; i < clients.length; ++i) {
+				for (let i = 0; i < clients.length; ++i) {
 
 					if (clients[i].token === token) {
 						stResult = clients[i];
@@ -225,7 +195,7 @@ module.exports = class DBClients {
 
 	rename (token, name) {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -246,7 +216,7 @@ module.exports = class DBClients {
 
 	delete (token) {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 

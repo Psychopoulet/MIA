@@ -27,7 +27,7 @@
 
 					return new Promise(function(resolve, reject) {
 
-						var sDirSSL = path.join(__dirname, '..', 'ssl')
+						let sDirSSL = path.join(__dirname, '..', 'ssl')
 
 						try {
 
@@ -43,7 +43,7 @@
 									path.join(sDirSSL, 'server.crt')
 								).then(function(keys) {
 
-									var server = require('https').createServer({
+									let server = require('https').createServer({
 										key: keys.privateKey,
 										cert: keys.certificate
 									});
@@ -122,7 +122,7 @@
 				
 				this.emitTo = function (p_sToken, p_sOrder, p_vData) {
 
-					for (var key in m_clSocketServer.sockets.sockets) {
+					for (let key in m_clSocketServer.sockets.sockets) {
 
 						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === p_sToken) {
 							m_clSocketServer.sockets.sockets[key].emit(p_sOrder, p_vData);
@@ -137,7 +137,7 @@
 				
 				this.setTokenToSocketById = function (p_sId, p_sToken) {
 
-					for (var key in m_clSocketServer.sockets.sockets) {
+					for (let key in m_clSocketServer.sockets.sockets) {
 
 						if (m_clSocketServer.sockets.sockets[key].id === p_sId) {
 							m_clSocketServer.sockets.sockets[key].token = p_sToken;
@@ -152,7 +152,7 @@
 				
 				this.disconnect = function (p_sToken) {
 
-					for (var key in m_clSocketServer.sockets.sockets) {
+					for (let key in m_clSocketServer.sockets.sockets) {
 
 						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === p_sToken) {
 							m_clSocketServer.sockets.sockets[key].disconnect();
@@ -167,9 +167,9 @@
 				
 				this.getSockets = function () {
 
-					var tabResult = [];
+					let tabResult = [];
 
-						for (var key in m_clSocketServer.sockets.sockets) {
+						for (let key in m_clSocketServer.sockets.sockets) {
 							tabResult.push(m_clSocketServer.sockets.sockets[key]);
 						}
 
@@ -179,9 +179,9 @@
 				
 				this.getSocket = function (p_sToken) {
 
-					var result = null;
+					let result = null;
 
-						for (var key in m_clSocketServer.sockets.sockets) {
+						for (let key in m_clSocketServer.sockets.sockets) {
 
 							if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === p_sToken) {
 								result = m_clSocketServer.sockets.sockets[key];

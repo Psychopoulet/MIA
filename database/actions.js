@@ -72,41 +72,9 @@ module.exports = class DBActions {
 		this.db = db;
 	}
 
-	create () {
-
-		var that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.run(
-				"CREATE TABLE IF NOT EXISTS actions (" +
-					" id INTEGER PRIMARY KEY AUTOINCREMENT," +
-					" id_user INTEGER NOT NULL," +
-					" id_child INTEGER DEFAULT NULL," +
-					" id_type INTEGER NOT NULL," +
-					" name VARCHAR(50) NOT NULL," +
-					" params VARCHAR(150) NOT NULL," +
-					" FOREIGN KEY(id_user) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE," +
-					" FOREIGN KEY(id_child) REFERENCES childs(id) ON DELETE CASCADE ON UPDATE CASCADE," +
-					" FOREIGN KEY(id_type) REFERENCES actionstypes(id) ON DELETE CASCADE ON UPDATE CASCADE" +
-			");", [], function(err) {
-
-				if (err) {
-					reject('(create table actions) ' + (err.message) ? err.message : err);
-				}
-				else {
-					that.getAll().then(resolve).catch(reject);
-				}
-
-			});
-
-		});
-
-	}
-
 	add (action) {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -162,7 +130,7 @@ module.exports = class DBActions {
 
 	lastInserted() {
 
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -183,7 +151,7 @@ module.exports = class DBActions {
 
 	getAll() {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
@@ -213,11 +181,11 @@ module.exports = class DBActions {
 
 	getAllByCron(cron) {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
-			var query;
+			let query;
 
 			if (!cron) {
 				reject('Aucun cron renseigné.');
@@ -258,15 +226,15 @@ module.exports = class DBActions {
 
 	getOneById (id) {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
 			that.getAll().then(function(actions) {
 
-				var stResult;
+				let stResult;
 
-				for (var i = 0; i < actions.length; ++i) {
+				for (let i = 0; i < actions.length; ++i) {
 
 					if (actions[i].id === id) {
 						stResult = actions[i];
@@ -291,7 +259,7 @@ module.exports = class DBActions {
 
 	delete (action) {
 		
-		var that = this;
+		let that = this;
 
 		return new Promise(function(resolve, reject) {
 
