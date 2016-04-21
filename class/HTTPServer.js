@@ -10,137 +10,6 @@
 
 // private
 
-	if (!fs.punlink) {
-
-		fs.punlink = function(file) {
-
-			return new Promise(function(resolve, reject) {
-
-				try {
-
-					fs.pfileExists(file).then(function(exists) {
-
-						if (!exists) {
-							resolve();
-						}
-						else {
-							
-							fs.unlink(file, function(err) {
-
-								if (err) {
-									reject((err.message) ? err.message : err);
-								}
-								else {
-									resolve();
-								}
-
-							});
-
-						}
-
-					}).catch(reject);
-
-				}
-				catch(e) {
-					reject(((e.message) ? e.message : e));
-				}
-
-			});
-
-		};
-
-	}
-
-	if (!fs.pwriteFile) {
-
-		fs.pwriteFile = function(file, message, options) {
-
-			return new Promise(function(resolve, reject) {
-
-				try {
-
-					fs.writeFile(file, message, (options) ? options : null, function(err) {
-
-						if (err) {
-							reject((err.message) ? err.message : err);
-						}
-						else {
-							resolve();
-						}
-
-					});
-
-				}
-				catch(e) {
-					reject(((e.message) ? e.message : e));
-				}
-
-			});
-
-		};
-
-	}
-
-	if (!fs.pappendFile) {
-
-		fs.pappendFile = function(file, message, options) {
-
-			return new Promise(function(resolve, reject) {
-
-				try {
-
-					fs.appendFile(file, message, (options) ? options : null, function(err) {
-
-						if (err) {
-							reject((err.message) ? err.message : err);
-						}
-						else {
-							resolve();
-						}
-
-					});
-
-				}
-				catch(e) {
-					reject(((e.message) ? e.message : e));
-				}
-
-			});
-
-		};
-
-	}
-
-	if (!fs.preadFile) {
-
-		fs.preadFile = function(file, options) {
-
-			return new Promise(function(resolve, reject) {
-
-				try {
-
-					fs.readFile(file, (options) ? options : null, function(err, data) {
-
-						if (err) {
-							reject((err.message) ? err.message : err);
-						}
-						else {
-							resolve(data);
-						}
-
-					});
-
-				}
-				catch(e) {
-					reject(((e.message) ? e.message : e));
-				}
-
-			});
-
-		};
-
-	}
-
 // module
 	
 	module.exports = function (Container) {
@@ -207,66 +76,21 @@
 
 				// files
 
-					function _readAllFiles(p_sDirectory) {
+					function _readAllFiles(dir) {
 
 						return new Promise(function(resolve, reject) {
 
 							try {
 
-								fs.readdir(p_sDirectory, function (err, files) {
+								fs.readdirProm(dir).then(function (files) {
 
-									let bResult = true, sResult = '';
+									files.forEach(function(file, i) {
+										files[i] = path.join(dir, file);
+									});
 
-									if (err) {
-										reject(err);
-									}
-									else {
+									return fs.concatFilesProm(files, 'utf8', "\r\n");
 
-										let i = files.length;
-
-										files.forEach(function (p_sFile) {
-
-											p_sFile = path.join(p_sDirectory, p_sFile);
-
-											fs.pfileExists(p_sFile).then(function(exists) {
-
-												if (exists) {
-
-													fs.readFile(p_sFile, 'utf8', function (err, data) {
-
-														i--;
-
-														if (err) {
-															if (0 === i) { reject(err); }
-														}
-														else {
-
-															sResult += data + "\r\n";
-
-															if (0 === i) {
-																resolve(sResult);
-															}
-
-														}
-
-													});
-
-												}
-												else if (0 === i) {
-													i--;
-													resolve(sResult);
-												}
-
-											}).catch(function(err) {
-												i--;
-												if (0 === i) { reject(err); }
-											});
-
-										});
-
-									}
-
-								});
+								}).then(resolve).catch(reject);
 
 							}
 							catch (e) {
@@ -290,77 +114,104 @@
 
 									// on efface les vieilles versions
 
-									fs.pmkdirp(path.dirname(m_sIndexBufferFile)).then(function() {
-										return fs.punlink(m_sIndexBufferFile);
+									fs.mkdirpProm(path.dirname(m_sIndexBufferFile)).then(function() {
+										return fs.unlinkProm(m_sIndexBufferFile);
 									}).then(function() {
-										return fs.punlink(m_sPluginsJavascriptsBufferFile);
+										return fs.unlinkProm(m_sPluginsJavascriptsBufferFile);
 									})
 
 									// on recréer les fichiers
 
 									.then(function() {
-										return fs.pwriteFile(m_sIndexBufferFile, '', 'utf8');
+										return fs.writeFileProm(m_sIndexBufferFile, '', 'utf8');
 									}).then(function() {
-										return fs.pwriteFile(m_sPluginsJavascriptsBufferFile, '', 'utf8');
+										return fs.writeFileProm(m_sPluginsJavascriptsBufferFile, '', 'utf8');
 									}).then(function() {
 
 										// on les rempli
 
-										let sPluginsWidgets = '';
+										let plugins = Container.get('plugins').plugins, sPluginsWidgets = '';
 
-										Container.get('plugins').plugins.forEach(function(plugin) {
+										function _bufferPluginWidget(plugin) {
 
-											if (plugin.widget) {
+											return new Promise(function(resolve, reject) {
 
-												sPluginsWidgets += fs.readFileSync(plugin.widget, 'utf8')
-																	.replace(/{{plugin.name}}/g, plugin.name)
-																	.replace(/{{plugin.description}}/g, plugin.description)
-																	.replace(/{{plugin.version}}/g, plugin.version);
+												if (!plugin.widget) {
+													resolve('');
+												}
+												else {
 
-											}
+													fs.readFileProm(plugin.widget, 'utf8').then(function(content) {
 
-											if (plugin.javascripts && 0 < plugin.javascripts.length) {
+														resolve(content.replace(/{{plugin.name}}/g, plugin.name)
+																		.replace(/{{plugin.description}}/g, plugin.description)
+																		.replace(/{{plugin.version}}/g, plugin.version));
 
-												plugin.javascripts.forEach(function(javascript) {
+													}).catch(reject);
 
-													fs.preadFile(javascript, 'utf8').then(function(data) {
+												}
+												
+											});
 
-														fs.pappendFile(m_sPluginsJavascriptsBufferFile, data + "\r\n", 'utf8').then(function() {
+										}
 
-														}).catch(function(err) {
+										function _bufferPlugin(i) {
 
-														});
+											return new Promise(function(resolve, reject) {
 
-													}).catch(function(err) {
-
-													});
-
-												});
-
-											}
-
-										});
-
-										fs.preadFile(path.join(m_sDirTemplates, 'index.html'), 'utf8').then(function (index) {
-
-											dns.lookup(os.hostname(), function (err, ip, fam) {
-
-												fs.pappendFile(
-													m_sIndexBufferFile,
-													index	.replace('{{ip}}', (err) ? '?.?.?.?' : ip)
-															.replace('{{widgets}}', sPluginsWidgets) + "\r\n",
-													'utf8'
-												).then(function() {
-
-													m_bBuffersCreated = true;
+												if (i >= plugins.length) {
 													resolve();
-										
-												}).catch(reject);
+												}
+												else {
+
+													_bufferPluginWidget(plugins[i]).then(function(widget) {
+
+														sPluginsWidgets += widget;
+
+														if (plugins[i].javascripts && 0 < plugins[i].javascripts.length) {
+
+															fs.concatFilesProm(plugins[i].javascripts, 'utf8', "\r\n").then(function(scripts) {
+																return fs.appendFileProm(m_sPluginsJavascriptsBufferFile, scripts, 'utf8');
+															}).then(function() {
+																return _bufferPlugin(i+1);
+															}).then(resolve).catch(reject);
+
+														}
+														else {
+															_bufferPlugin(i+1).then(resolve).catch(reject);
+														}
+
+													}).catch(reject);
+
+												}
 
 											});
 
-										})
-										.catch(reject);
+										}
+
+										_bufferPlugin(0).then(function() {
+
+											return fs.readFileProm(path.join(m_sDirTemplates, 'index.html'), 'utf8').then(function (index) {
+
+												dns.lookup(os.hostname(), function (err, ip, fam) {
+
+													fs.appendFileProm(
+														m_sIndexBufferFile,
+														index	.replace('{{ip}}', (err) ? '?.?.?.?' : ip)
+																.replace('{{widgets}}', sPluginsWidgets) + "\r\n",
+														'utf8'
+													).then(function() {
+
+														m_bBuffersCreated = true;
+														resolve();
+											
+													}).catch(reject);
+
+												});
+
+											});
+
+										}).catch(reject);
 
 									}).catch(reject);
 
@@ -445,14 +296,7 @@
 								// js
 
 									.get('/js/plugins.js', function (req, res) {
-
-										_createBuffers().then(function() {
-											res.sendFile(m_sPluginsJavascriptsBufferFile);
-										})
-										.catch(function() {
-											_sendJSResponse(res, 500, 'Impossible de générer les scripts des plugins')
-										});
-
+										res.sendFile(m_sPluginsJavascriptsBufferFile);
 									})
 									.get('/js/children.js', function (req, res) {
 
@@ -539,6 +383,8 @@
 									.use(function (req, res) {
 										_404(req, res);
 									});
+
+								server.timeout = 2 * 1000;
 
 								server.listen(nWebPort, function () {
 

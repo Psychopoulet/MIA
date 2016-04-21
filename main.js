@@ -43,10 +43,7 @@
 
 			}
 
-			Container.get('conf').load().then(resolve)
-			.catch(function(e) {
-				reject((e.message) ? e.message : e);
-			});
+			Container.get('conf').load().then(resolve).catch(reject);
 
 		});
 
@@ -60,7 +57,7 @@
 				dbFile = path.join(__dirname, 'database', 'MIA.sqlite3'),
 				createFile = path.join(__dirname, 'database', 'create.sql');
 
-			fs.pdirExists(createFile).then(function(exists) {
+			fs.isDirectoryProm(createFile).then(function(exists) {
 
 				if (!exists) {
 					db = new sqlite3.Database(dbFile);
@@ -68,7 +65,7 @@
 				}
 				else {
 
-					fs.pdirExists(dbFile).then(function(exists) {
+					fs.isDirectoryProm(dbFile).then(function(exists) {
 
 						if (exists) {
 							db = new sqlite3.Database(dbFile);
@@ -80,55 +77,48 @@
 
 							db.serialize(function() {
 								
-								fs.readFile(createFile, 'utf8', function (err, sql) {
+								fs.readFileProm(createFile, 'utf8').then(function (sql) {
 
-									if (err) {
-										reject((err.message) ? err.message : err);
-									}
-									else {
+									let queries = [];
 
-										let queries = [];
+									sql.split(';').forEach(function(query) {
 
-										sql.split(';').forEach(function(query) {
+										query = query.trim()
+													.replace(/--(.*)\s/g, "")
+													.replace(/\s/g, " ")
+													.replace(/  /g, " ");
 
-											query = query.trim()
-														.replace(/--(.*)\s/g, "")
-														.replace(/\s/g, " ")
-														.replace(/  /g, " ");
+										if ('' != query) {
+											queries.push(query + ';');
+										}
 
-											if ('' != query) {
-												queries.push(query + ';');
-											}
+									});
 
-										});
+									function executeQueries(i) {
 
-										function executeQueries(i) {
+										if (i >= queries.length) {
+											resolve(db);
+										}
+										else {
 
-											if (i >= queries.length) {
-												resolve(db);
-											}
-											else {
+											db.run(queries[i], [], function(err) {
 
-												db.run(queries[i], [], function(err) {
+												if (err) {
+													reject((err.message) ? err.message : err);
+												}
+												else {
+													executeQueries(i + 1);
+												}
 
-													if (err) {
-														reject((err.message) ? err.message : err);
-													}
-													else {
-														executeQueries(i + 1);
-													}
-
-												});
-
-											}
+											});
 
 										}
 
-										executeQueries(0);
-
 									}
-									
-								});
+
+									executeQueries(0);
+
+								}).catch(reject);
 
 							});
 
@@ -262,6 +252,7 @@
 						Container.get('logs').success('[START PROCESS ' + process.pid + ']');
 
 						new MIA(Container).start()
+							.then(function() { Container.get('logs').success('MIA started'); })
 							.catch(function (err) { Container.get('logs').err(((err.message) ? err.message : err)); });
 
 					})
