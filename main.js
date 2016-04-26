@@ -149,7 +149,7 @@
 					status = new Status(db),
 					users = new Users(db);
 
-				Container	.set('database', db)
+				Container	.set('db', db)
 
 							.set('actions', actions)
 							.set('actionstypes', actionstypes)
