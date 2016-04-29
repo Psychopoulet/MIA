@@ -1,193 +1,210 @@
 
 "use strict";
 
-// dépendances
+// deps
 	
 	const path = require('path');
 
+// private
+
+	// attrs
+
+		var m_clSocketServer, m_tabOnConnection = [], m_tabOnLog = [], m_tabOnDisconnect = [];
+
 // module
+
+module.exports = class HTTPSocket {
 	
-	module.exports = function (Container) {
-	
-		"use strict";
-		
-		// attributes
-			
-			var that = this,
-				m_clSocketServer,
-				m_tabOnConnection = [],
-				m_tabOnLog = [],
-				m_tabOnDisconnect = [];
-				
-		// methodes
+	start (Container) {
 
-			// public
-				
-				this.start = function () {
+		return new Promise(function(resolve, reject) {
 
-					return new Promise(function(resolve, reject) {
+			try {
 
-						try {
+				m_clSocketServer = require('socket.io').listen(Container.get('http'));
 
-							m_clSocketServer = require('socket.io').listen(Container.get('http'));
+				m_clSocketServer.sockets.on('connection', function (socket) {
 
-							m_clSocketServer.sockets.on('connection', function (socket) {
+					Container.get('logs').info('-- [HTTP socket client] ' + socket.id + ' connected');
+					
+					socket.on('disconnect', function () {
+						
+						Container.get('logs').info('-- [HTTP socket client] ' + socket.id + ' disconnected');
 
-								Container.get('logs').success('-- [HTTP socket client] ' + socket.id + ' connected');
-								
-								socket.on('disconnect', function () {
-									
-									Container.get('logs').info('-- [HTTP socket client] ' + socket.id + ' disconnected');
-
-									m_tabOnDisconnect.forEach(function (fOnDisconnect) {
-										fOnDisconnect(socket);
-									});
-
-								});
-								
-								m_tabOnConnection.forEach(function (fOnConnection) {
-									fOnConnection(socket);
-								});
-								
-							});
-
-							if (Container.get('conf').get('ssl')) {
-								Container.get('logs').success('-- [HTTP socket server] with ssl started on port ' + Container.get('conf').get('webport'));
-							}
-							else {
-								Container.get('logs').success('-- [HTTP socket server] started on port ' + Container.get('conf').get('webport'));
-							}
-
-							resolve();
-
-						}
-						catch (e) {
-							reject((e.message) ? e.message : e);
-						}
+						m_tabOnDisconnect.forEach(function (fOnDisconnect) {
+							fOnDisconnect(socket);
+						});
 
 					});
 					
+					m_tabOnConnection.forEach(function (fOnConnection) {
+						fOnConnection(socket);
+					});
+					
+				});
+
+				if (Container.get('conf').get('ssl')) {
+					Container.get('logs').success('-- [HTTP socket server] avec SSL démarré sur le port ' + Container.get('conf').get('webport'));
+				}
+				else {
+					Container.get('logs').success('-- [HTTP socket server] démarré sur le port ' + Container.get('conf').get('webport'));
 				}
 
-				this.emit = function (order, data) {
-					m_clSocketServer.sockets.emit(order, data);
-				};
-				
-				this.emitTo = function (token, order, data) {
+				resolve();
 
-					for (let key in m_clSocketServer.sockets.sockets) {
+			}
+			catch (e) {
+				reject((e.message) ? e.message : e);
+			}
 
-						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
-							m_clSocketServer.sockets.sockets[key].emit(order, data);
-							break;
-						}
+		});
+		
+	}
 
-					}
-
-					return that;
-					
-				};
-
-				this.setTokenToSocketById = function (id, token) {
-
-					for (let key in m_clSocketServer.sockets.sockets) {
-
-						if (m_clSocketServer.sockets.sockets[key].id === id) {
-							m_clSocketServer.sockets.sockets[key].token = token;
-							break;
-						}
-
-					}
-
-					return that;
-					
-				};
-				
-				this.disconnect = function (token) {
-
-					for (let key in m_clSocketServer.sockets.sockets) {
-
-						if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
-							m_clSocketServer.sockets.sockets[key].disconnect();
-							break;
-						}
-
-					}
-
-					return that;
-					
-				};
-				
-				this.getSockets = function () {
-
-					let tabResult = [];
-
-						for (let key in m_clSocketServer.sockets.sockets) {
-							tabResult.push(m_clSocketServer.sockets.sockets[key]);
-						}
-
-					return tabResult;
-
-				};
-				
-				this.getSocket = function (token) {
-
-					let result = null;
-
-						for (let key in m_clSocketServer.sockets.sockets) {
-
-							if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
-								result = m_clSocketServer.sockets.sockets[key];
-								break;
-							}
-
-						}
-
-					return result;
-					
-				};
-				
-				// callbacks
-					
-					this.fireLogin = function (socket, client) {
-
-						m_tabOnLog.forEach(function(callback) {
-							callback(socket, client);
-						});
-
-						return that;
-						
-					};
-					
-					this.onConnection = function (p_fCallback) {
-
-						if ('function' === typeof p_fCallback) {
-							m_tabOnConnection.push(p_fCallback);
-						}
-						
-						return that;
-						
-					};
-					
-					this.onLog = function (p_fCallback) {
-
-						if ('function' === typeof p_fCallback) {
-							m_tabOnLog.push(p_fCallback);
-						}
-						
-						return that;
-						
-					};
-					
-					this.onDisconnect = function (p_fCallback) {
-
-						if ('function' === typeof p_fCallback) {
-							m_tabOnDisconnect.push(p_fCallback);
-						}
-								
-						return that;
-						
-					};
-					
-	};
+	emit (order, data) {
+		m_clSocketServer.sockets.emit(order, data);
+	}
 	
+	emitTo (token, order, data) {
+
+		for (let key in m_clSocketServer.sockets.sockets) {
+
+			if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
+				m_clSocketServer.sockets.sockets[key].emit(order, data);
+				break;
+			}
+
+		}
+
+		return this;
+		
+	}
+
+	setTokenToSocketById (id, token) {
+
+		for (let key in m_clSocketServer.sockets.sockets) {
+
+			if (m_clSocketServer.sockets.sockets[key].id === id) {
+				m_clSocketServer.sockets.sockets[key].token = token;
+				break;
+			}
+
+		}
+
+		return this;
+		
+	}
+	
+	disconnect (token) {
+
+		for (let key in m_clSocketServer.sockets.sockets) {
+
+			if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
+				m_clSocketServer.sockets.sockets[key].disconnect();
+				break;
+			}
+
+		}
+
+		return this;
+		
+	}
+	
+	getSockets () {
+
+		let tabResult = [];
+
+			for (let key in m_clSocketServer.sockets.sockets) {
+				tabResult.push(m_clSocketServer.sockets.sockets[key]);
+			}
+
+		return tabResult;
+
+	}
+	
+	getSocket (token) {
+
+		let result = null;
+
+			for (let key in m_clSocketServer.sockets.sockets) {
+
+				if (m_clSocketServer.sockets.sockets[key].token && m_clSocketServer.sockets.sockets[key].token === token) {
+					result = m_clSocketServer.sockets.sockets[key];
+					break;
+				}
+
+			}
+
+		return result;
+		
+	}
+	
+	// callbacks
+	
+	fireLogin (socket, client) {
+
+		m_tabOnLog.forEach(function(callback) {
+			callback(socket, client);
+		});
+
+		return this;
+		
+	}
+	
+	onConnection (callback) {
+
+		if ('function' === typeof callback) {
+			m_tabOnConnection.push(callback);
+		}
+		
+		return this;
+		
+	}
+	
+	onLog (callback) {
+
+		if ('function' === typeof callback) {
+			m_tabOnLog.push(callback);
+		}
+		
+		return this;
+		
+	}
+	
+	onDisconnect (callback, callbackLog, callbackConnection) {
+
+		if ('function' === typeof callback) {
+			m_tabOnDisconnect.push(callback);
+		}
+		
+		if ('function' === typeof callbackLog) {
+
+			for (let i = 0; i < m_tabOnLog.length; ++i) {
+
+				if (m_tabOnLog[i] === callbackLog) {
+					m_tabOnLog.splice(i, 1);
+					break;
+				}
+
+			}
+
+		}
+		
+		if ('function' === typeof callbackConnection) {
+
+			for (let i = 0; i < m_tabOnConnection.length; ++i) {
+
+				if (m_tabOnConnection[i] === callbackConnection) {
+					m_tabOnConnection.splice(i, 1);
+					break;
+				}
+
+			}
+
+		}
+		
+		return this;
+		
+	}
+	
+};

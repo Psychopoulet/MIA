@@ -33,8 +33,11 @@
 
 									if (action.child && action.child.token) {
 
-										if (action.params) {
+										if ('object' === typeof action.params) {
 											childssockets.emitTo(action.child.token, action.type.command, action.params);
+										}
+										else if ('string' === typeof action.params) {
+											childssockets.emitTo(action.child.token, action.type.command, JSON.parse(action.params));
 										}
 										else {
 											childssockets.emitTo(action.child.token, action.type.command);
@@ -43,8 +46,11 @@
 									}
 									else {
 
-										if (action.params) {
+										if ('object' === typeof action.params) {
 											childssockets.emit(action.type.command, action.params);
+										}
+										else if ('string' === typeof action.params) {
+											childssockets.emit(action.type.command, JSON.parse(action.params));
 										}
 										else {
 											childssockets.emit(action.type.command);
@@ -54,8 +60,7 @@
 
 								});
 
-							})
-							.catch(function (err) {
+							}).catch(function (err) {
 								Container.get('logs').err('-- [crons] : ' + err);
 							});
 
@@ -114,14 +119,12 @@
 								Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
 							}
 
-						})
-						.catch(function(err) {
+						}).catch(function(err) {
 							err = (err.message) ? err.message : err;
 							Container.get('logs').err('-- [database/clients/getAll] ' + ((err.message) ? err.message : err));
 						});
 
-					})
-					.catch(function(err) {
+					}).catch(function(err) {
 						err = (err.message) ? err.message : err;
 						Container.get('logs').err('-- [database/status/getOneByCode] ' + ((err.message) ? err.message : err));
 					});
@@ -174,14 +177,12 @@
 								Container.get('logs').err('-- [MIA] ' + ((e.message) ? e.message : e));
 							}
 
-						})
-						.catch(function(err) {
+						}).catch(function(err) {
 							err = (err.message) ? err.message : err;
 							Container.get('logs').err('-- [database/childs/getAll] ' + ((err.message) ? err.message : err));
 						});
 
-					})
-					.catch(function(err) {
+					}).catch(function(err) {
 						err = (err.message) ? err.message : err;
 						Container.get('logs').err('-- [database/status/getOneByCode] ' + ((err.message) ? err.message : err));
 					});
@@ -196,8 +197,7 @@
 
 						clientssockets.emit('users', [user]);
 
-					})
-					.catch(function(err) {
+					}).catch(function(err) {
 						err = (err.message) ? err.message : err;
 						Container.get('logs').err('-- [database/users/lastInserted] ' + ((err.message) ? err.message : err));
 					});
@@ -314,8 +314,7 @@
 
 												}
 
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												err = (err.message) ? err.message : err;
 												Container.get('logs').err('-- [MIA] ' + ((err.message) ? err.message : err));
 											});
@@ -345,26 +344,22 @@
 															_sendChilds();
 															_sendClients();
 
-														})
-														.catch(function(err) {
+														}).catch(function(err) {
 															Container.get('logs').err('-- [database/clients/add] ' + ((err.message) ? err.message : err));
 															socket.emit('login.error', "Impossible de vous connecter.");
 														});
 
-													})
-													.catch(function(err) {
+													}).catch(function(err) {
 														Container.get('logs').err('-- [database/status/getOneByCode] ' + ((err.message) ? err.message : err));
 														socket.emit('login.error', "Impossible de vous connecter.");
 													});
 
-												})
-												.catch(function(err) {
+												}).catch(function(err) {
 													Container.get('logs').err('-- [database/users/lastInserted] ' + ((err.message) ? err.message : err));
 													socket.emit('login.error', "Impossible de vous connecter.");
 												});
 
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [database/users/exists] ' + ((err.message) ? err.message : err));
 												socket.emit('login.error', "Impossible de vous connecter.");
 											});
@@ -420,20 +415,17 @@
 
 														_sendClients();
 
-													})
-													.catch(function(err) {
+													}).catch(function(err) {
 														Container.get('logs').err('-- [database/clients/add] ' + ((err.message) ? err.message : err));
 														socket.emit('client.allow.error', "Impossible d'enregistrer cet enfant.");
 													});
 
-												})
-												.catch(function(err) {
+												}).catch(function(err) {
 													Container.get('logs').err('-- [database/users/lastInserted] ' + ((err.message) ? err.message : err));
 													socket.emit('client.allow.error', "Impossible d'enregistrer cet enfant.");
 												});
 
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [database/status/getOneByCode] ' + ((err.message) ? err.message : err));
 												socket.emit('client.allow.error', "Impossible d'enregistrer cet enfant.");
 											});
@@ -461,8 +453,7 @@
 										}
 										else {
 
-											Container.get('clients').rename(client.token, client.name).then(_sendClients)
-											.catch(function(err) {
+											Container.get('clients').rename(client.token, client.name).then(_sendClients).catch(function(err) {
 												Container.get('logs').err('-- [database/clients/rename] ' + ((err.message) ? err.message : err));
 												socket.emit('child.rename.error', 'Impossible de renommer ce client.');
 											});
@@ -498,8 +489,7 @@
 
 												_sendClients();
 
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [database/clients/delete] ' + ((err.message) ? err.message : err));
 												socket.emit('client.delete.error', 'Impossible de supprimer ce client.');
 											});
@@ -544,14 +534,12 @@
 
 													_sendChilds();
 
-												})
-												.catch(function(err) {
+												}).catch(function(err) {
 													Container.get('logs').err('-- [database/childs/add] ' + ((e.message) ? e.message : e));
 													socket.emit('child.allow.error', "Impossible d'autoriser cet enfant.");
 												});
 
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [database/status/getOneByCode] ' + ((e.message) ? e.message : e));
 												socket.emit('child.allow.error', "Impossible d'autoriser cet enfant.");
 											});
@@ -579,8 +567,7 @@
 										}
 										else {
 
-											Container.get('childs').rename(child.token, child.name).then(_sendChilds)
-											.catch(function(err) {
+											Container.get('childs').rename(child.token, child.name).then(_sendChilds).catch(function(err) {
 												Container.get('logs').err('-- [database/childs/rename] ' + ((err.message) ? err.message : err));
 												socket.emit('child.rename.error', 'Impossible de renommer cet enfant.');
 											});
@@ -614,8 +601,7 @@
 
 												_sendChilds();
 
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [database/childs/delete] ' + ((err.message) ? err.message : err));
 												socket.emit('child.delete.error', 'Impossible de supprimer cet enfant.');
 											});
@@ -675,15 +661,34 @@
 
 											Container.get('actions').getOneById(action.id).then(function(action) {
 
-												if (!action.params) {
-													childssockets.emitTo(action.child.token, action.type.command);
+												if (action.child && action.child.token) {
+
+													if ('object' === typeof action.params) {
+														childssockets.emitTo(action.child.token, action.type.command, action.params);
+													}
+													else if ('string' === typeof action.params) {
+														childssockets.emitTo(action.child.token, action.type.command, JSON.parse(action.params));
+													}
+													else {
+														childssockets.emitTo(action.child.token, action.type.command);
+													}
+
 												}
 												else {
-													childssockets.emitTo(action.child.token, action.type.command, JSON.parse(action.params));
+
+													if ('object' === typeof action.params) {
+														childssockets.emit(action.type.command, action.params);
+													}
+													else if ('string' === typeof action.params) {
+														childssockets.emit(action.type.command, JSON.parse(action.params));
+													}
+													else {
+														childssockets.emit(action.type.command);
+													}
+
 												}
 
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
 												socket.emit('actions.error', "Impossible de récupérer cette action : " + ((err.message) ? err.message : err));
 											});
@@ -718,20 +723,17 @@
 
 													socket.emit('actions', actions);
 
-												})
-												.catch(function(err) {
+												}).catch(function(err) {
 													Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
 													socket.emit('actions.error', "Impossible de récupérer les actions.");
 												});
 
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
 												socket.emit('actions.error', "Impossible de sauvegarder cette action : " + ((err.message) ? err.message : err));
 											});
 
-										})
-										.catch(function(err) {
+										}).catch(function(err) {
 											Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
 											socket.emit('actions.error', "Impossible de sauvegarder cette action : " + ((err.message) ? err.message : err));
 										});
@@ -760,14 +762,12 @@
 
 												socket.emit('actions', actions);
 
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
 												socket.emit('actions.error', "Impossible de récupérer les actions.");
 											});
 
-										})
-										.catch(function(err) {
+										}).catch(function(err) {
 											Container.get('logs').err('-- [actions] ' + ((err.message) ? err.message : err));
 											socket.emit('actions.error', "Impossible de supprimer cette action : " + ((err.message) ? err.message : err));
 										});
@@ -855,20 +855,17 @@
 
 													socket.emit('crons', crons);
 
-												})
-												.catch(function(err) {
+												}).catch(function(err) {
 													Container.get('logs').err('-- [crons] ' + ((err.message) ? err.message : err));
 													socket.emit('crons.error', "Impossible de récupérer les tâches plannifiées.");
 												});
 
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [crons] ' + ((err.message) ? err.message : err));
 												socket.emit('crons.error', "Impossible de sauvegarder cette tâche plannifiée : " + ((err.message) ? err.message : err));
 											});
 
-										})
-										.catch(function(err) {
+										}).catch(function(err) {
 											Container.get('logs').err('-- [crons] ' + ((err.message) ? err.message : err));
 											socket.emit('crons.error', "Impossible de sauvegarder cette tâche plannifiée : " + ((err.message) ? err.message : err));
 										});
@@ -897,14 +894,12 @@
 
 												socket.emit('crons', crons);
 
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [crons] ' + ((err.message) ? err.message : err));
 												socket.emit('crons.error', "Impossible de récupérer les tâches plannifiées.");
 											});
 
-										})
-										.catch(function(err) {
+										}).catch(function(err) {
 											Container.get('logs').err('-- [crons] ' + ((err.message) ? err.message : err));
 											socket.emit('crons.error', "Impossible de supprimer cette tâche plannifiée : " + ((err.message) ? err.message : err));
 										});
@@ -931,8 +926,7 @@
 
 											socket.emit('cronsactions', cronsactions);
 
-										})
-										.catch(function(err) {
+										}).catch(function(err) {
 											Container.get('logs').err('-- [Impossible] ' + ((err.message) ? err.message : err));
 											socket.emit('Impossible.error', "Impossible de récupérer les liens entre tâches plannifiées et actions.");
 										});
@@ -972,14 +966,12 @@
 
 													socket.emit('cronsactions', cronsactions);
 
-												})
-												.catch(function(err) {
+												}).catch(function(err) {
 													Container.get('logs').err('-- [Impossible] ' + ((err.message) ? err.message : err));
 													socket.emit('Impossible.error', "Impossible de récupérer les liens entre tâches plannifiées et actions.");
 												});
 
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [cronsactions] ' + ((err.message) ? err.message : err));
 												socket.emit('cronsactions.error', "Impossible de lier cette tâche plannifiée à cette action : " + ((err.message) ? err.message : err));
 											});
@@ -1021,14 +1013,12 @@
 
 													socket.emit('cronsactions', cronsactions);
 
-												})
-												.catch(function(err) {
+												}).catch(function(err) {
 													Container.get('logs').err('-- [Impossible] ' + ((err.message) ? err.message : err));
 													socket.emit('Impossible.error', "Impossible de récupérer les liens entre tâches plannifiées et actions.");
 												});
 
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [cronsactions] ' + ((err.message) ? err.message : err));
 												socket.emit('cronsactions.error', "Impossible de lier cette tâche plannifiée à cette action : " + ((err.message) ? err.message : err));
 											});
@@ -1068,14 +1058,12 @@
 													socket.emit('user.update.login', login);
 													_sendUsers();
 
-												})
-												.catch(function(err) {
+												}).catch(function(err) {
 													Container.get('logs').err('-- [database/users/update] ' + ((err.message) ? err.message : err));
 													socket.emit('user.error', 'Impossible de modifier cet utilisateur.');
 												});
 												
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [database/users/lastInserted] ' + ((err.message) ? err.message : err));
 												socket.emit('user.error', 'Impossible de récupérer cet utilisateur.');
 											});
@@ -1112,14 +1100,12 @@
 
 												Container.get('users').update(user).then(function() {
 													socket.emit('user.update.password');
-												})
-												.catch(function(err) {
+												}).catch(function(err) {
 													Container.get('logs').err('-- [database/users/update] ' + ((err.message) ? err.message : err));
 													socket.emit('user.error', 'Impossible de modifier cet utilisateur.');
 												});
 												
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [database/users/lastInserted] ' + ((err.message) ? err.message : err));
 												socket.emit('user.error', 'Impossible de récupérer cet utilisateur.');
 											});
@@ -1245,8 +1231,7 @@
 
 										Container.get('logs').getLogs().then(function(logs) {
 											socket.emit('logs', logs);
-										})
-										.catch(function(err) {
+										}).catch(function(err) {
 											Container.get('logs').err('-- [logs] ' + ((err.message) ? err.message : err));
 											socket.emit('logs.error', "Impossible de récupérer les logs.");
 										});
@@ -1287,8 +1272,7 @@
 
 											Container.get('logs').read(log.year, log.month, log.day).then(function(content) {
 												socket.emit('log', content);
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [logs] ' + ((err.message) ? err.message : err));
 												socket.emit('logs.error', "Impossible de lire le log.");
 											});
@@ -1386,8 +1370,7 @@
 
 												}
 
-											})
-											.catch(function(err) {
+											}).catch(function(err) {
 												Container.get('logs').err('-- [MIA] ' + ((err.message) ? err.message : err));
 												socket.emit('login.error', "Impossible de vous connecter.");
 											});
@@ -1461,8 +1444,7 @@
 
 									Container.get('crons').getAll().then(function(crons) {
 										crons.forEach(_runCron);
-									})
-									.catch(function (err) {
+									}).catch(function (err) {
 										Container.get('logs').err('-- [crons] : ' + err);
 									});
 
@@ -1499,11 +1481,11 @@
 										})
 
 								.loadAll(Container).then(function() {
-									return Container.get('webserver').start(); // server http
+									return Container.get('webserver').start(Container); // server http
 								}).then(function() {
-									return clientssockets.start(); // server http socket
+									return clientssockets.start(Container); // server http socket
 								}).then(function() {
-									return childssockets.start(); // server childs
+									return childssockets.start(Container); // server childs
 								}).then(resolve).catch(reject);
 
 						}
