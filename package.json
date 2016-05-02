@@ -16,12 +16,13 @@
     "sqlite3": "^3.1.3",
     "daemon": "^1.1.0",
 
-    "simplefs": "^2.1.0",
-    "simplecontainer": "^1.1.2",
     "simpleconfig": "^1.2.5",
+    "simplecontainer": "^1.1.2",
+    "simplefs": "^2.1.0",
+    "simplefreesms": "^0.1.0",
     "simplelogs": "^2.0.1",
-    "simplessl": "^1.3.2",
-    "simplepluginsmanager": "^2.1.0"
+    "simplepluginsmanager": "^2.1.0",
+    "simplessl": "^1.3.3"
 
   },
   "devDependencies": {},
