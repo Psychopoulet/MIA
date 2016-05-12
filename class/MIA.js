@@ -30,34 +30,7 @@
 							Container.get('actions').getAllByCron(cron).then(function(actions) {
 
 								actions.forEach(function(action) {
-
-									if (action.child && action.child.token) {
-
-										if ('object' === typeof action.params) {
-											childssockets.emitTo(action.child.token, action.type.command, action.params);
-										}
-										else if ('string' === typeof action.params) {
-											childssockets.emitTo(action.child.token, action.type.command, JSON.parse(action.params));
-										}
-										else {
-											childssockets.emitTo(action.child.token, action.type.command);
-										}
-
-									}
-									else {
-
-										if ('object' === typeof action.params) {
-											childssockets.emit(action.type.command, action.params);
-										}
-										else if ('string' === typeof action.params) {
-											childssockets.emit(action.type.command, JSON.parse(action.params));
-										}
-										else {
-											childssockets.emit(action.type.command);
-										}
-
-									}
-
+									Container.get('actions').execute(action.type.command, action);
 								});
 
 							}).catch(function (err) {
@@ -1448,45 +1421,89 @@
 										Container.get('logs').err('-- [crons] : ' + err);
 									});
 
+
+								// actions
+
+									function classicActionExecuter (action) {
+
+										if (action.child && action.child.token) {
+
+											if ('object' === typeof action.params) {
+												childssockets.emitTo(action.child.token, action.type.command, action.params);
+											}
+											else if ('string' === typeof action.params) {
+												childssockets.emitTo(action.child.token, action.type.command, JSON.parse(action.params));
+											}
+											else {
+												childssockets.emitTo(action.child.token, action.type.command);
+											}
+
+										}
+										else {
+
+											if ('object' === typeof action.params) {
+												childssockets.emit(action.type.command, action.params);
+											}
+											else if ('string' === typeof action.params) {
+												childssockets.emit(action.type.command, JSON.parse(action.params));
+											}
+											else {
+												childssockets.emit(action.type.command);
+											}
+
+										}
+
+									}
+
+									Container.get('actions').bindExecuter('media.sound.play', classicActionExecuter).then(function() {
+										return Container.get('actions').bindExecuter('media.video.play', classicActionExecuter);
+									}).then(function() {
+										return Container.get('actions').bindExecuter('tts', classicActionExecuter);
+									}).catch(function (err) {
+										Container.get('logs').err('-- [actions] : ' + err);
+									});
+							
 								// plugins
 
-								Container.get('plugins')
+									// error
 
-									.on('error', function (err) {
+									Container.get('plugins').on('error', function (err) {
 										Container.get('logs').err('-- [plugins] : ' + err);
 									})
 
 									// load
 
-										.on('loaded', function(plugin) {
-											Container.get('logs').success("-- [plugins] : " + plugin.name + " (v" + plugin.version + ") loaded");
-										})
-										.on('allloaded', function() {
-											Container.get('logs').success("-- [plugins] : all loaded");
-										})
-										.on('unloaded', function(plugin) {
-											Container.get('logs').info("-- [plugins] : " + plugin.name + "' (v" + plugin.version + ") unloaded");
-										})
+									.on('loaded', function(plugin) {
+										Container.get('logs').success("-- [plugins] : " + plugin.name + " (v" + plugin.version + ") loaded");
+									})
+									.on('allloaded', function() {
+										Container.get('logs').success("-- [plugins] : all loaded");
+									})
+									.on('unloaded', function(plugin) {
+										Container.get('logs').info("-- [plugins] : " + plugin.name + "' (v" + plugin.version + ") unloaded");
+									})
 
 									// write
 
-										.on('installed', function(plugin) {
-											Container.get('logs').success("-- [plugins] : '" + plugin.name + "' (v" + plugin.version + ") installed");
-										})
-										.on('updated', function(plugin) {
-											Container.get('logs').success("-- [plugins] : '" + plugin.name + "' (v" + plugin.version + ") updated");
-										})
-										.on('uninstalled', function(plugin) {
-											Container.get('logs').success("-- [plugins] : '" + plugin.name + "' (v" + plugin.version + ") uninstalled");
-										})
+									.on('installed', function(plugin) {
+										Container.get('logs').success("-- [plugins] : '" + plugin.name + "' (v" + plugin.version + ") installed");
+									})
+									.on('updated', function(plugin) {
+										Container.get('logs').success("-- [plugins] : '" + plugin.name + "' (v" + plugin.version + ") updated");
+									})
+									.on('uninstalled', function(plugin) {
+										Container.get('logs').success("-- [plugins] : '" + plugin.name + "' (v" + plugin.version + ") uninstalled");
+									}).loadAll(Container).then(function() {
+										return Container.get('webserver').start(Container); // server http
+									})
 
-								.loadAll(Container).then(function() {
-									return Container.get('webserver').start(Container); // server http
-								}).then(function() {
-									return clientssockets.start(Container); // server http socket
-								}).then(function() {
-									return childssockets.start(Container); // server childs
-								}).then(resolve).catch(reject);
+								// servers
+
+									.then(function() {
+										return clientssockets.start(Container); // server http socket
+									}).then(function() {
+										return childssockets.start(Container); // server childs
+									}).then(resolve).catch(reject);
 
 						}
 						catch (e) {

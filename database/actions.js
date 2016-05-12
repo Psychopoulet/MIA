@@ -26,6 +26,8 @@
 		" INNER JOIN childs ON childs.id = actions.id_child" +
 		" INNER JOIN actionstypes ON actionstypes.id = actions.id_type";
 
+	var _tabExecuters = {};
+
 	function _formateAction(action) {
 
 		action.user = {
@@ -75,7 +77,6 @@ module.exports = class DBActions {
 	add (action) {
 
 		let that = this;
-
 		return new Promise(function(resolve, reject) {
 
 			if (!action) {
@@ -281,6 +282,51 @@ module.exports = class DBActions {
 					}
 
 				});
+
+			}
+
+		});
+
+	}
+
+	bindExecuter(actiontypecommand, executer) {
+
+		let that = this;
+		return new Promise(function(resolve, reject) {
+
+			if ('string' !== typeof actiontypecommand) {
+				reject("La commande du type d'action est incorrect.");
+			}
+			else if ('function' !== typeof executer) {
+				reject("L'exécuteur est incorrect.");
+			}
+			else {
+				_tabExecuters[actiontypecommand] = executer;
+				resolve();
+			}
+
+		});
+
+	}
+
+	execute(actiontypecommand, action) {
+
+		let that = this;
+		return new Promise(function(resolve, reject) {
+
+			if ('string' !== typeof actiontypecommand) {
+				reject("La commande du type d'action est incorrect.");
+			}
+			else if (!_tabExecuters[actiontypecommand]) {
+				resolve();
+			}
+			else {
+
+				_tabExecuters[actiontypecommand].forEach(function(executer) {
+					try { executer(action); } catch(e) { }
+				});
+
+				resolve();
 
 			}
 
