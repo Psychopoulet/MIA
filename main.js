@@ -57,7 +57,7 @@
 				dbFile = path.join(__dirname, 'database', 'MIA.sqlite3'),
 				createFile = path.join(__dirname, 'database', 'create.sql');
 
-			fs.isDirectoryProm(createFile).then(function(exists) {
+			fs.isFileProm(createFile).then(function(exists) {
 
 				if (!exists) {
 					db = new sqlite3.Database(dbFile);
@@ -65,7 +65,7 @@
 				}
 				else {
 
-					fs.isDirectoryProm(dbFile).then(function(exists) {
+					fs.isFileProm(dbFile).then(function(exists) {
 
 						if (exists) {
 							db = new sqlite3.Database(dbFile);

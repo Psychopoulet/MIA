@@ -10,7 +10,6 @@ module.exports = class DBActionsTypes {
 	add (actiontype) {
 
 		let that = this;
-
 		return new Promise(function(resolve, reject) {
 
 			if (!actiontype) {
@@ -24,19 +23,30 @@ module.exports = class DBActionsTypes {
 			}
 			else {
 
-				that.db.run("INSERT INTO actionstypes (name, command) VALUES (:name, :command);", {
-					':name': actiontype.name,
-					':command': actiontype.command
-				}, function(err) {
+				that.getOneByCommand(actiontype.command).then(function(actiontype) {
 
-					if (err) {
-						reject((err.message) ? err.message : err);
+					if (actiontype) {
+						reject('Cette commande existe déjà.');
 					}
 					else {
-						that.lastInserted().then(resolve).catch(reject);
+
+						that.db.run("INSERT INTO actionstypes (name, command) VALUES (:name, :command);", {
+							':name': actiontype.name,
+							':command': actiontype.command
+						}, function(err) {
+
+							if (err) {
+								reject((err.message) ? err.message : err);
+							}
+							else {
+								that.lastInserted().then(resolve).catch(reject);
+							}
+
+						});
+
 					}
 
-				});
+				}).catch(reject);
 
 			}
 
@@ -47,7 +57,6 @@ module.exports = class DBActionsTypes {
 	lastInserted () {
 
 		let that = this;
-
 		return new Promise(function(resolve, reject) {
 
 			that.db.get("SELECT id, name, command FROM actionstypes ORDER BY id DESC LIMIT 0,1;", [], function(err, row) {
@@ -68,7 +77,6 @@ module.exports = class DBActionsTypes {
 	getAll () {
 		
 		let that = this;
-
 		return new Promise(function(resolve, reject) {
 
 			that.db.all("SELECT id, name, command FROM actionstypes;", [], function(err, rows) {
@@ -81,6 +89,35 @@ module.exports = class DBActionsTypes {
 				}
 
 			});
+
+		});
+
+	}
+
+	getOneByCommand(command) {
+		
+		let that = this;
+		return new Promise(function(resolve, reject) {
+
+			if (!command) {
+				reject('Aucune commande renseignée.');
+			}
+			else {
+
+				that.db.all("SELECT id, name, command FROM actionstypes WHERE command = :command;", {
+					':command': actiontype.command
+				}, function(err, rows) {
+
+					if (err) {
+						reject((err.message) ? err.message : err);
+					}
+					else {
+						resolve((rows) ? rows[0] : null);
+					}
+
+				});
+
+			}
 
 		});
 
