@@ -1,1 +1,1 @@
-cls && cd %~dp0\..\ && node daemon.js
+cls && cd %~dp0\..\ && npm update && node lib/daemon.js
