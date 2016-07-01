@@ -34,15 +34,12 @@ module.exports = class DBUsers {
 			else if (!user.password) {
 				reject('Aucun mot de passe renseigné.');
 			}
-			else if (!user.email) {
-				reject('Aucun email renseigné.');
-			}
 			else {
 
 				that.db.run("INSERT INTO users (login, password, email) VALUES (:login, :password, :email);", {
 					':login': user.login,
 					':password': _cryptPassword(user.password),
-					':email': user.email
+					':email': (user.email) ? err.message : ""
 				}, function(err) {
 
 					if (err) {
