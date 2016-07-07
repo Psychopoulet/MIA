@@ -64,7 +64,7 @@
 			
 // module
 	
-module.exports = class ChildsSocket {
+module.exports = class ServerChildrenSockets {
 
 	start (Container) {
 

@@ -13,7 +13,7 @@
 
 // module
 
-module.exports = class HTTPSocket {
+module.exports = class ServerClientsSockets {
 	
 	start (Container) {
 
