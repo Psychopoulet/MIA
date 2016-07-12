@@ -1,1 +1,1 @@
-cls && cd %~dp0\..\ && npm update && node lib/main.js
+cls && cd %~dp0\..\ && npm update --prod && node lib/main.js
