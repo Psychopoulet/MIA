@@ -221,8 +221,8 @@ module.exports = class ServerClientsWeb {
 						"port": this.container.get("conf").get("ports.clients.https"),
 						"name": "client HTTPS",
 						"ssl": true,
-						key: keys.privateKey,
-						cert: keys.certificate
+						"key": keys.privateKey,
+						"cert": keys.certificate
 					})
 
 				});
