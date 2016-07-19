@@ -37,10 +37,6 @@
 					_sendResponse(res, p_nCode, 'text/html', p_sMessage);
 				}
 					
-					function _404(res) {
-						_sendHTMLResponse(res, 404, 'Not found');
-					}
-					
 					function _500(res, p_sMessage) {
 
 						if (p_sMessage) {
@@ -54,14 +50,6 @@
 				
 				function _sendJSResponse(res, p_nCode, p_sMessage) {
 					_sendResponse(res, p_nCode, 'application/javascript', p_sMessage);
-				}
-
-				function _sendCSSResponse(res, p_nCode, p_sMessage) {
-					_sendResponse(res, p_nCode, 'text/css', p_sMessage);
-				}
-
-				function _sendPNGResponse(res, p_nCode, p_sMessage) {
-					_sendResponse(res, p_nCode, 'image/png', p_sMessage);
 				}
 
 		// files
@@ -188,7 +176,7 @@
 
 // module
 
-module.exports = class ServerClientsWeb {
+module.exports = class ServerWeb {
 	
 	constructor (Container) {
 		this.container = Container;
@@ -199,7 +187,7 @@ module.exports = class ServerClientsWeb {
 		let multiserver = new (require("node-multi-webserver"))();
 
 		return multiserver.addServer({
-			"port": this.container.get("conf").get("ports.clients.http"),
+			"port": this.container.get("conf").get("ports.http"),
 			"name": "client HTTP",
 			"ssl": false
 		}).then(() => {
@@ -218,7 +206,7 @@ module.exports = class ServerClientsWeb {
 				).then((keys) => {
 
 					return multiserver.addServer({
-						"port": this.container.get("conf").get("ports.clients.https"),
+						"port": this.container.get("conf").get("ports.https"),
 						"name": "client HTTPS",
 						"ssl": true,
 						"key": keys.privateKey,
@@ -327,7 +315,7 @@ module.exports = class ServerClientsWeb {
 				// 404
 
 					.use(function (req, res) {
-						_404(req, res);
+						_sendHTMLResponse(res, 404, 'Not found');
 					});
 
 			return multiserver.listen(app).then(function() {

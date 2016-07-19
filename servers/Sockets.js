@@ -13,7 +13,7 @@
 
 // module
 
-module.exports = class ServerClientsSockets {
+module.exports = class ServerSockets {
 	
 	start (Container) {
 
