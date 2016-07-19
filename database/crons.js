@@ -16,152 +16,217 @@
 	" FROM crons" +
 		" INNER JOIN users ON users.id = crons.id_user";
 
-	function _formateCron(cron) {
-
-		cron.user = {
-			id : cron.user_id,
-			login : cron.user_login
-		};
-
-			delete cron.user_id;
-			delete cron.user_login;
-
-		return cron;
-
-	}
-
 // module
 
-module.exports = class DBCrons {
+module.exports = class DBCrons extends require("node-scenarios").abstract {
 
-	constructor (db) {
-		this.db = db;
-	}
+	// formate data
 
-	add (cron) {
+		static formate(cron) {
 
-		let that = this;
+			cron.user = {
+				id : cron.user_id,
+				login : cron.user_login
+			};
 
-		return new Promise(function(resolve, reject) {
+				delete cron.user_id;
+				delete cron.user_login;
+
+			return cron;
+
+		}
+
+	// read
+
+		last () {
+
+			return new Promise((resolve, reject) => {
+
+				this.db.get(_sSelectQuery + " ORDER BY users.id DESC LIMIT 0,1;", [], (err, row) => {
+					
+					if (err) {
+						reject((err.message) ? err.message : err);
+					}
+					else {
+						resolve((row) ? DBCrons.formate(row) : {});
+					}
+
+				});
+
+			});
+
+		}
+
+		search(data) {
+			
+			let options = {}, query = _sSelectQuery;
+
+			if (data) {
+
+				query += " WHERE 1 = 1";
+
+				if (data.id) {
+					query += " AND crons.id = :id";
+					options[":id"] = data.id;
+				}
+				if (data.token) {
+					query += " AND crons.token = :token";
+					options[":token"] = data.token;
+				}
+				if (data.name) {
+					query += " AND crons.name = :name";
+					options[":name"] = data.name;
+				}
+
+				if (data.user) {
+
+					if (data.user.id) {
+						query += " AND users.id = :users_id";
+						options[":users_id"] = data.users.id;
+					}
+					if (data.user.login) {
+						query += " AND users.login = :users_login";
+						options[":users_login"] = data.user.login;
+					}
+					if (data.user.email) {
+						query += " AND users.email = :users_email";
+						options[":users_email"] = data.user.email;
+					}
+					
+				}
+				
+			}
+
+			return new Promise((resolve, reject) => {
+
+				this.db.all(_sSelectQuery + " ORDER BY users.login ASC, crons.name ASC;", options, (err, rows) => {
+
+					if (err) {
+						reject((err.message) ? err.message : err);
+					}
+					else {
+
+						rows.forEach((row, key) => {
+							rows[key] = DBCrons.formate(row);
+						});
+
+						resolve(rows);
+
+					}
+
+				});
+
+			});
+
+		}
+
+	// write
+
+		add (cron) {
 
 			if (!cron) {
-				reject('Aucun cron renseigné.');
+				return Promise.reject("Aucun cron renseigné.");
 			}
 			else if (!cron.user) {
-				reject('Aucun utilisateur renseigné.');
+				return Promise.reject("Aucun utilisateur renseigné.");
 			}
 				else if (!cron.user.id) {
-					reject("L'utilisateur renseigné n'est pas valide.");
+					return Promise.reject("L'utilisateur renseigné n'est pas valide.");
 				}
 			else if (!cron.name) {
-				reject('Aucun nom renseigné.');
+				return Promise.reject("Aucun nom renseigné.");
 			}
 			else if (!cron.timer) {
-				reject('Aucun timer renseigné.');
+				return Promise.reject("Aucun timer renseigné.");
 			}
 			else {
 
-				that.db.run("INSERT INTO crons (id_user, name, timer) VALUES (:id_user, :name, :timer);", {
-					':id_user': cron.user.id,
-					':name': cron.name,
-					':timer': cron.timer
-				}, function(err) {
+				return new Promise((resolve, reject) => {
 
-					if (err) {
-						reject((err.message) ? err.message : err);
-					}
-					else {
-						that.lastInserted().then(resolve).catch(reject);
-					}
+					this.db.run("INSERT INTO crons (id_user, name, timer) VALUES (:id_user, :name, :timer);", {
+						":id_user": cron.user.id,
+						":name": cron.name,
+						":timer": cron.timer
+					}, (err) => {
 
-				});
+						if (err) {
+							reject((err.message) ? err.message : err);
+						}
+						else {
+							this.last().then(resolve).catch(reject);
+						}
 
-			}
-
-		});
-
-	}
-
-	lastInserted() {
-
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.get(_sSelectQuery + " ORDER BY crons.id DESC LIMIT 0,1;", [], function(err, row) {
-				
-				if (err) {
-					reject((err.message) ? err.message : err);
-				}
-				else {
-					resolve((row) ? _formateCron(row) : {});
-				}
-
-			});
-
-		});
-
-	}
-
-	getAll() {
-		
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.all(_sSelectQuery, [], function(err, rows) {
-
-				if (err) {
-					reject((err.message) ? err.message : err);
-				}
-				else if (!rows) {
-					resolve([]);
-				}
-				else {
-
-					rows.forEach(function(row, key) {
-						rows[key] = _formateCron(row);
 					});
 
-					resolve(rows);
+				});
 
-				}
+			}
 
-			});
+		}
 
-		});
-
-	}
-
-	delete (cron) {
-		
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
+		edit (cron) {
 
 			if (!cron) {
-				reject('Aucune tâche plannifiée renseignée.');
+				return Promise.reject("Aucun cron renseigné.");
 			}
-			else if (!cron.id) {
-				reject("La tâche plannifiée renseignée est invalide.");
+			else if (!cron.name) {
+				return Promise.reject("Aucun nom renseigné.");
+			}
+			else if (!cron.timer) {
+				return Promise.reject("Aucun timer renseigné.");
 			}
 			else {
 
-				that.db.run("DELETE FROM crons WHERE id = :id;", { ':id' : cron.id }, function(err) {
+				return new Promise((resolve, reject) => {
 
-					if (err) {
-						reject((err.message) ? err.message : err);
-					}
-					else {
-						resolve();
-					}
+					this.db.run("UPDATE crons SET name = :name, timer = :timer WHERE id = :id;", {
+						":id": cron.id,
+						":name": cron.name,
+						":timer": cron.timer
+					}, (err) => {
+
+						if (err) {
+							reject((err.message) ? err.message : err);
+						}
+						else {
+							resolve(cron);
+						}
+
+					});
 
 				});
 
 			}
 
-		});
+		}
 
-	}
+		delete (cron) {
+			
+			if (!cron) {
+				return Promise.reject("Aucune tâche plannifiée renseignée.");
+			}
+			else if (!cron.id) {
+				return Promise.reject("La tâche plannifiée renseignée est invalide.");
+			}
+			else {
+
+				return new Promise((resolve, reject) => {
+
+					this.db.run("DELETE FROM crons WHERE id = :id;", { ":id" : cron.id }, (err) => {
+
+						if (err) {
+							reject((err.message) ? err.message : err);
+						}
+						else {
+							resolve();
+						}
+
+					});
+
+				});
+
+			}
+
+		}
 
 };

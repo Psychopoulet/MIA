@@ -19,202 +19,237 @@
 	" FROM childs" +
 		" INNER JOIN status ON status.id = childs.id_status";
 
-	function _formateChild(child) {
-
-		child.status = {
-			id : child.status_id,
-			code : child.status_code,
-			name : child.status_name,
-			backgroundcolor : child.status_backgroundcolor,
-			textcolor : child.status_textcolor
-		};
-
-			delete child.status_id;
-			delete child.status_code;
-			delete child.status_name;
-			delete child.status_backgroundcolor;
-			delete child.status_textcolor;
-
-		return child;
-
-	}
-
 // module
 
-module.exports = class DBChilds {
+module.exports = class DBChilds extends require("node-scenarios").abstract {
 
-	constructor (db) {
-		this.db = db;
-	}
+	// formate data
 
-	add (child) {
+		static formate(child) {
 
-		let that = this;
+			child.status = {
+				id : child.status_id,
+				code : child.status_code,
+				name : child.status_name,
+				backgroundcolor : child.status_backgroundcolor,
+				textcolor : child.status_textcolor
+			};
 
-		return new Promise(function(resolve, reject) {
+				delete child.status_id;
+				delete child.status_code;
+				delete child.status_name;
+				delete child.status_backgroundcolor;
+				delete child.status_textcolor;
 
-			if (!child) {
-				reject("Aucun enfant renseigné.");
-			}
-			else if (!child.status) {
-				reject("Aucun statut renseigné.");
-			}
-				else if (!child.status.id) {
-					reject("Le statut renseigné n'est pas valide.");
+			return child;
+
+		}
+
+	// read
+
+		last () {
+
+			return new Promise((resolve, reject) => {
+
+				this.db.get(_sSelectQuery + " ORDER BY childs.id DESC LIMIT 0,1;", [], (err, row) => {
+					
+					if (err) {
+						reject((err.message) ? err.message : err);
+					}
+					else {
+						resolve((row) ? DBChilds.formate(row) : {});
+					}
+
+				});
+
+			});
+
+		}
+
+		search (data) {
+			
+			let options = {}, query = _sSelectQuery;
+
+			if (data) {
+
+				query += " WHERE 1 = 1";
+
+				if (data.id) {
+					query += " AND childs.id = :id";
+					options[":id"] = data.id;
 				}
-			else if (!child.token) {
-				reject('Aucun token renseigné.');
-			}
-			else if (!child.name) {
-				reject('Aucun nom renseigné.');
-			}
-			else {
+				if (data.token) {
+					query += " AND childs.token = :token";
+					options[":token"] = data.token;
+				}
+				if (data.name) {
+					query += " AND childs.name = :name";
+					options[":name"] = data.name;
+				}
 
-				that.db.run("INSERT INTO childs (id_status, token, name) VALUES (:id_status, :token, :name);", {
-					':id_status': child.status.id,
-					':token': child.token,
-					':name': child.name
-				}, function(err) {
+				if (data.status) {
+
+					if (data.status.id) {
+						query += " AND status.id = :status_id";
+						options[":status_id"] = data.status.id;
+					}
+					if (data.status.code) {
+						query += " AND status.code = :status_code";
+						options[":status_code"] = data.status.code;
+					}
+					if (data.status.name) {
+						query += " AND status.name = :status_name";
+						options[":status_name"] = data.status.name;
+					}
+					if (data.status.name) {
+						query += " AND status.name = :status_backgroundcolor";
+						options[":status_backgroundcolor"] = data.status.name;
+					}
+					if (data.status.name) {
+						query += " AND status.name = :status_textcolor";
+						options[":status_textcolor"] = data.status.name;
+					}
+					
+				}
+				
+			}
+
+			return new Promise((resolve, reject) => {
+
+				this.db.all(_sSelectQuery + " ORDER BY status.name ASC, childs.name ASC;", options, (err, rows) => {
 
 					if (err) {
 						reject((err.message) ? err.message : err);
 					}
 					else {
-						that.lastInserted().then(resolve).catch(reject);
+
+						rows.forEach((row, key) => {
+							rows[key] = DBChilds.formate(row);
+						});
+
+						resolve(rows);
+
 					}
+
+				});
+
+			});
+
+		}
+
+	// write
+
+		add (child) {
+
+			if (!child) {
+				return Promise.reject("Aucun enfant renseigné.");
+			}
+			else if (!child.status) {
+				return Promise.reject("Aucun statut renseigné.");
+			}
+				else if (!child.status.id) {
+					return Promise.reject("Le statut renseigné n'est pas valide.");
+				}
+			else if (!child.token) {
+				return Promise.reject("Aucun token renseigné.");
+			}
+			else if (!child.name) {
+				return Promise.reject("Aucun nom renseigné.");
+			}
+			else {
+
+				return new Promise((resolve, reject) => {
+
+					this.db.run("INSERT INTO childs (id_status, token, name) VALUES (:id_status, :token, :name);", {
+						":id_status": child.status.id,
+						":token": child.token,
+						":name": child.name
+					}, (err) => {
+
+						if (err) {
+							reject((err.message) ? err.message : err);
+						}
+						else {
+							this.last().then(resolve).catch(reject);
+						}
+
+					});
+
+				});
+				
+			}
+
+		}
+
+		edit (child) {
+
+			if (!child) {
+				return Promise.reject("Aucun enfant renseigné.");
+			}
+			else if (!child.status) {
+				return Promise.reject("Aucun statut renseigné.");
+			}
+				else if (!child.status.id) {
+					return Promise.reject("Le statut renseigné n'est pas valide.");
+				}
+			else if (!child.token) {
+				return Promise.reject("Aucun token renseigné.");
+			}
+			else if (!child.name) {
+				return Promise.reject("Aucun nom renseigné.");
+			}
+			else {
+
+				return new Promise((resolve, reject) => {
+
+					this.db.run("UPDATE childs SET id_status = :id_status, name = :name WHERE id = :id;", {
+						":id": child.id,
+						":id_status": child.status.id,
+						":name": child.name
+					}, (err) => {
+
+						if (err) {
+							reject((err.message) ? err.message : err);
+						}
+						else {
+							resolve(child);
+						}
+
+					});
 
 				});
 
 			}
 
-		});
+		}
 
-	}
+		delete (child) {
 
-	lastInserted () {
-
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.get(_sSelectQuery + " ORDER BY childs.id DESC LIMIT 0,1;", [], function(err, row) {
-				
-				if (err) {
-					reject((err.message) ? err.message : err);
+			if (!child) {
+				return Promise.reject("Aucun enfant renseigné.");
+			}
+				else if (!child.id) {
+					return Promise.reject("L'enfant renseigné n'est pas valide.");
 				}
-				else {
-					resolve((row) ? _formateChild(row) : {});
-				}
+			else {
 
-			});
+				return new Promise((resolve, reject) => {
 
-		});
+					this.db.run("DELETE FROM childs WHERE id = :id;", { ":id" : child.id }, (err) => {
 
-	}
+						if (err) {
+							reject((err.message) ? err.message : err);
+						}
+						else {
+							resolve();
+						}
 
-	getAll () {
-		
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.all(_sSelectQuery, [], function(err, rows) {
-
-				if (err) {
-					reject((err.message) ? err.message : err);
-				}
-				else if (!rows) {
-					resolve([]);
-				}
-				else {
-
-					rows.forEach(function(row, key) {
-						rows[key] = _formateChild(row);
 					});
 
-					resolve(rows);
+				});
 
-				}
-
-			});
-
-		});
-
-	}
-
-	getOneByToken (token) {
-		
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.getAll().then(function(childs) {
-
-				let stResult;
-
-				for (let i = 0; i < childs.length; ++i) {
-
-					if (childs[i].token === token) {
-						stResult = childs[i];
-						break;
-					}
-
-				}
-
-				if (stResult) {
-					resolve(stResult);
-				}
-				else {
-					reject("Le token enfant '" + token + "' n'existe pas.");
-				}
-
-			})
-			.catch(reject);
-
-		});
-
-	}
-
-	rename (token, name) {
-		
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.run("UPDATE childs SET name = :name WHERE token = :token;", { ':name': name, ':token' : token }, function(err) {
-
-				if (err) {
-					reject((err.message) ? err.message : err);
-				}
-				else {
-					that.getOneByToken(token).then(resolve).catch(reject);
-				}
-
-			});
-
-		});
-
-	}
-
-	delete (token) {
-		
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.run("DELETE FROM childs WHERE token = :token;", { ':token' : token }, function(err) {
-
-				if (err) {
-					reject((err.message) ? err.message : err);
-				}
-				else {
-					resolve();
-				}
-
-			});
-
-		});
-
-	}
+			}
+			
+		}
 
 };

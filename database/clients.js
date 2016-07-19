@@ -23,216 +23,268 @@
 		" INNER JOIN users ON users.id = clients.id_user" +
 		" INNER JOIN status ON status.id = clients.id_status";
 
-	function _formateClient(client) {
-
-		client.user = {
-			id : client.user_id,
-			login : client.user_login
-		};
-
-			delete client.user_id;
-			delete client.user_login;
-
-		client.status = {
-			id : client.status_id,
-			code : client.status_code,
-			name : client.status_name,
-			backgroundcolor : client.status_backgroundcolor,
-			textcolor : client.status_textcolor
-		};
-
-			delete client.status_id;
-			delete client.status_code;
-			delete client.status_name;
-			delete client.status_color;
-
-		return client;
-
-	}
-
 // module
 
-module.exports = class DBClients {
+module.exports = class DBClients extends require("node-scenarios").abstract {
 
-	constructor (db) {
-		this.db = db;
-	}
+	// formate data
 
-	add (client) {
+		static formate(client) {
 
-		let that = this;
+			client.user = {
+				id : client.user_id,
+				login : client.user_login
+			};
 
-		return new Promise(function(resolve, reject) {
+				delete client.user_id;
+				delete client.user_login;
 
-			if (!client) {
-				reject("Aucun client renseigné.");
-			}
-			else if (!client.status) {
-				reject("Aucun statut renseigné.");
-			}
-				else if (!client.status.id) {
-					reject("Le statut renseigné n'est pas valide.");
+			client.status = {
+				id : client.status_id,
+				code : client.status_code,
+				name : client.status_name,
+				backgroundcolor : client.status_backgroundcolor,
+				textcolor : client.status_textcolor
+			};
+
+				delete client.status_id;
+				delete client.status_code;
+				delete client.status_name;
+				delete client.status_color;
+
+			return client;
+
+		}
+
+	// read
+
+		last () {
+
+			return new Promise((resolve, reject) => {
+
+				this.db.get(_sSelectQuery + " ORDER BY clients.id DESC LIMIT 0,1;", [], (err, row) => {
+					
+					if (err) {
+						reject((err.message) ? err.message : err);
+					}
+					else {
+						resolve((row) ? DBClients.formate(row) : {});
+					}
+
+				});
+
+			});
+
+		}
+
+		search (data) {
+			
+			let options = {}, query = _sSelectQuery;
+
+			if (data) {
+
+				query += " WHERE 1 = 1";
+
+				if (data.id) {
+					query += " AND clients.id = :id";
+					options[":id"] = data.id;
 				}
-			else if (!client.user) {
-				reject("Aucun utilisateur renseigné.");
-			}
-				else if (!client.user.id) {
-					reject("L'utilisateur renseigné n'est pas valide.");
+				if (data.token) {
+					query += " AND clients.token = :token";
+					options[":token"] = data.token;
 				}
-			else if (!client.token) {
-				reject('Aucun token renseigné.');
-			}
-			else if (!client.name) {
-				reject('Aucun nom renseigné.');
-			}
-			else {
+				if (data.name) {
+					query += " AND clients.name = :name";
+					options[":name"] = data.name;
+				}
 
-				that.db.run("INSERT INTO clients (id_user, id_status, token, name) VALUES (:id_user, :id_status, :token, :name);", {
-					':id_user': client.user.id,
-					':id_status': client.status.id,
-					':token': client.token,
-					':name': client.name
-				}, function(err) {
+				if (data.user) {
+
+					if (data.user.id) {
+						query += " AND users.id = :users_id";
+						options[":users_id"] = data.users.id;
+					}
+					if (data.user.login) {
+						query += " AND users.login = :users_login";
+						options[":users_login"] = data.user.login;
+					}
+					if (data.user.email) {
+						query += " AND users.email = :users_email";
+						options[":users_email"] = data.user.email;
+					}
+					
+				}
+				
+				if (data.status) {
+
+					if (data.status.id) {
+						query += " AND status.id = :status_id";
+						options[":status_id"] = data.status.id;
+					}
+					if (data.status.code) {
+						query += " AND status.code = :status_code";
+						options[":status_code"] = data.status.code;
+					}
+					if (data.status.name) {
+						query += " AND status.name = :status_name";
+						options[":status_name"] = data.status.name;
+					}
+					if (data.status.name) {
+						query += " AND status.name = :status_backgroundcolor";
+						options[":status_backgroundcolor"] = data.status.name;
+					}
+					if (data.status.name) {
+						query += " AND status.name = :status_textcolor";
+						options[":status_textcolor"] = data.status.name;
+					}
+					
+				}
+				
+			}
+
+			return new Promise((resolve, reject) => {
+
+				this.db.all(_sSelectQuery + " ORDER BY users.login ASC, status.name ASC, clients.name ASC;", options, (err, rows) => {
 
 					if (err) {
 						reject((err.message) ? err.message : err);
 					}
 					else {
-						that.lastInserted().then(resolve).catch(reject);
+
+						rows.forEach((row, key) => {
+							rows[key] = DBClients.formate(row);
+						});
+
+						resolve(rows);
+
 					}
+
+				});
+
+			});
+
+		}
+
+	// write
+
+		add (client) {
+
+			if (!client) {
+				return Promise.reject("Aucun client renseigné.");
+			}
+			else if (!client.status) {
+				return Promise.reject("Aucun statut renseigné.");
+			}
+				else if (!client.status.id) {
+					return Promise.reject("Le statut renseigné n'est pas valide.");
+				}
+			else if (!client.user) {
+				return Promise.reject("Aucun utilisateur renseigné.");
+			}
+				else if (!client.user.id) {
+					return Promise.reject("L'utilisateur renseigné n'est pas valide.");
+				}
+			else if (!client.token) {
+				return Promise.reject("Aucun token renseigné.");
+			}
+			else if (!client.name) {
+				return Promise.reject("Aucun nom renseigné.");
+			}
+			else {
+
+				return new Promise((resolve, reject) => {
+
+					this.db.run("INSERT INTO clients (id_user, id_status, token, name) VALUES (:id_user, :id_status, :token, :name);", {
+						":id_user": client.user.id,
+						":id_status": client.status.id,
+						":token": client.token,
+						":name": client.name
+					}, (err) => {
+
+						if (err) {
+							reject((err.message) ? err.message : err);
+						}
+						else {
+							this.last().then(resolve).catch(reject);
+						}
+
+					});
 
 				});
 
 			}
 
-		});
+		}
 
-	}
+		edit (client) {
 
-	lastInserted () {
-
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.get(_sSelectQuery + " ORDER BY clients.id DESC LIMIT 0,1;", [], function(err, row) {
-				
-				if (err) {
-					reject((err.message) ? err.message : err);
+			if (!client) {
+				return Promise.reject("Aucun client renseigné.");
+			}
+			else if (!client.status) {
+				return Promise.reject("Aucun statut renseigné.");
+			}
+				else if (!client.status.id) {
+					return Promise.reject("Le statut renseigné n'est pas valide.");
 				}
-				else {
-					resolve((row) ? _formateClient(row) : {});
-				}
+			else if (!client.token) {
+				return Promise.reject("Aucun token renseigné.");
+			}
+			else if (!client.name) {
+				return Promise.reject("Aucun nom renseigné.");
+			}
+			else {
 
-			});
+				return new Promise((resolve, reject) => {
 
-		});
+					this.db.run("UPDATE clients SET id_status = :id_status, name = :name WHERE id = :id;", {
+						":id": client.id,
+						":id_status": client.status.id,
+						":name": client.name
+					}, (err) => {
 
-	}
+						if (err) {
+							reject((err.message) ? err.message : err);
+						}
+						else {
+							resolve(client);
+						}
 
-	getAll () {
-		
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.all( _sSelectQuery, [], function(err, rows) {
-
-				if (err) {
-					reject((err.message) ? err.message : err);
-				}
-				else if (!rows) {
-					resolve([]);
-				}
-				else {
-
-					rows.forEach(function(row, key) {
-						rows[key] = _formateClient(row);
 					});
 
-					resolve(rows);
+				});
 
+			}
+
+		}
+
+		delete (client) {
+			
+			if (!client) {
+				return Promise.reject("Aucun client renseigné.");
+			}
+				else if (!client.id) {
+					return Promise.reject("Le client renseigné n'est pas valide.");
 				}
+			else {
+				
+				return new Promise((resolve, reject) => {
 
-			});
+					this.db.run("DELETE FROM clients WHERE id = :id;", { ":id" : client.id }, (err) => {
 
-		});
+						if (err) {
+							reject((err.message) ? err.message : err);
+						}
+						else {
+							resolve();
+						}
 
-	}
+					});
 
-	getOneByToken (token) {
-		
-		let that = this;
+				});
 
-		return new Promise(function(resolve, reject) {
-
-			that.getAll().then(function(clients) {
-
-				let stResult;
-
-				for (let i = 0; i < clients.length; ++i) {
-
-					if (clients[i].token === token) {
-						stResult = clients[i];
-						break;
-					}
-
-				}
-
-				if (stResult) {
-					resolve(stResult);
-				}
-				else {
-					reject("Le token client '" + token + "' n'existe pas.");
-				}
-
-			})
-			.catch(reject);
-
-		});
-
-	}
-
-	rename (token, name) {
-		
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.run("UPDATE clients SET name = :name WHERE token = :token;", { ':name': name, ':token' : token }, function(err) {
-
-				if (err) {
-					reject((err.message) ? err.message : err);
-				}
-				else {
-					that.getOneByToken(token).then(resolve).catch(reject);
-				}
-
-			});
-
-		});
-
-	}
-
-	delete (token) {
-		
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.run("DELETE FROM clients WHERE token = :token;", { ':token' : token }, function(err) {
-
-				if (err) {
-					reject((err.message) ? err.message : err);
-				}
-				else {
-					resolve();
-				}
-
-			});
-
-		});
-
-	}
+			}
+			
+		}
 
 };

@@ -1,87 +1,60 @@
 
 "use strict";
 
+// private
+
+	var _sSelectQuery = "" +
+	" SELECT" +
+
+		" status.id," +
+		" status.code," +
+		" status.name," +
+		" status.backgroundcolor," +
+		" status.textcolor" +
+
+	" FROM status";
+
 // module
 
-module.exports = class DBStatus {
+module.exports = class DBStatus extends require("node-scenarios").abstract {
 
-	constructor (db) {
-		this.db = db;
-	}
+	// read
 
-	add (status) {
+		last () {
 
-		let that = this;
+			return new Promise((resolve, reject) => {
 
-		return new Promise(function(resolve, reject) {
-
-			if (!status) {
-				reject('Aucun utilisateur renseigné.');
-			}
-			else if (!status.code) {
-				reject('Aucun code renseigné.');
-			}
-			else if (!status.name) {
-				reject('Aucun nom renseigné.');
-			}
-			else if (!status.backgroundcolor) {
-				reject('Aucune couleur de fond renseignée.');
-			}
-			else if (!status.textcolor) {
-				reject('Aucune couleur de texte renseignée.');
-			}
-			else {
-
-				that.db.run("INSERT INTO status (code, name, backgroundcolor, textcolor) VALUES (:code, :name, :backgroundcolor, :textcolor);", {
-					':code': status.code,
-					':name': status.name,
-					':backgroundcolor': status.backgroundcolor,
-					':textcolor': status.textcolor
-				}, function(err) {
-
+				this.db.get(_sSelectQuery + " ORDER BY status.id DESC LIMIT 0,1;", [], (err, row) => {
+					
 					if (err) {
 						reject((err.message) ? err.message : err);
 					}
 					else {
-						that.lastInserted().then(resolve).catch(reject);
+						resolve((row) ? DBStatus.formate(row) : {});
 					}
 
 				});
 
-			}
-
-		});
-
-	}
-
-	lastInserted () {
-
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.get("SELECT id, code, name, backgroundcolor, textcolor FROM status ORDER BY id DESC LIMIT 0,1;", [], function(err, row) {
-				
-				if (err) {
-					reject((err.message) ? err.message : err);
-				}
-				else {
-					resolve((row) ? row : {});
-				}
-
 			});
 
-		});
+		}
 
-	}
+
+
+
+
+// @TODO : search
+
+
+
+
+
 
 	getAll () {
 		
-		let that = this;
+		return new Promise((resolve, reject) => {
 
-		return new Promise(function(resolve, reject) {
-
-			that.db.all("SELECT id, code, name, backgroundcolor, textcolor FROM status;", [], function(err, rows) {
+			this.db.all("SELECT id, code, name, backgroundcolor, textcolor FROM status;", [], (err, rows) => {
 
 				if (err) {
 					reject((err.message) ? err.message : err);
@@ -98,11 +71,9 @@ module.exports = class DBStatus {
 
 	getOneByCode (code) {
 		
-		let that = this;
+		return new Promise((resolve, reject) => {
 
-		return new Promise(function(resolve, reject) {
-
-			that.getAll().then(function(status) {
+			this.getAll().then((status) => {
 
 				let stResult;
 
@@ -128,5 +99,61 @@ module.exports = class DBStatus {
 		});
 
 	}
+
+	// write
+
+		add (status) {
+
+			return new Promise((resolve, reject) => {
+
+				if (!status) {
+					reject('Aucun utilisateur renseigné.');
+				}
+				else if (!status.code) {
+					reject('Aucun code renseigné.');
+				}
+				else if (!status.name) {
+					reject('Aucun nom renseigné.');
+				}
+				else if (!status.backgroundcolor) {
+					reject('Aucune couleur de fond renseignée.');
+				}
+				else if (!status.textcolor) {
+					reject('Aucune couleur de texte renseignée.');
+				}
+				else {
+
+					this.db.run("INSERT INTO status (code, name, backgroundcolor, textcolor) VALUES (:code, :name, :backgroundcolor, :textcolor);", {
+						':code': status.code,
+						':name': status.name,
+						':backgroundcolor': status.backgroundcolor,
+						':textcolor': status.textcolor
+					}, (err) => {
+
+						if (err) {
+							reject((err.message) ? err.message : err);
+						}
+						else {
+							this.last().then(resolve).catch(reject);
+						}
+
+					});
+
+				}
+
+			});
+
+		}
+
+
+
+
+
+// @TODO : edit & delete
+
+
+
+
+
 
 };

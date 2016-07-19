@@ -13,45 +13,54 @@
 
 // module
 
-module.exports = class DBUsers {
+module.exports = class DBUsers extends require("node-scenarios").abstract {
 
-	constructor (db) {
-		this.db = db;
-	}
+	// read
 
-	add (user) {
+		last () {
 
-		let that = this;
+			return new Promise((resolve, reject) => {
 
-		return new Promise(function(resolve, reject) {
-
-			if (!user) {
-				reject('Aucun utilisateur renseigné.');
-			}
-			else if (!user.login) {
-				reject('Aucun login renseigné.');
-			}
-			else if (!user.password) {
-				reject('Aucun mot de passe renseigné.');
-			}
-			else {
-
-				that.db.run("INSERT INTO users (login, password, email) VALUES (:login, :password, :email);", {
-					':login': user.login,
-					':password': _cryptPassword(user.password),
-					':email': (user.email) ? err.message : ""
-				}, function(err) {
-
+				this.db.get(_sSelectQuery + " ORDER BY users.id DESC LIMIT 0,1;", [], (err, row) => {
+					
 					if (err) {
 						reject((err.message) ? err.message : err);
 					}
 					else {
-						that.lastInserted().then(resolve).catch(reject);
+						resolve((row) ? DBUsers.formate(row) : {});
 					}
 
 				});
 
-			}
+			});
+
+		}
+
+
+
+
+
+// @TODO : search
+
+
+
+
+
+
+	getAll () {
+		
+		return new Promise((resolve, reject) => {
+
+			this.db.all("SELECT id, login, password, email FROM users;", [], (err, rows) => {
+
+				if (err) {
+					reject((err.message) ? err.message : err);
+				}
+				else {
+					resolve((rows) ? rows : []);
+				}
+
+			});
 
 		});
 
@@ -59,11 +68,9 @@ module.exports = class DBUsers {
 
 	exists (login, password) {
 
-		let that = this;
+		return new Promise((resolve, reject) => {
 
-		return new Promise(function(resolve, reject) {
-
-			that.getAll().then(function(users) {
+			this.getAll().then((users) => {
 
 				let result = false;
 
@@ -86,53 +93,47 @@ module.exports = class DBUsers {
 
 	}
 
-	lastInserted () {
+	// write
 
-		let that = this;
+		add (user) {
 
-		return new Promise(function(resolve, reject) {
+			return new Promise((resolve, reject) => {
 
-			that.db.get("SELECT id, login, password, email FROM users ORDER BY id DESC LIMIT 0,1;", [], function(err, row) {
-				
-				if (err) {
-					reject((err.message) ? err.message : err);
+				if (!user) {
+					reject('Aucun utilisateur renseigné.');
+				}
+				else if (!user.login) {
+					reject('Aucun login renseigné.');
+				}
+				else if (!user.password) {
+					reject('Aucun mot de passe renseigné.');
 				}
 				else {
-					resolve((row) ? row : {});
+
+					this.db.run("INSERT INTO users (login, password, email) VALUES (:login, :password, :email);", {
+						':login': user.login,
+						':password': _cryptPassword(user.password),
+						':email': (user.email) ? err.message : ""
+					}, (err) => {
+
+						if (err) {
+							reject((err.message) ? err.message : err);
+						}
+						else {
+							this.last().then(resolve).catch(reject);
+						}
+
+					});
+
 				}
 
 			});
 
-		});
-
-	}
-
-	getAll () {
-		
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
-
-			that.db.all("SELECT id, login, password, email FROM users;", [], function(err, rows) {
-
-				if (err) {
-					reject((err.message) ? err.message : err);
-				}
-				else {
-					resolve((rows) ? rows : []);
-				}
-
-			});
-
-		});
-
-	}
+		}
 
 	update (user) {
 
-		let that = this;
-
-		return new Promise(function(resolve, reject) {
+		return new Promise((resolve, reject) => {
 
 			if (!user) {
 				reject('Aucun utilisateur renseigné.');
@@ -145,18 +146,18 @@ module.exports = class DBUsers {
 			}
 			else {
 
-				that.db.run("UPDATE users SET login = :login, password = :password, email = :email WHERE id = :id;", {
+				this.db.run("UPDATE users SET login = :login, password = :password, email = :email WHERE id = :id;", {
 					':login': user.login,
 					':password': _cryptPassword(user.password),
 					':email': (user.email) ? user.email : '',
 					':id': user.id
-				}, function(err) {
+				}, (err) => {
 
 					if (err) {
 						reject((err.message) ? err.message : err);
 					}
 					else {
-						that.lastInserted().then(resolve).catch(reject);
+						this.last().then(resolve).catch(reject);
 					}
 
 				});
@@ -166,5 +167,16 @@ module.exports = class DBUsers {
 		});
 
 	}
+
+
+
+
+
+// @TODO : edit & delete
+
+
+
+
+
 
 };
