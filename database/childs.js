@@ -1,6 +1,10 @@
 
 "use strict";
 
+// deps
+
+	const DBStatus = require(require("path").join(__dirname, "status.js"));
+
 // private
 
 	var _sSelectQuery = "" +
@@ -27,13 +31,13 @@ module.exports = class DBChilds extends require("node-scenarios").abstract {
 
 		static formate(child) {
 
-			child.status = {
+			child.status = DBStatus.formate({
 				id : child.status_id,
 				code : child.status_code,
 				name : child.status_name,
 				backgroundcolor : child.status_backgroundcolor,
 				textcolor : child.status_textcolor
-			};
+			});
 
 				delete child.status_id;
 				delete child.status_code;
@@ -101,13 +105,18 @@ module.exports = class DBChilds extends require("node-scenarios").abstract {
 						query += " AND status.name = :status_name";
 						options[":status_name"] = data.status.name;
 					}
-					if (data.status.name) {
-						query += " AND status.name = :status_backgroundcolor";
-						options[":status_backgroundcolor"] = data.status.name;
-					}
-					if (data.status.name) {
-						query += " AND status.name = :status_textcolor";
-						options[":status_textcolor"] = data.status.name;
+
+					if (data.status.colors) {
+
+						if (data.status.colors.background) {
+							query += " AND status.backgroundcolor = :status_backgroundcolor";
+							options[":status_backgroundcolor"] = data.status.colors.background;
+						}
+						if (data.status.colors.text) {
+							query += " AND status.textcolor = :status_textcolor";
+							options[":status_textcolor"] = data.status.colors.text;
+						}
+
 					}
 					
 				}
@@ -186,6 +195,9 @@ module.exports = class DBChilds extends require("node-scenarios").abstract {
 			if (!child) {
 				return Promise.reject("Aucun enfant renseigné.");
 			}
+				else if (!child.id) {
+					return Promise.reject("L'enfant renseigné n'est pas valide.");
+				}
 			else if (!child.status) {
 				return Promise.reject("Aucun statut renseigné.");
 			}

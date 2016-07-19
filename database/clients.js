@@ -1,6 +1,11 @@
 
 "use strict";
 
+// deps
+
+	const	DBStatus = require(require("path").join(__dirname, "status.js")),
+			DBUsers = require(require("path").join(__dirname, "users.js"));
+
 // private
 
 	var _sSelectQuery = "" +
@@ -12,6 +17,7 @@
 
 		" users.id AS user_id," +
 		" users.login AS user_login," +
+		" users.email AS user_email," +
 
 		" status.id AS status_id," +
 		" status.code AS status_code," +
@@ -31,21 +37,23 @@ module.exports = class DBClients extends require("node-scenarios").abstract {
 
 		static formate(client) {
 
-			client.user = {
+			client.user = DBUsers.formate({
 				id : client.user_id,
-				login : client.user_login
-			};
+				login : client.user_login,
+				email : client.user_email
+			});
 
 				delete client.user_id;
 				delete client.user_login;
+				delete client.user_email;
 
-			client.status = {
+			client.status = DBStatus.formate({
 				id : client.status_id,
 				code : client.status_code,
 				name : client.status_name,
 				backgroundcolor : client.status_backgroundcolor,
 				textcolor : client.status_textcolor
-			};
+			});
 
 				delete client.status_id;
 				delete client.status_code;
@@ -102,7 +110,7 @@ module.exports = class DBClients extends require("node-scenarios").abstract {
 
 					if (data.user.id) {
 						query += " AND users.id = :users_id";
-						options[":users_id"] = data.users.id;
+						options[":users_id"] = data.user.id;
 					}
 					if (data.user.login) {
 						query += " AND users.login = :users_login";
@@ -129,13 +137,18 @@ module.exports = class DBClients extends require("node-scenarios").abstract {
 						query += " AND status.name = :status_name";
 						options[":status_name"] = data.status.name;
 					}
-					if (data.status.name) {
-						query += " AND status.name = :status_backgroundcolor";
-						options[":status_backgroundcolor"] = data.status.name;
-					}
-					if (data.status.name) {
-						query += " AND status.name = :status_textcolor";
-						options[":status_textcolor"] = data.status.name;
+
+					if (data.status.colors) {
+
+						if (data.status.colors.background) {
+							query += " AND status.backgroundcolor = :status_backgroundcolor";
+							options[":status_backgroundcolor"] = data.status.colors.background;
+						}
+						if (data.status.colors.text) {
+							query += " AND status.textcolor = :status_textcolor";
+							options[":status_textcolor"] = data.status.colors.text;
+						}
+
 					}
 					
 				}
@@ -221,6 +234,9 @@ module.exports = class DBClients extends require("node-scenarios").abstract {
 			if (!client) {
 				return Promise.reject("Aucun client renseigné.");
 			}
+				else if (!client.id) {
+					return Promise.reject("Le client renseigné n'est pas valide.");
+				}
 			else if (!client.status) {
 				return Promise.reject("Aucun statut renseigné.");
 			}
