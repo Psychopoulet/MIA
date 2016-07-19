@@ -14,10 +14,11 @@
 // private
 
 	var _gulpFile = path.join(__dirname, "gulpfile.js"),
+		_databaseFiles = path.join(__dirname, "database", "**", "*.js"),
 		_libFiles = path.join(__dirname, "lib", "**", "*.js"),
 		_unitTestsFiles = path.join(__dirname, "tests", "**", "*.js"),
 		_pluginsFiles = path.join(__dirname, "plugins", "**", "*.js"),
-		_allJSFiles = [_gulpFile, _libFiles, _pluginsFiles, _unitTestsFiles];
+		_allJSFiles = [_gulpFile, _databaseFiles, _libFiles, _pluginsFiles, _unitTestsFiles];
 
 // tasks
 
