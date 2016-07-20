@@ -61,34 +61,34 @@ module.exports = class DBCrons extends require("node-scenarios").abstract {
 			
 			let options = {}, query = _sSelectQuery;
 
-			if (data) {
+			if ("undefined" !== typeof data) {
 
 				query += " WHERE 1 = 1";
 
-				if (data.id) {
+				if ("undefined" !== typeof data.id) {
 					query += " AND crons.id = :id";
 					options[":id"] = data.id;
 				}
-				if (data.token) {
+				if ("undefined" !== typeof data.token) {
 					query += " AND crons.token = :token";
 					options[":token"] = data.token;
 				}
-				if (data.name) {
+				if ("undefined" !== typeof data.name) {
 					query += " AND crons.name = :name";
 					options[":name"] = data.name;
 				}
 
-				if (data.user) {
+				if ("undefined" !== typeof data.user) {
 
-					if (data.user.id) {
+					if ("undefined" !== typeof data.user.id) {
 						query += " AND users.id = :users_id";
 						options[":users_id"] = data.users.id;
 					}
-					if (data.user.login) {
+					if ("undefined" !== typeof data.user.login) {
 						query += " AND users.login = :users_login";
 						options[":users_login"] = data.user.login;
 					}
-					if (data.user.email) {
+					if ("undefined" !== typeof data.user.email) {
 						query += " AND users.email = :users_email";
 						options[":users_email"] = data.user.email;
 					}
@@ -124,19 +124,19 @@ module.exports = class DBCrons extends require("node-scenarios").abstract {
 
 		add (cron) {
 
-			if (!cron) {
+			if ("undefined" === typeof cron) {
 				return Promise.reject("Aucun cron renseigné.");
 			}
-			else if (!cron.user) {
+			else if ("undefined" === typeof cron.user) {
 				return Promise.reject("Aucun utilisateur renseigné.");
 			}
-				else if (!cron.user.id) {
+				else if ("undefined" === typeof cron.user.id) {
 					return Promise.reject("L'utilisateur renseigné n'est pas valide.");
 				}
-			else if (!cron.name) {
+			else if ("undefined" === typeof cron.name) {
 				return Promise.reject("Aucun nom renseigné.");
 			}
-			else if (!cron.timer) {
+			else if ("undefined" === typeof cron.timer) {
 				return Promise.reject("Aucun timer renseigné.");
 			}
 			else {
@@ -166,13 +166,13 @@ module.exports = class DBCrons extends require("node-scenarios").abstract {
 
 		edit (cron) {
 
-			if (!cron) {
+			if ("undefined" === typeof cron) {
 				return Promise.reject("Aucun cron renseigné.");
 			}
-			else if (!cron.name) {
+			else if ("undefined" === typeof cron.name) {
 				return Promise.reject("Aucun nom renseigné.");
 			}
-			else if (!cron.timer) {
+			else if ("undefined" === typeof cron.timer) {
 				return Promise.reject("Aucun timer renseigné.");
 			}
 			else {
@@ -202,10 +202,10 @@ module.exports = class DBCrons extends require("node-scenarios").abstract {
 
 		delete (cron) {
 			
-			if (!cron) {
+			if ("undefined" === typeof cron) {
 				return Promise.reject("Aucune tâche plannifiée renseignée.");
 			}
-			else if (!cron.id) {
+			else if ("undefined" === typeof cron.id) {
 				return Promise.reject("La tâche plannifiée renseignée est invalide.");
 			}
 			else {

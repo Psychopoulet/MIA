@@ -78,41 +78,41 @@ module.exports = class DBChilds extends require("node-scenarios").abstract {
 
 				query += " WHERE 1 = 1";
 
-				if (data.id) {
+				if ("undefined" !== typeof data.id) {
 					query += " AND childs.id = :id";
 					options[":id"] = data.id;
 				}
-				if (data.token) {
+				if ("undefined" !== typeof data.token) {
 					query += " AND childs.token = :token";
 					options[":token"] = data.token;
 				}
-				if (data.name) {
+				if ("undefined" !== typeof data.name) {
 					query += " AND childs.name = :name";
 					options[":name"] = data.name;
 				}
 
-				if (data.status) {
+				if ("undefined" !== typeof data.status) {
 
-					if (data.status.id) {
+					if ("undefined" !== typeof data.status.id) {
 						query += " AND status.id = :status_id";
 						options[":status_id"] = data.status.id;
 					}
-					if (data.status.code) {
+					if ("undefined" !== typeof data.status.code) {
 						query += " AND status.code = :status_code";
 						options[":status_code"] = data.status.code;
 					}
-					if (data.status.name) {
+					if ("undefined" !== typeof data.status.name) {
 						query += " AND status.name = :status_name";
 						options[":status_name"] = data.status.name;
 					}
 
-					if (data.status.colors) {
+					if ("undefined" !== typeof data.status.colors) {
 
-						if (data.status.colors.background) {
+						if ("undefined" !== typeof data.status.colors.background) {
 							query += " AND status.backgroundcolor = :status_backgroundcolor";
 							options[":status_backgroundcolor"] = data.status.colors.background;
 						}
-						if (data.status.colors.text) {
+						if ("undefined" !== typeof data.status.colors.text) {
 							query += " AND status.textcolor = :status_textcolor";
 							options[":status_textcolor"] = data.status.colors.text;
 						}
@@ -150,19 +150,19 @@ module.exports = class DBChilds extends require("node-scenarios").abstract {
 
 		add (child) {
 
-			if (!child) {
+			if ("undefined" === typeof child) {
 				return Promise.reject("Aucun enfant renseigné.");
 			}
-			else if (!child.status) {
+			else if ("undefined" === typeof child.status) {
 				return Promise.reject("Aucun statut renseigné.");
 			}
-				else if (!child.status.id) {
+				else if ("undefined" === typeof child.status.id) {
 					return Promise.reject("Le statut renseigné n'est pas valide.");
 				}
-			else if (!child.token) {
+			else if ("undefined" === typeof child.token) {
 				return Promise.reject("Aucun token renseigné.");
 			}
-			else if (!child.name) {
+			else if ("undefined" === typeof child.name) {
 				return Promise.reject("Aucun nom renseigné.");
 			}
 			else {
@@ -192,22 +192,22 @@ module.exports = class DBChilds extends require("node-scenarios").abstract {
 
 		edit (child) {
 
-			if (!child) {
+			if ("undefined" === typeof child) {
 				return Promise.reject("Aucun enfant renseigné.");
 			}
-				else if (!child.id) {
+				else if ("undefined" === typeof child.id) {
 					return Promise.reject("L'enfant renseigné n'est pas valide.");
 				}
-			else if (!child.status) {
+			else if ("undefined" === typeof child.status) {
 				return Promise.reject("Aucun statut renseigné.");
 			}
-				else if (!child.status.id) {
+				else if ("undefined" === typeof child.status.id) {
 					return Promise.reject("Le statut renseigné n'est pas valide.");
 				}
-			else if (!child.token) {
+			else if ("undefined" === typeof child.token) {
 				return Promise.reject("Aucun token renseigné.");
 			}
-			else if (!child.name) {
+			else if ("undefined" === typeof child.name) {
 				return Promise.reject("Aucun nom renseigné.");
 			}
 			else {
@@ -237,10 +237,10 @@ module.exports = class DBChilds extends require("node-scenarios").abstract {
 
 		delete (child) {
 
-			if (!child) {
+			if ("undefined" === typeof child) {
 				return Promise.reject("Aucun enfant renseigné.");
 			}
-				else if (!child.id) {
+				else if ("undefined" === typeof child.id) {
 					return Promise.reject("L'enfant renseigné n'est pas valide.");
 				}
 			else {

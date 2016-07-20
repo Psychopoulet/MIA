@@ -59,30 +59,30 @@ module.exports = class DBStatus extends require("node-scenarios").abstract {
 			
 			let options = {}, query = _sSelectQuery;
 
-			if (data) {
+			if ("undefined" !== typeof data) {
 
 				query += " WHERE 1 = 1";
 
-				if (data.id) {
+				if ("undefined" !== typeof data.id) {
 					query += " AND status.id = :id";
 					options[":id"] = data.id;
 				}
-				if (data.code) {
+				if ("undefined" !== typeof data.code) {
 					query += " AND status.code = :code";
 					options[":code"] = data.code;
 				}
-				if (data.name) {
+				if ("undefined" !== typeof data.name) {
 					query += " AND status.name = :name";
 					options[":name"] = data.name;
 				}
 
-				if (data.colors) {
+				if ("undefined" !== typeof data.colors) {
 
-					if (data.colors.background) {
+					if ("undefined" !== typeof data.colors.background) {
 						query += " AND status.backgroundcolor = :backgroundcolor";
 						options[":backgroundcolor"] = data.colors.background;
 					}
-					if (data.colors.text) {
+					if ("undefined" !== typeof data.colors.text) {
 						query += " AND status.textcolor = :textcolor";
 						options[":textcolor"] = data.colors.text;
 					}
@@ -118,22 +118,22 @@ module.exports = class DBStatus extends require("node-scenarios").abstract {
 
 		add (status) {
 
-			if (!status) {
+			if ("undefined" === typeof status) {
 				return Promise.reject("Aucun utilisateur renseigné.");
 			}
-			else if (!status.code) {
+			else if ("undefined" === typeof status.code) {
 				return Promise.reject("Aucun code renseigné.");
 			}
-			else if (!status.name) {
+			else if ("undefined" === typeof status.name) {
 				return Promise.reject("Aucun nom renseigné.");
 			}
-			else if (!status.colors) {
+			else if ("undefined" === typeof status.colors) {
 				return Promise.reject("Aucune couleur renseignée.");
 			}
-				else if (!status.colors.background) {
+				else if ("undefined" === typeof status.colors.background) {
 					return Promise.reject("Aucune couleur de fond renseignée.");
 				}
-				else if (!status.colors.text) {
+				else if ("undefined" === typeof status.colors.text) {
 					return Promise.reject("Aucune couleur de texte renseignée.");
 				}
 			else {
@@ -164,25 +164,25 @@ module.exports = class DBStatus extends require("node-scenarios").abstract {
 
 		edit (status) {
 
-			if (!status) {
+			if ("undefined" === typeof status) {
 				return Promise.reject("Aucun statut renseigné.");
 			}
-				else if (!status.id) {
+				else if ("undefined" === typeof status.id) {
 					return Promise.reject("Le statut renseigné n'est pas valide.");
 				}
-			else if (!status.code) {
+			else if ("undefined" === typeof status.code) {
 				return Promise.reject("Aucun code renseigné.");
 			}
-			else if (!status.name) {
+			else if ("undefined" === typeof status.name) {
 				return Promise.reject("Aucun nom renseigné.");
 			}
-			else if (!status.colors) {
+			else if ("undefined" === typeof status.colors) {
 				return Promise.reject("Aucune couleur renseignée.");
 			}
-				else if (!status.colors.background) {
+				else if ("undefined" === typeof status.colors.background) {
 					return Promise.reject("Aucune couleur de fond renseignée.");
 				}
-				else if (!status.colors.text) {
+				else if ("undefined" === typeof status.colors.text) {
 					return Promise.reject("Aucune couleur de texte renseignée.");
 				}
 			else {
@@ -213,10 +213,10 @@ module.exports = class DBStatus extends require("node-scenarios").abstract {
 
 		delete (status) {
 
-			if (!status) {
+			if ("undefined" === typeof status) {
 				return Promise.reject("Aucun statut renseigné.");
 			}
-				else if (!status.id) {
+				else if ("undefined" === typeof status.id) {
 					return Promise.reject("Le statut renseigné n'est pas valide.");
 				}
 			else {

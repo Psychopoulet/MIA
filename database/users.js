@@ -52,19 +52,19 @@ module.exports = class DBUsers extends require("node-scenarios").abstract {
 			
 			let options = {}, query = _sSelectQuery;
 
-			if (data) {
+			if ("undefined" !== typeof data) {
 
 				query += " WHERE 1 = 1";
 
-				if (data.id) {
+				if ("undefined" !== typeof data.id) {
 					query += " AND users.id = :id";
 					options[":id"] = data.id;
 				}
-				if (data.login) {
+				if ("undefined" !== typeof data.login) {
 					query += " AND users.login = :login";
 					options[":login"] = data.login;
 				}
-				if (data.email) {
+				if ("undefined" !== typeof data.email) {
 					query += " AND users.email = :email";
 					options[":email"] = data.email;
 				}
@@ -141,16 +141,16 @@ module.exports = class DBUsers extends require("node-scenarios").abstract {
 
 		add (user) {
 
-			if (!user) {
+			if ("undefined" === typeof user) {
 				return Promise.reject("Aucun utilisateur renseigné.");
 			}
-			else if (!user.login) {
+			else if ("undefined" === typeof user.login) {
 				return Promise.reject("Aucun login renseigné.");
 			}
-			else if (!user.password) {
+			else if ("undefined" === typeof user.password) {
 				return Promise.reject("Aucun mot de passe renseigné.");
 			}
-			else if (!user.email) {
+			else if ("undefined" === typeof user.email) {
 				return Promise.reject("Aucun email renseigné.");
 			}
 			else {
@@ -182,16 +182,16 @@ module.exports = class DBUsers extends require("node-scenarios").abstract {
 
 			return new Promise((resolve, reject) => {
 
-				if (!user) {
+				if ("undefined" === typeof user) {
 					reject("Aucun utilisateur renseigné.");
 				}
-				else if (!user.login) {
+				else if ("undefined" === typeof user.login) {
 					reject("Aucun login renseigné.");
 				}
-				else if (!user.password) {
+				else if ("undefined" === typeof user.password) {
 					reject("Aucun mot de passe renseigné.");
 				}
-				else if (!user.email) {
+				else if ("undefined" === typeof user.email) {
 					reject("Aucun email renseigné.");
 				}
 				else {
@@ -220,10 +220,10 @@ module.exports = class DBUsers extends require("node-scenarios").abstract {
 
 		delete (user) {
 			
-			if (!user) {
+			if ("undefined" === typeof user) {
 				return Promise.reject("Aucun utilisateur renseigné.");
 			}
-				else if (!user.id) {
+				else if ("undefined" === typeof user.id) {
 					return Promise.reject("L'utilisateur renseigné n'est pas valide.");
 				}
 			else {

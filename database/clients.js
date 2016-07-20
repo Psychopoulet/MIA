@@ -93,58 +93,58 @@ module.exports = class DBClients extends require("node-scenarios").abstract {
 
 				query += " WHERE 1 = 1";
 
-				if (data.id) {
+				if ("undefined" !== typeof data.id) {
 					query += " AND clients.id = :id";
 					options[":id"] = data.id;
 				}
-				if (data.token) {
+				if ("undefined" !== typeof data.token) {
 					query += " AND clients.token = :token";
 					options[":token"] = data.token;
 				}
-				if (data.name) {
+				if ("undefined" !== typeof data.name) {
 					query += " AND clients.name = :name";
 					options[":name"] = data.name;
 				}
 
-				if (data.user) {
+				if ("undefined" !== typeof data.user) {
 
-					if (data.user.id) {
+					if ("undefined" !== typeof data.user.id) {
 						query += " AND users.id = :users_id";
 						options[":users_id"] = data.user.id;
 					}
-					if (data.user.login) {
+					if ("undefined" !== typeof data.user.login) {
 						query += " AND users.login = :users_login";
 						options[":users_login"] = data.user.login;
 					}
-					if (data.user.email) {
+					if ("undefined" !== typeof data.user.email) {
 						query += " AND users.email = :users_email";
 						options[":users_email"] = data.user.email;
 					}
 					
 				}
 				
-				if (data.status) {
+				if ("undefined" !== typeof data.status) {
 
-					if (data.status.id) {
+					if ("undefined" !== typeof data.status.id) {
 						query += " AND status.id = :status_id";
 						options[":status_id"] = data.status.id;
 					}
-					if (data.status.code) {
+					if ("undefined" !== typeof data.status.code) {
 						query += " AND status.code = :status_code";
 						options[":status_code"] = data.status.code;
 					}
-					if (data.status.name) {
+					if ("undefined" !== typeof data.status.name) {
 						query += " AND status.name = :status_name";
 						options[":status_name"] = data.status.name;
 					}
 
-					if (data.status.colors) {
+					if ("undefined" !== typeof data.status.colors) {
 
-						if (data.status.colors.background) {
+						if ("undefined" !== typeof data.status.colors.background) {
 							query += " AND status.backgroundcolor = :status_backgroundcolor";
 							options[":status_backgroundcolor"] = data.status.colors.background;
 						}
-						if (data.status.colors.text) {
+						if ("undefined" !== typeof data.status.colors.text) {
 							query += " AND status.textcolor = :status_textcolor";
 							options[":status_textcolor"] = data.status.colors.text;
 						}
@@ -182,25 +182,25 @@ module.exports = class DBClients extends require("node-scenarios").abstract {
 
 		add (client) {
 
-			if (!client) {
+			if ("undefined" === typeof client) {
 				return Promise.reject("Aucun client renseigné.");
 			}
-			else if (!client.status) {
+			else if ("undefined" === typeof client.status) {
 				return Promise.reject("Aucun statut renseigné.");
 			}
-				else if (!client.status.id) {
+				else if ("undefined" === typeof client.status.id) {
 					return Promise.reject("Le statut renseigné n'est pas valide.");
 				}
-			else if (!client.user) {
+			else if ("undefined" === typeof client.user) {
 				return Promise.reject("Aucun utilisateur renseigné.");
 			}
-				else if (!client.user.id) {
+				else if ("undefined" === typeof client.user.id) {
 					return Promise.reject("L'utilisateur renseigné n'est pas valide.");
 				}
-			else if (!client.token) {
+			else if ("undefined" === typeof client.token) {
 				return Promise.reject("Aucun token renseigné.");
 			}
-			else if (!client.name) {
+			else if ("undefined" === typeof client.name) {
 				return Promise.reject("Aucun nom renseigné.");
 			}
 			else {
@@ -231,22 +231,22 @@ module.exports = class DBClients extends require("node-scenarios").abstract {
 
 		edit (client) {
 
-			if (!client) {
+			if ("undefined" === typeof client) {
 				return Promise.reject("Aucun client renseigné.");
 			}
-				else if (!client.id) {
+				else if ("undefined" === typeof client.id) {
 					return Promise.reject("Le client renseigné n'est pas valide.");
 				}
-			else if (!client.status) {
+			else if ("undefined" === typeof client.status) {
 				return Promise.reject("Aucun statut renseigné.");
 			}
-				else if (!client.status.id) {
+				else if ("undefined" === typeof client.status.id) {
 					return Promise.reject("Le statut renseigné n'est pas valide.");
 				}
-			else if (!client.token) {
+			else if ("undefined" === typeof client.token) {
 				return Promise.reject("Aucun token renseigné.");
 			}
-			else if (!client.name) {
+			else if ("undefined" === typeof client.name) {
 				return Promise.reject("Aucun nom renseigné.");
 			}
 			else {
@@ -276,10 +276,10 @@ module.exports = class DBClients extends require("node-scenarios").abstract {
 
 		delete (client) {
 			
-			if (!client) {
+			if ("undefined" === typeof client) {
 				return Promise.reject("Aucun client renseigné.");
 			}
-				else if (!client.id) {
+				else if ("undefined" === typeof client.id) {
 					return Promise.reject("Le client renseigné n'est pas valide.");
 				}
 			else {
