@@ -8,17 +8,18 @@
 		gulp = require("gulp"),
 		eslint = require("gulp-eslint"),
 		excludeGitignore = require("gulp-exclude-gitignore"),
-		mocha = require("gulp-mocha"),
 		plumber = require("gulp-plumber");
 
 // private
 
 	var _gulpFile = path.join(__dirname, "gulpfile.js"),
-		_databaseFiles = path.join(__dirname, "database", "**", "*.js"),
-		_libFiles = path.join(__dirname, "lib", "**", "*.js"),
-		_unitTestsFiles = path.join(__dirname, "tests", "**", "*.js"),
-		_pluginsFiles = path.join(__dirname, "plugins", "**", "*.js"),
-		_allJSFiles = [_gulpFile, _databaseFiles, _libFiles, _pluginsFiles, _unitTestsFiles];
+
+		_libFiles = path.join(__dirname, "lib", "*.js"),
+			_databaseFiles = path.join(__dirname, "lib", "database", "**", "*.js"),
+			_serversFiles = path.join(__dirname, "lib", "servers", "*.js"),
+				_apiFiles = path.join(__dirname, "lib", "servers", "api", "**", "*.js"),
+
+		_allJSFiles = [_gulpFile, _libFiles, _databaseFiles, _serversFiles, _apiFiles];
 
 // tasks
 
@@ -41,21 +42,13 @@
 
 	});
 
-	gulp.task("mocha", ["eslint"], function () {
-
-		return gulp.src(_unitTestsFiles)
-			.pipe(plumber())
-			.pipe(mocha({reporter: "spec"}));
-
-	});
-
 // watcher
 
 	gulp.task("watch", function () {
-		gulp.watch(_allJSFiles, ["mocha"]);
+		gulp.watch(_allJSFiles, ["eslint"]);
 	});
 
 
 // default
 
-	gulp.task("default", ["mocha"]);
+	gulp.task("default", ["eslint"]);
