@@ -76,9 +76,6 @@
 					<li class="nav-item">
 						<a id="navLogs" href="#" class="nav-link"><span class="fa fa-list"></span> Logs</a>
 					</li>
-					<!--<li class="nav-item">
-						<a id="navTTS" href="#" class="nav-link"><span class="fa fa-microphone"></span> TTS</a>
-					</li>-->
 				</ul>
 				
 			</div>
@@ -119,7 +116,7 @@
 
 				<div class="col-xs-12 only-connected hidden-xs-up" data-ng-controller="ControllerLogin">
 
-					<form id="login_form" action="#" method="POST" class="card" data-ng-submit="log();">
+					<form class="card" data-ng-submit="log()">
 
 						<div class="card-header">Login</div>
 
@@ -159,72 +156,20 @@
 
 				<div class="col-xs-12 col-md-3 col-lg-2 only-logged hidden-xs-up">
 
-					<div data-ng-controller="ControllerClients">
+					<div data-ng-controller="ControllerDevices">
 						
 						<div class="card">
 
 							<div class="card-header">
-								<span class="fa fa-user"></span> Clients
+								<span class="fa fa-user"></span> Périphériques
 							</div>
 
 							<ul class="list-group">
-
-								<li class="list-group-item"
-									data-ng-repeat="client in clients"
-									data-ng-style="{ 'background-color' : client.status.backgroundcolor, 'color' : client.status.textcolor }">
-
-									<div class="clearfix">
-
-										<div class="pull-left">{{client.name}}</div>
-
-										<div class="btn-group pull-right">
-											<button type="button" class="btn fa fa-check" data-ng-show="'ACCEPTED' != client.status.code" data-ng-click="allow(client);"></button>
-											<button type="button" class="btn fa fa-edit" data-ng-show="'ACCEPTED' == client.status.code" data-ng-click="rename(client);"></button>
-											<button type="button" class="btn fa fa-trash" data-ng-click="delete(client);"></button>
-										</div>
-
-									</div>
-
-								</li>
 
 							</ul>
 							
 						</div>
 						
-					</div>
-
-					<div data-ng-controller="ControllerChilds">
-						
-						<div class="card">
-
-							<div class="card-header">
-								<span class="fa fa-child"></span> Enfants
-							</div>
-
-							<ul class="list-group">
-
-								<li class="list-group-item"
-									data-ng-repeat="child in childs"
-									data-ng-style="{ 'background-color' : child.status.backgroundcolor, 'color' : client.status.textcolor }">
-
-									<div class="clearfix">
-
-										<div class="pull-left">{{child.name}}</div>
-
-										<div class="btn-group pull-right">
-											<button type="button" class="btn fa fa-check" data-ng-show="'ACCEPTED' != child.status.code" data-ng-click="allow(child);"></button>
-											<button type="button" class="btn fa fa-edit" data-ng-show="'ACCEPTED' == child.status.code" data-ng-click="rename(child);"></button>
-											<button type="button" class="btn fa fa-trash" data-ng-click="delete(child);"></button>
-										</div>
-
-									</div>
-
-								</li>
-
-							</ul>
-							
-						</div>
-					
 					</div>
 
 				</div>
@@ -419,7 +364,7 @@
 
 			</div>
 			
-			<div id="modalLinkCronsActions" class="modal fade only-logged hidden-xs-up" data-ng-controller="ControllerLinkCronsActions">
+			<!--<div id="modalLinkCronsActions" class="modal fade only-logged hidden-xs-up" data-ng-controller="ControllerLinkCronsActions">
 
 				<div class="modal-dialog">
 
@@ -511,7 +456,7 @@
 
 				</div>
 
-			</div>
+			</div>-->
 			
 		<div id="modalActions" class="modal fade only-logged hidden-xs-up" data-ng-controller="ControllerActions">
 
@@ -707,11 +652,6 @@
 
 											<div class="card-block">
 
-												<span data-ng-repeat="(i, dayName) in monthContent">
-													<span data-ng-show="0 < i">, </span>
-													<a href="#" data-ng-click="seeLog(yearName, monthName, dayName);">{{dayName}}</a>
-												</span>
-
 											</div>
 
 										</div>
@@ -736,51 +676,6 @@
 
 		</div>
 
-		<div id="modalTTS" class="modal fade only-logged hidden-xs-up" data-ng-controller="ControllerTTS">
-
-			<div class="modal-dialog">
-
-				<form class="modal-content">
-
-					<div class="modal-header">
-						<h5 class="modal-title"><span class="fa fa-microphone"></span> TTS</h5>
-					</div>
-
-					<div class="modal-body">
-
-						<div class="form-group">
-							<label for="formTTSText">Texte</label>
-							<input id="formTTSText" type="text" class="form-control" placeholder="Texte" data-ng-model="text">
-						</div>
-
-						<div class="form-group">
-							<label for="formTTSChild">Enfant</label>
-							<select id="formTTSChild" class="form-control" data-ng-model="child" ng-options="child.name group by child.status.name for child in childs">
-								<option>--</option>
-							</select>
-						</div>
-
-					</div>
-
-					<div class="modal-footer">
-
-						<button type="button" class="btn btn-primary" data-ng-click="execute(child, text);">
-							<span class="fa fa-play"></span> Exécuter
-						</button>
-						<button type="button" class="btn btn-primary" data-ng-click="createAction(child, text);">
-							<span class=" fa fa-fire"></span> Créer une action
-						</button>
-
-						<button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
-						
-					</div>
-
-				</form>
-
-			</div>
-
-		</div>
-			
 		<!-- JS -->
 
 			<!-- popup translation -->
