@@ -21,31 +21,6 @@
 			<link rel="stylesheet" type="text/css" href="/libs/bootstrap.css">
 			<link rel="stylesheet" type="text/css" href="/libs/fonts/css/font-awesome.min.css">
 
-			<style>
-				.SimpleLogsList .SimpleLogsLine .SimpleLogsTime {
-					padding-right: 10px;
-					padding-bottom: 5px;
-				}
-				.SimpleLogsList .SimpleLogsLine .SimpleLogsMessage {
-					padding-bottom: 5px;
-				}
-				.SimpleLogsList .SimpleLogsLine .SimpleLogsMessage.log {
-					color: black;
-				}
-				.SimpleLogsList .SimpleLogsLine .SimpleLogsMessage.info {
-					color: blue;
-				}
-				.SimpleLogsList .SimpleLogsLine .SimpleLogsMessage.success {
-					color: green;
-				}
-				.SimpleLogsList .SimpleLogsLine .SimpleLogsMessage.error {
-					color: red;
-				}
-				.SimpleLogsList .SimpleLogsLine .SimpleLogsMessage.warning {
-					color: orange;
-				}
-			</style>
-			
 	</head>
 
 	<body data-ng-app="MIAApp">
@@ -82,10 +57,10 @@
 
 			<div class="pull-xs-right">
 				
-				<span class="label label-danger only-disconnected">déconnecté</span>
-				<span class="label label-warning only-connected hidden-xs-up">connecté</span>
-				<span class="label label-info only-validation hidden-xs-up">validation...</span>
-				<span class="label label-success only-validated hidden-xs-up">validé</span>
+				<span class="text-danger only-disconnected">déconnecté</span>
+				<span class="text-warning only-connected hidden-xs-up">connecté</span>
+				<span class="text-info only-validation hidden-xs-up">validation...</span>
+				<span class="text-success only-validated hidden-xs-up">validé</span>
 
 			</div>
 
@@ -115,23 +90,7 @@
 
 				</div>
 
-				<div class="col-xs-12 only-validation hidden-xs-up">
-
-					<div class="card card-inverse card-info text-xs-center">
-
-						<div class="card-block">
-
-							<blockquote class="card-blockquote">
-								MIA connectée. Veuillez attendre la validation de votre identifiant.
-							</blockquote>
-
-						</div>
-
-					</div>
-
-				</div>
-
-				<div class="col-xs-12 only-connected hidden-xs-up" data-ng-controller="ControllerLogin">
+				<div class="col-xs-12 only-connected only-validation hidden-xs-up" data-ng-controller="ControllerLogin">
 
 					<form class="card" data-ng-submit="log()">
 
@@ -183,6 +142,32 @@
 
 							<ul class="list-group">
 
+								<li class="list-group-item" data-ng-repeat="device in devices" data-ng-class="{ 'list-group-item-success': device.connected }">
+
+									<div class="row">
+
+										<div class="col-xs-1">
+											<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == device.status.code, 'fa-remove': 'BLOCKED' == device.status.code, 'fa-hourglass-start': 'WAITING' == device.status.code }"></span>
+										</div>
+
+										<div class="col-xs-8">
+											<span>{{device.name}}</span>
+											<span data-ng-show="device.user.id"> ({{device.user.login}})</span>
+										</div>
+
+										<div class="col-xs-2">
+											<button type="button" class="btn-link" data-ng-show="'ACCEPTED' == device.status.code" data-ng-click="remove(device);">
+												<span class="fa fa-times-circle-o"></span>
+											</button>
+											<button type="button" class="btn-link" data-ng-show="'ACCEPTED' != device.status.code" data-ng-click="valid(device);">
+												<span class="fa fa-check-circle-o"></span>
+											</button>
+										</div>
+
+									</div>
+
+								</li>
+
 							</ul>
 							
 						</div>
@@ -221,7 +206,7 @@
 		<!-- modales -->
 
 
-		<div id="modalUser" class="modal fade only-validated hidden-xs-up" data-ng-controller="ControllerUser">
+		<!--<div id="modalUser" class="modal fade only-validated hidden-xs-up" data-ng-controller="ControllerUser">
 
 			<div class="modal-dialog">
 
@@ -381,7 +366,7 @@
 
 			</div>
 			
-			<!--<div id="modalLinkCronsActions" class="modal fade only-validated hidden-xs-up" data-ng-controller="ControllerLinkCronsActions">
+			<div id="modalLinkCronsActions" class="modal fade only-validated hidden-xs-up" data-ng-controller="ControllerLinkCronsActions">
 
 				<div class="modal-dialog">
 
@@ -473,7 +458,7 @@
 
 				</div>
 
-			</div>-->
+			</div>
 			
 		<div id="modalActions" class="modal fade only-validated hidden-xs-up" data-ng-controller="ControllerActions">
 
@@ -691,7 +676,7 @@
 
 			</div>
 
-		</div>
+		</div>-->
 
 		<!-- JS -->
 
@@ -721,8 +706,71 @@
 			<script type="text/javascript" src="/libs/angular-modules.js"></script>
 
 			<script type="text/javascript">
+
 				var socket = io.connect();
+				var getToken = function() { return ""; };
+
+				function errorToHTML(errors) {
+
+					var result = "";
+
+						console.log(errors);
+
+						if (errors instanceof Array) {
+
+							var tresult = [];
+							for (var i = 0; i < errors.length; ++i) {
+
+								if (errors[i].message) {
+									tresult.push(errors[i].message);
+								}
+
+							}
+
+							for (var i = 0; i < tresult.length; ++i) {
+
+								if (0 < i || (0 == i && 1 < tresult.length)) {
+									result += "- " + tresult[i];
+								}
+								else {
+									result += tresult[i];
+								}
+
+								if (i < tresult.length - 1) {
+									result += "<br />";
+								}
+
+							}
+
+						}
+							
+						if (!result) {
+							result = "Impossible de lire l'erreur générée par l'API";
+						}
+
+					return result;
+						
+				}
+
+					function APIErrorToHTML(err) {
+
+						if (err && "string" === typeof err) {
+							return err;
+						}
+						else if (err && err.data && "string" === typeof err.data) {
+							return err.data;
+						}
+						else if (!err || !err.data) {
+							return "Erreur non documentée par l'API";
+						}
+						else {
+							return (errorToHTML( ("object" === typeof err.data.errors && err.data.errors instanceof Array) ? err.data.errors : "" ));
+						}
+
+					}
+
 				var app = angular.module('MIAApp', ['ngBootstrapPopup', 'ngCookies']);
+
 			</script>
 			
 			<script src="/js/scripts.js"></script>
