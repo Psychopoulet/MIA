@@ -59,6 +59,7 @@
 				
 				<span class="text-danger only-disconnected">déconnecté</span>
 				<span class="text-warning only-connected hidden-xs-up">connecté</span>
+				<span class="text-info only-tokencreation hidden-xs-up">création de token</span>
 				<span class="text-info only-validation hidden-xs-up">validation...</span>
 				<span class="text-success only-validated hidden-xs-up">validé</span>
 
@@ -90,6 +91,22 @@
 
 				</div>
 
+				<div class="col-xs-12 only-tokencreation">
+
+					<div class="card card-inverse card-info text-xs-center">
+
+						<div class="card-block">
+
+							<blockquote class="card-blockquote">
+								Enregistrement de votre périphérique...
+							</blockquote>
+
+						</div>
+
+					</div>
+
+				</div>
+
 				<div class="col-xs-12 only-connected only-validation hidden-xs-up" data-ng-controller="ControllerLogin">
 
 					<form class="card" data-ng-submit="log()">
@@ -107,7 +124,7 @@
 								<label for="login_login">Login</label>
 
 								<input id="login_login" type="text" placeholder="Login" class="form-control"
-										data-ng-model="login" data-ng-disabled="inProgress"
+										data-ng-model="login" data-ng-disabled="loginInProgress"
 								/>
 							
 							</div>
@@ -117,12 +134,12 @@
 								<label for="login_password">Mot de passe</label>
 
 								<input id="login_password" type="password" placeholder="Mot de passe" class="form-control"
-										data-ng-model="password" data-ng-disabled="inProgress"
+										data-ng-model="password" data-ng-disabled="loginInProgress"
 								/>
 
 							</div>
 
-							<button type="submit" class="btn btn-primary" data-ng-disabled="inProgress">Connexion</button>
+							<button type="submit" class="btn btn-primary" data-ng-disabled="loginInProgress">Connexion</button>
 
 						</div>
 
@@ -706,71 +723,8 @@
 			<script type="text/javascript" src="/libs/angular-modules.js"></script>
 
 			<script type="text/javascript">
-
 				var socket = io.connect();
-				var getToken = function() { return ""; };
-
-				function errorToHTML(errors) {
-
-					var result = "";
-
-						console.log(errors);
-
-						if (errors instanceof Array) {
-
-							var tresult = [];
-							for (var i = 0; i < errors.length; ++i) {
-
-								if (errors[i].message) {
-									tresult.push(errors[i].message);
-								}
-
-							}
-
-							for (var i = 0; i < tresult.length; ++i) {
-
-								if (0 < i || (0 == i && 1 < tresult.length)) {
-									result += "- " + tresult[i];
-								}
-								else {
-									result += tresult[i];
-								}
-
-								if (i < tresult.length - 1) {
-									result += "<br />";
-								}
-
-							}
-
-						}
-							
-						if (!result) {
-							result = "Impossible de lire l'erreur générée par l'API";
-						}
-
-					return result;
-						
-				}
-
-					function APIErrorToHTML(err) {
-
-						if (err && "string" === typeof err) {
-							return err;
-						}
-						else if (err && err.data && "string" === typeof err.data) {
-							return err.data;
-						}
-						else if (!err || !err.data) {
-							return "Erreur non documentée par l'API";
-						}
-						else {
-							return (errorToHTML( ("object" === typeof err.data.errors && err.data.errors instanceof Array) ? err.data.errors : "" ));
-						}
-
-					}
-
-				var app = angular.module('MIAApp', ['ngBootstrapPopup', 'ngCookies']);
-
+				var app = angular.module('MIAApp', ['ngBootstrapPopup', 'ngMIAAPI']);
 			</script>
 			
 			<script src="/js/scripts.js"></script>
