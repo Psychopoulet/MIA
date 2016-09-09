@@ -27,7 +27,7 @@
     "cron": "^1.1.0",
     "forever-monitor": "^1.7.0",
 
-    "node-promfs": "^0.2.0",
+    "node-promfs": "^0.2.1",
     "node-containerpattern": "^0.2.0",
     "node-confmanager": "^0.3.0",
     "node-multi-socketservers": "^0.2.2",
