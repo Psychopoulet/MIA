@@ -157,47 +157,72 @@
 
 					<div class="row">
 						
-						<div class="col-xs-12 col-md-3 col-lg-2">
+						<div class="col-xs-12 col-md-3 col-lg-2" data-ng-controller="ControllerDevices">
 
-							<div data-ng-controller="ControllerDevices">
-								
-								<div class="card">
+							<div class="card">
 
-									<div class="card-header">
-										<span class="fa fa-user"></span> Périphériques
-									</div>
+								<div class="card-header">
+									<span class="fa fa-user"></span> Clients
+								</div>
 
-									<ul class="list-group">
+								<ul class="list-group">
 
-										<li class="list-group-item" data-ng-repeat="device in devices" data-ng-class="{ 'list-group-item-success': device.connected }">
+									<!-- <li class="list-group-item" data-ng-repeat="device in devices" data-ng-class="{ 'list-group-item-success': device.connected }"> -->
+									<li class="list-group-item" data-ng-repeat="device in devices | filter : { function: {code: 'CLIENT' } }">
 
-											<div class="row">
+										<div class="row">
 
-												<div class="col-xs-1">
-													<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == device.status.code, 'fa-remove': 'BLOCKED' == device.status.code, 'fa-hourglass-start': 'WAITING' == device.status.code }"></span>
-												</div>
-
-												<div class="col-xs-8">
-													<span>{{device.name}}</span>
-													<span data-ng-show="device.user.id"> ({{device.user.login}})</span>
-												</div>
-
-												<div class="col-xs-2">
-													<button type="button" class="btn-link" data-ng-show="'ACCEPTED' == device.status.code" data-ng-click="remove(device);">
-														<span class="fa fa-times-circle-o"></span>
-													</button>
-													<button type="button" class="btn-link" data-ng-show="'ACCEPTED' != device.status.code" data-ng-click="valid(device);">
-														<span class="fa fa-check-circle-o"></span>
-													</button>
-												</div>
-
+											<div class="col-xs-1">
+												<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == device.status.code, 'fa-remove': 'BLOCKED' == device.status.code, 'fa-hourglass-start': 'WAITING' == device.status.code }"></span>
 											</div>
 
-										</li>
+											<div class="col-xs-8">
+												<span>{{device.name}}</span>
+												<span data-ng-show="device.user.id"> ({{device.user.login}})</span>
+											</div>
 
-									</ul>
-									
+											<div class="col-xs-2">
+												<button type="button" class="btn-link" data-ng-show="'ACCEPTED' == device.status.code || 'WAITING' == device.status.code" data-ng-click="delete(device);">
+													<span class="fa fa-times-circle-o"></span>
+												</button>
+												<button type="button" class="btn-link" data-ng-show="'WAITING' == device.status.code" data-ng-click="valid(device);">
+													<span class="fa fa-check-circle-o"></span>
+												</button>
+											</div>
+
+										</div>
+
+									</li>
+
+								</ul>
+								
+							</div>
+
+							<div class="card">
+
+								<div class="card-header">
+									<span class="fa fa-user"></span> Enfants
 								</div>
+
+								<ul class="list-group">
+
+									<li class="list-group-item" data-ng-repeat="device in devices | filter : { function: {code: 'CHILD' } }">
+
+										<div class="row">
+
+											<div class="col-xs-1">
+												<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == device.status.code, 'fa-remove': 'BLOCKED' == device.status.code, 'fa-hourglass-start': 'WAITING' == device.status.code }"></span>
+											</div>
+
+											<div class="col-xs-8">
+												<span>{{device.name}}</span>
+											</div>
+
+										</div>
+
+									</li>
+
+								</ul>
 								
 							</div>
 
@@ -728,9 +753,13 @@
 
 			<!-- libs -->
 
+			<!--
+				future drag'n'drop
+				<script type="text/javascript" src="/libs/interact.js"></script>
+			-->
+
 			<script type="text/javascript" src="/libs/tether.js"></script>
 			<script type="text/javascript" src="/libs/jquery.js"></script>
-			<script type="text/javascript" src="/libs/interact.js"></script>
 			<script type="text/javascript" src="/libs/bootstrap.js"></script>
 			<script type="text/javascript" src="/libs/socketio.js"></script>
 			<script type="text/javascript" src="/libs/angular.js"></script>
