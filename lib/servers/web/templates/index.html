@@ -23,7 +23,7 @@
 
 	</head>
 
-	<body data-ng-app="MIAApp">
+	<body data-ng-app="MIAApp" data-ng-controller="ControllerLogin">
 
 
 		<!-- menu -->
@@ -31,9 +31,9 @@
 
 		<header class="navbar navbar-light navbar-static-top">
 
-			<div class="navbar-brand">MIA <small>({{ip}})</small></div>
+			<div class="navbar-brand">MIA <small>(ip : {{ip}})</small></div>
 
-			<div class="only-validated hidden-xs-up">
+			<div data-ng-show="isValidated && isConnected">
 
 				<ul class="nav navbar-nav hidden-sm-down">
 					<li class="nav-item">
@@ -57,11 +57,13 @@
 
 			<div class="pull-xs-right">
 				
-				<span class="text-danger only-disconnected">déconnecté</span>
-				<span class="text-warning only-connected hidden-xs-up">connecté</span>
-				<span class="text-info only-tokencreation hidden-xs-up">création de token</span>
-				<span class="text-info only-validation hidden-xs-up">validation...</span>
-				<span class="text-success only-validated hidden-xs-up">validé</span>
+				<span data-ng-show="isDisconnected" class="text-danger">déconnecté</span>
+
+				<div data-ng-show="isConnected">
+					<span data-ng-show="isWaitingForTokenCreation" class="text-info">création de token</span>
+					<span data-ng-show="isWaitingForValidation" class="text-info">validation...</span>
+					<span data-ng-show="isValidated" class="text-success">connecté</span>
+				</div>
 
 			</div>
 
@@ -73,9 +75,9 @@
 
 		<div class="container-fluid">
 
-			<div class="row">
+			<div data-ng-show="isDisconnected" class="row">
 
-				<div class="col-xs-12 only-disconnected">
+				<div class="col-xs-12">
 
 					<div class="card card-inverse card-danger text-xs-center">
 
@@ -91,7 +93,11 @@
 
 				</div>
 
-				<div class="col-xs-12 only-tokencreation">
+			</div>
+
+			<div data-ng-show="isConnected" class="row">
+
+				<div data-ng-show="isWaitingForTokenCreation" class="col-xs-12">
 
 					<div class="card card-inverse card-info text-xs-center">
 
@@ -107,7 +113,7 @@
 
 				</div>
 
-				<div class="col-xs-12 only-connected only-validation hidden-xs-up" data-ng-controller="ControllerLogin">
+				<div data-ng-show="isWaitingForValidation" class="col-xs-12">
 
 					<form class="card" data-ng-submit="log()">
 
@@ -147,74 +153,82 @@
 
 				</div>
 
-				<div class="col-xs-12 col-md-3 col-lg-2 only-validated hidden-xs-up">
+				<div data-ng-show="isValidated" class="col-xs-12">
 
-					<div data-ng-controller="ControllerDevices">
+					<div class="row">
 						
-						<div class="card">
+						<div class="col-xs-12 col-md-3 col-lg-2">
 
-							<div class="card-header">
-								<span class="fa fa-user"></span> Périphériques
-							</div>
+							<div data-ng-controller="ControllerDevices">
+								
+								<div class="card">
 
-							<ul class="list-group">
-
-								<li class="list-group-item" data-ng-repeat="device in devices" data-ng-class="{ 'list-group-item-success': device.connected }">
-
-									<div class="row">
-
-										<div class="col-xs-1">
-											<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == device.status.code, 'fa-remove': 'BLOCKED' == device.status.code, 'fa-hourglass-start': 'WAITING' == device.status.code }"></span>
-										</div>
-
-										<div class="col-xs-8">
-											<span>{{device.name}}</span>
-											<span data-ng-show="device.user.id"> ({{device.user.login}})</span>
-										</div>
-
-										<div class="col-xs-2">
-											<button type="button" class="btn-link" data-ng-show="'ACCEPTED' == device.status.code" data-ng-click="remove(device);">
-												<span class="fa fa-times-circle-o"></span>
-											</button>
-											<button type="button" class="btn-link" data-ng-show="'ACCEPTED' != device.status.code" data-ng-click="valid(device);">
-												<span class="fa fa-check-circle-o"></span>
-											</button>
-										</div>
-
+									<div class="card-header">
+										<span class="fa fa-user"></span> Périphériques
 									</div>
 
-								</li>
+									<ul class="list-group">
 
-							</ul>
-							
-						</div>
-						
-					</div>
+										<li class="list-group-item" data-ng-repeat="device in devices" data-ng-class="{ 'list-group-item-success': device.connected }">
 
-				</div>
+											<div class="row">
 
-				<div class="col-xs-12 col-md-9 col-lg-10 only-validated hidden-xs-up">
+												<div class="col-xs-1">
+													<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == device.status.code, 'fa-remove': 'BLOCKED' == device.status.code, 'fa-hourglass-start': 'WAITING' == device.status.code }"></span>
+												</div>
 
-					<div class="card">
-						
-						<div class="card-header">
-							<span class="fa fa-paperclip"></span> Widgets plugins
-						</div>
+												<div class="col-xs-8">
+													<span>{{device.name}}</span>
+													<span data-ng-show="device.user.id"> ({{device.user.login}})</span>
+												</div>
 
-						<div class="card-block">
-							
-							<div class="row">
+												<div class="col-xs-2">
+													<button type="button" class="btn-link" data-ng-show="'ACCEPTED' == device.status.code" data-ng-click="remove(device);">
+														<span class="fa fa-times-circle-o"></span>
+													</button>
+													<button type="button" class="btn-link" data-ng-show="'ACCEPTED' != device.status.code" data-ng-click="valid(device);">
+														<span class="fa fa-check-circle-o"></span>
+													</button>
+												</div>
 
-								{{pluginstemplates}}
+											</div>
+
+										</li>
+
+									</ul>
+									
+								</div>
 								
 							</div>
 
 						</div>
-						
+
+						<div class="col-xs-12 col-md-9 col-lg-10">
+
+							<div class="card">
+								
+								<div class="card-header">
+									<span class="fa fa-paperclip"></span> Widgets plugins
+								</div>
+
+								<div class="card-block">
+									
+									<div class="row">
+
+										{{pluginstemplates}}
+										
+									</div>
+
+								</div>
+								
+							</div>
+
+						</div>
+
 					</div>
 
 				</div>
-
+				
 			</div>
 
 		</div>
@@ -223,7 +237,7 @@
 		<!-- modales -->
 
 
-		<!--<div id="modalUser" class="modal fade only-validated hidden-xs-up" data-ng-controller="ControllerUser">
+		<!--<div id="modalUser" class="modal fade only-validated" data-ng-controller="ControllerUser">
 
 			<div class="modal-dialog">
 
@@ -289,7 +303,7 @@
 
 		</div>
 		
-		<div id="modalCrons" class="modal fade only-validated hidden-xs-up" data-ng-controller="ControllerCrons">
+		<div id="modalCrons" class="modal fade only-validated" data-ng-controller="ControllerCrons">
 
 			<div class="modal-dialog">
 
@@ -348,7 +362,7 @@
 
 		</div>
 
-			<div id="modalCron" class="modal fade only-validated hidden-xs-up" data-ng-controller="ControllerCron">
+			<div id="modalCron" class="modal fade only-validated" data-ng-controller="ControllerCron">
 
 				<div class="modal-dialog">
 
@@ -383,7 +397,7 @@
 
 			</div>
 			
-			<div id="modalLinkCronsActions" class="modal fade only-validated hidden-xs-up" data-ng-controller="ControllerLinkCronsActions">
+			<div id="modalLinkCronsActions" class="modal fade only-validated" data-ng-controller="ControllerLinkCronsActions">
 
 				<div class="modal-dialog">
 
@@ -477,7 +491,7 @@
 
 			</div>
 			
-		<div id="modalActions" class="modal fade only-validated hidden-xs-up" data-ng-controller="ControllerActions">
+		<div id="modalActions" class="modal fade only-validated" data-ng-controller="ControllerActions">
 
 			<div class="modal-dialog">
 
@@ -540,7 +554,7 @@
 
 		</div>
 			
-			<div id="modalAction" class="modal fade only-validated hidden-xs-up" data-ng-controller="ControllerAction">
+			<div id="modalAction" class="modal fade only-validated" data-ng-controller="ControllerAction">
 
 				<div class="modal-dialog">
 
@@ -584,7 +598,7 @@
 
 			</div>
 			
-		<div id="modalPlugins" class="modal fade only-validated hidden-xs-up" data-ng-controller="ControllerPlugins">
+		<div id="modalPlugins" class="modal fade only-validated" data-ng-controller="ControllerPlugins">
 
 			<div class="modal-dialog">
 
@@ -643,7 +657,7 @@
 
 		</div>
 			
-		<div id="modalLogs" class="modal fade only-validated hidden-xs-up" data-ng-controller="ControllerLogs">
+		<div id="modalLogs" class="modal fade only-validated" data-ng-controller="ControllerLogs">
 
 			<div class="modal-dialog">
 
