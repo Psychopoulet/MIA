@@ -170,22 +170,26 @@
 									<!-- <li class="list-group-item" data-ng-repeat="device in devices" data-ng-class="{ 'list-group-item-success': device.connected }"> -->
 									<li class="list-group-item" data-ng-repeat="device in devices | filter : { function: {code: 'CLIENT' } }">
 
-											<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == device.status.code, 'fa-remove': 'BLOCKED' == device.status.code, 'fa-hourglass-start': 'WAITING' == device.status.code }"></span>
+										<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == device.status.code, 'fa-remove': 'BLOCKED' == device.status.code, 'fa-hourglass-start': 'WAITING' == device.status.code }"></span>
 
-											<span>{{device.name}}</span>
-											<span data-ng-show="device.user.id"> ({{device.user.login}})</span>
+										<span>{{device.name}}</span>
+										<span data-ng-show="device.user.id"> ({{device.user.login}})</span>
 
-											<button type="button" class="btn-link pull-xs-right" data-ng-click="delete(device);">
-												<span class="fa fa-times-circle-o"></span>
-											</button>
+										<button type="button" class="btn-link pull-xs-right" data-ng-click="delete(device);">
+											<span class="fa fa-times-circle-o"></span>
+										</button>
 
-											<button type="button" class="btn-link pull-xs-right" data-ng-show="'ACCEPTED' == device.status.code || 'WAITING' == device.status.code" data-ng-click="block(device);">
-												<span class="fa fa-ban"></span>
-											</button>
+										<button type="button" class="btn-link pull-xs-right" data-ng-show="'ACCEPTED' == device.status.code || 'WAITING' == device.status.code" data-ng-click="block(device);">
+											<span class="fa fa-ban"></span>
+										</button>
 
-											<button type="button" class="btn-link pull-xs-right" data-ng-show="'WAITING' == device.status.code || 'BLOCKED' == device.status.code" data-ng-click="valid(device);">
-												<span class="fa fa-check-circle-o"></span>
-											</button>
+										<button type="button" class="btn-link pull-xs-right" data-ng-show="'ACCEPTED' == device.status.code" data-ng-click="rename(device);">
+											<span class="fa fa-file-text-o"></span>
+										</button>
+
+										<button type="button" class="btn-link pull-xs-right" data-ng-show="'WAITING' == device.status.code || 'BLOCKED' == device.status.code" data-ng-click="valid(device);">
+											<span class="fa fa-check-circle-o"></span>
+										</button>
 
 									</li>
 
