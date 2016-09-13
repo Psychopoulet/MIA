@@ -40,17 +40,17 @@
 						<a id="navUsers" href="#" class="nav-link"><span class="fa fa-user"></span> Utilisateurs</a>
 					</li>
 					<li class="nav-item">
+						<a id="navPlugins" href="#" class="nav-link"><span class="fa fa-paperclip"></span> Plugins</a>
+					</li>
+					<!--<li class="nav-item">
 						<a id="navCrons" href="#" class="nav-link"><span class="fa fa-calendar"></span> Tâches plannifiées</a>
 					</li>
 					<li class="nav-item">
 						<a id="navActions" href="#" class="nav-link"><span class="fa fa-fire"></span> Actions</a>
 					</li>
 					<li class="nav-item">
-						<a id="navPlugins" href="#" class="nav-link"><span class="fa fa-paperclip"></span> Plugins</a>
-					</li>
-					<li class="nav-item">
 						<a id="navLogs" href="#" class="nav-link"><span class="fa fa-list"></span> Logs</a>
-					</li>
+					</li>-->
 				</ul>
 				
 			</div>
@@ -327,6 +327,65 @@
 
 		</div>
 		
+		<div id="modalPlugins" class="modal fade only-validated" data-ng-controller="ControllerPlugins">
+
+			<div class="modal-dialog">
+
+				<div class="modal-content">
+
+					<div class="modal-header">
+						<h5 class="modal-title"><span class="fa fa-paperclip"></span> Plugins</h5>
+					</div>
+
+					<div class="modal-body">
+
+						<button type="button" class="btn btn-primary" data-ng-click="addViaGithub();">
+							<span class="fa fa-plus"></span> Ajouter via Github
+						</button>
+
+						<br /><br />
+
+						<ul class="list-group">
+
+							<li class="list-group-item" data-ng-repeat="plugin in plugins">
+
+								<div class="clearfix">
+
+									<h6 class="pull-left">{{plugin.name}}</h6>
+
+									<div class="btn-group pull-right">
+
+										<button type="button" class="btn fa fa-cloud-download"
+												data-ng-show="plugin.github && '' != plugin.github"
+												data-ng-click="updateViaGithub(plugin);">
+										</button>
+
+										<button type="button" class="btn fa fa-trash"
+												data-ng-click="delete(plugin);">
+										</button>
+									
+									</div>
+
+								</div>
+
+								{{plugin.description}}
+
+							</li>
+
+						</ul>
+
+					</div>
+
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+		
 		<!--<div id="modalCrons" class="modal fade only-validated" data-ng-controller="ControllerCrons">
 
 			<div class="modal-dialog">
@@ -598,14 +657,14 @@
 							<div class="form-group">
 								<label for="formActionChild">Enfant</label>
 								<select id="formActionChild" class="form-control" data-ng-model="action.child" ng-options="child.name group by child.status.name for child in childs">
-									<option>-- Tous --</option>
+									<optionTous<option>
 								</select>
 							</div>
 
 							<div class="form-group">
 								<label for="formActionType">Type</label>
 								<select id="formActionType" class="form-control" data-ng-model="action.type" ng-options="type.name for type in actionstypes">
-									<option>-- NC --</option>
+									<option>NC</option>
 								</select>
 							</div>
 
@@ -621,65 +680,6 @@
 				</div>
 
 			</div>
-			
-		<div id="modalPlugins" class="modal fade only-validated" data-ng-controller="ControllerPlugins">
-
-			<div class="modal-dialog">
-
-				<div class="modal-content">
-
-					<div class="modal-header">
-						<h5 class="modal-title"><span class="fa fa-paperclip"></span> Plugins</h5>
-					</div>
-
-					<div class="modal-body">
-
-						<button type="button" class="btn btn-primary" data-ng-click="addViaGithub();">
-							<span class="fa fa-plus"></span> Ajouter via Github
-						</button>
-
-						<br /><br />
-
-						<ul class="list-group">
-
-							<li class="list-group-item" data-ng-repeat="plugin in plugins">
-
-								<div class="clearfix">
-
-									<h6 class="pull-left">{{plugin.name}}</h6>
-
-									<div class="btn-group pull-right">
-
-										<button type="button" class="btn fa fa-cloud-download"
-												data-ng-show="plugin.github && '' != plugin.github"
-												data-ng-click="updateViaGithub(plugin);">
-										</button>
-
-										<button type="button" class="btn fa fa-trash"
-												data-ng-click="delete(plugin);">
-										</button>
-									
-									</div>
-
-								</div>
-
-								{{plugin.description}}
-
-							</li>
-
-						</ul>
-
-					</div>
-
-					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
-					</div>
-
-				</div>
-
-			</div>
-
-		</div>
 			
 		<div id="modalLogs" class="modal fade only-validated" data-ng-controller="ControllerLogs">
 
