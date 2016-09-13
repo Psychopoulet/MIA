@@ -37,7 +37,7 @@
 
 				<ul class="nav navbar-nav hidden-sm-down">
 					<li class="nav-item">
-						<a id="navUsers" href="#" class="nav-link"><span class="fa fa-user"></span> Utilisateur</a>
+						<a id="navUsers" href="#" class="nav-link"><span class="fa fa-user"></span> Utilisateurs</a>
 					</li>
 					<li class="nav-item">
 						<a id="navCrons" href="#" class="nav-link"><span class="fa fa-calendar"></span> Tâches plannifiées</a>
@@ -130,7 +130,7 @@
 								<label for="login_login">Login</label>
 
 								<input id="login_login" type="text" placeholder="Login" class="form-control"
-										data-ng-model="login" data-ng-disabled="loginInProgress"
+										data-ng-model="login" data-ng-disabled="loginInProgress" data-ng-trim="true"
 								/>
 							
 							</div>
@@ -140,7 +140,7 @@
 								<label for="login_password">Mot de passe</label>
 
 								<input id="login_password" type="password" placeholder="Mot de passe" class="form-control"
-										data-ng-model="password" data-ng-disabled="loginInProgress"
+										data-ng-model="password" data-ng-disabled="loginInProgress" data-ng-trim="true"
 								/>
 
 							</div>
@@ -261,7 +261,7 @@
 		<!-- modales -->
 
 
-		<!--<div id="modalUser" class="modal fade only-validated" data-ng-controller="ControllerUser">
+		<div id="modalUsers" class="modal fade only-validated" data-ng-controller="ControllerUser">
 
 			<div class="modal-dialog">
 
@@ -279,12 +279,12 @@
 
 							<div class="input-group">
 
-								<input id="formUserLogin" type="text" class="form-control" placeholder="Login" data-ng-model="user.login">
+								<input id="formUserLogin" type="text" class="form-control" placeholder="Login" data-ng-model="login" data-ng-trim="true">
 
 								<span class="input-group-btn">
 
 									<button type="button" class="btn btn-primary"
-											data-ng-click="editLogin(user.login);">
+											data-ng-click="editLogin(login);">
 										Modifier
 									</button>
 
@@ -300,12 +300,12 @@
 
 							<div class="input-group">
 
-								<input id="formUserPassword" type="password" class="form-control" placeholder="Mot de passe" data-ng-model="user.password">
+								<input id="formUserPassword" type="password" class="form-control" placeholder="Mot de passe" data-ng-model="password" data-ng-trim="true">
 
 								<span class="input-group-btn">
 
 									<button type="button" class="btn btn-primary"
-											data-ng-click="editPassword(user.password);">
+											data-ng-click="editPassword(password);">
 										Modifier
 									</button>
 
@@ -327,7 +327,7 @@
 
 		</div>
 		
-		<div id="modalCrons" class="modal fade only-validated" data-ng-controller="ControllerCrons">
+		<!--<div id="modalCrons" class="modal fade only-validated" data-ng-controller="ControllerCrons">
 
 			<div class="modal-dialog">
 
