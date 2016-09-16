@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 	<head>
 		
 		<!-- INFOS -->
@@ -15,7 +16,16 @@
 			<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" />
 
 			<meta name="google" content="notranslate" />
-			
+
+			<!-- Apple -->
+
+				<link rel="apple-touch-icon" href="/pictures/favicon.png">
+				
+			<!-- IE -->
+
+				<meta name="application-name" content="MIA"/>
+				<meta name="msapplication-TileColor" content="#FFFFFF"/>
+				
 		<!-- CSS -->
 
 			<link rel="stylesheet" type="text/css" href="/libs/bootstrap.css">
@@ -29,7 +39,7 @@
 		<!-- menu -->
 
 
-		<header class="navbar navbar-light navbar-static-top">
+		<header class="navbar navbar-light navbar-static-top" role="navigation">
 
 			<div class="navbar-brand">MIA <small>(ip : {{ip}})</small></div>
 
@@ -73,7 +83,7 @@
 		<!-- content -->
 
 
-		<div class="container-fluid">
+		<div class="container-fluid" role="main">
 
 			<div data-ng-show="isDisconnected" class="row">
 
