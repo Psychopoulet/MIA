@@ -169,94 +169,98 @@
 
 					<div class="row">
 						
-						<div class="col-xs-12 col-md-3 col-lg-2" data-ng-controller="ControllerDevices">
+						<div class="hidden-xs-down col-sm-12 col-lg-4 col-xl-3" data-ng-controller="ControllerDevices">
 
-							<div class="card">
+							<div class="row">
 
-								<div class="card-header">
-									<span class="fa fa-user"></span> Clients
-								</div>
+								<div class="col-sm-6 col-lg-12">
 
-								<ul class="list-group">
+									<div class="card">
 
-									<!-- <li class="list-group-item" data-ng-repeat="device in devices" data-ng-class="{ 'list-group-item-success': device.connected }"> -->
-									<li class="list-group-item" data-ng-repeat="device in devices | filter : { function: {code: 'CLIENT' } }">
-
-										<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == device.status.code, 'fa-remove': 'BLOCKED' == device.status.code, 'fa-hourglass-start': 'WAITING' == device.status.code }"></span>
-
-										<span>{{device.name}}</span>
-										<span data-ng-show="device.user.id"> ({{device.user.login}})</span>
-
-										<button type="button" class="btn-link pull-xs-right" data-ng-click="delete(device);">
-											<span class="fa fa-times-circle-o"></span>
-										</button>
-
-										<button type="button" class="btn-link pull-xs-right" data-ng-show="'ACCEPTED' == device.status.code || 'WAITING' == device.status.code" data-ng-click="block(device);">
-											<span class="fa fa-ban"></span>
-										</button>
-
-										<button type="button" class="btn-link pull-xs-right" data-ng-show="'ACCEPTED' == device.status.code" data-ng-click="rename(device);">
-											<span class="fa fa-file-text-o"></span>
-										</button>
-
-										<button type="button" class="btn-link pull-xs-right" data-ng-show="'WAITING' == device.status.code || 'BLOCKED' == device.status.code" data-ng-click="valid(device);">
-											<span class="fa fa-check-circle-o"></span>
-										</button>
-
-									</li>
-
-								</ul>
-								
-							</div>
-
-							<div class="card">
-
-								<div class="card-header">
-									<span class="fa fa-user"></span> Enfants
-								</div>
-
-								<ul class="list-group">
-
-									<li class="list-group-item" data-ng-repeat="device in devices | filter : { function: {code: 'CHILD' } }">
-
-										<div class="row">
-
-											<div class="col-xs-1">
-												<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == device.status.code, 'fa-remove': 'BLOCKED' == device.status.code, 'fa-hourglass-start': 'WAITING' == device.status.code }"></span>
-											</div>
-
-											<div class="col-xs-8">
-												<span>{{device.name}}</span>
-											</div>
-
+										<div class="card-header">
+											<span class="fa fa-user"></span> Clients
 										</div>
 
-									</li>
+										<ul class="list-group">
 
-								</ul>
-								
-							</div>
+											<!-- <li class="list-group-item" data-ng-repeat="device in devices" data-ng-class="{ 'list-group-item-success': device.connected }"> -->
+											<li class="list-group-item" data-ng-repeat="device in devices | filter : { function: {code: 'CLIENT' } }">
 
-						</div>
+												<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == device.status.code, 'fa-remove': 'BLOCKED' == device.status.code, 'fa-hourglass-start': 'WAITING' == device.status.code }"></span>
 
-						<div class="col-xs-12 col-md-9 col-lg-10">
+												<span>{{device.name}}</span>
+												<span data-ng-show="device.user.id"> ({{device.user.login}})</span>
 
-							<div class="card">
-								
-								<div class="card-header">
-									<span class="fa fa-paperclip"></span> Widgets plugins
-								</div>
+												<button type="button" class="btn-link pull-xs-right" data-ng-click="delete(device);">
+													<span class="fa fa-times-circle-o"></span>
+												</button>
 
-								<div class="card-block">
-									
-									<div class="card-columns">
+												<button type="button" class="btn-link pull-xs-right" data-ng-show="'ACCEPTED' == device.status.code || 'WAITING' == device.status.code" data-ng-click="block(device);">
+													<span class="fa fa-ban"></span>
+												</button>
 
-										{{pluginstemplates}}
+												<button type="button" class="btn-link pull-xs-right" data-ng-show="'ACCEPTED' == device.status.code" data-ng-click="rename(device);">
+													<span class="fa fa-file-text-o"></span>
+												</button>
+
+												<button type="button" class="btn-link pull-xs-right" data-ng-show="'WAITING' == device.status.code || 'BLOCKED' == device.status.code" data-ng-click="valid(device);">
+													<span class="fa fa-check-circle-o"></span>
+												</button>
+
+											</li>
+
+										</ul>
 										
 									</div>
 
 								</div>
 								
+								<div class="col-sm-6 col-lg-12">
+
+									<div class="card">
+
+										<div class="card-header">
+											<span class="fa fa-user"></span> Enfants
+										</div>
+
+										<ul class="list-group">
+
+											<li class="list-group-item" data-ng-repeat="device in devices | filter : { function: {code: 'CHILD' } }">
+
+												<div class="row">
+
+													<div class="col-xs-1">
+														<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == device.status.code, 'fa-remove': 'BLOCKED' == device.status.code, 'fa-hourglass-start': 'WAITING' == device.status.code }"></span>
+													</div>
+
+													<div class="col-xs-8">
+														<span>{{device.name}}</span>
+													</div>
+
+												</div>
+
+											</li>
+
+										</ul>
+										
+									</div>
+
+								</div>
+
+							</div>
+
+						</div>
+
+						<div class="col-xs-12 col-md-12 col-lg-8 col-xl-9">
+
+							<div class="card-deck-wrapper">
+
+								<div class="card-deck">
+
+									{{pluginstemplates}}
+								
+								</div>
+
 							</div>
 
 						</div>
