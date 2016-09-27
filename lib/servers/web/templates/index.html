@@ -525,16 +525,15 @@
 									<div class="input-group-btn">
 										<select class="form-control" data-ng-model="cron.timer.month">
 											<option value="*">Tous les mois</option>
-											<option data-ng-repeat="i in [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]" data-ng-value="i">{{i}}</option>
+											<option data-ng-repeat="i in [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ]" data-ng-value="i">{{i}}</option>
 										</select>
 									</div>
 
 									<div class="input-group-btn">
 										<select class="form-control" data-ng-model="cron.timer.weekday">
 											<option value="*">Touts les jours de la semaine</option>
-											<option data-ng-repeat="i in [ 1, 2, 3, 4, 5, 6, 7 ]" data-ng-value="i">{{i}}</option>
+											<option data-ng-repeat="i in [ 1, 2, 3, 4, 5, 6, 0 ]" data-ng-value="i">{{i}}</option>
 											<option value="1-5">1-5</option>
-											<option value="6-7">6-7</option>
 										</select>
 									</div>
 
