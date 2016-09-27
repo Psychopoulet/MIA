@@ -57,10 +57,10 @@
 					<li class="nav-item">
 						<a id="navPlugins" href="#" class="nav-link"><span class="fa fa-paperclip"></span> Plugins</a>
 					</li>
-					<!--
 					<li class="nav-item">
 						<a id="navActions" href="#" class="nav-link"><span class="fa fa-fire"></span> Actions</a>
 					</li>
+					<!--
 					<li class="nav-item">
 						<a id="navLogs" href="#" class="nav-link"><span class="fa fa-list"></span> Logs</a>
 					</li>-->
@@ -419,10 +419,6 @@
 							<span class="fa fa-plus"></span> Ajouter
 						</button>
 
-						<!--<button type="button" class="btn btn-primary" data-ng-click="linkToAction();" data-ng-show="0 < crons.length">
-							<span class="fa fa-fire"></span> Lier à une action
-						</button>-->
-
 						<br /><br />
 
 						<div data-ng-show="0 >= crons.length">
@@ -438,10 +434,16 @@
 									<div class="pull-left">{{cron.name}}</div>
 
 									<div class="btn-group pull-right">
+
+										<!--<button type="button" class="btn btn-primary" data-ng-click="linkToAction(cron);">
+											<span class="fa fa-fire"></span> Lier à une action
+										</button>-->
+
 										<button type="button" class="btn btn-primary fa fa-trash"
 												data-ng-click="delete(cron);"
 												data-toggle="tooltip" data-placement="auto" title="Supprimer la tâche plannifiée">
 										</button>
+
 									</div>
 
 								</div>
@@ -646,7 +648,7 @@
 
 				</div>
 
-			</div>
+			</div>-->
 			
 		<div id="modalActions" class="modal fade only-validated" data-ng-controller="ControllerActions">
 
@@ -660,17 +662,17 @@
 
 					<div class="modal-body">
 						
+						<button type="button" class="btn btn-primary" data-ng-click="add();">
+							<span class="fa fa-plus"></span> Ajouter
+						</button>
+
+						<br /><br />
+
 						<div data-ng-show="0 >= actions.length">
 							Aucune action enregistrée.
 						</div>
 
 						<div data-ng-show="0 < actions.length">
-
-							<button type="button" class="btn btn-primary" data-ng-click="linkToCron();">
-								<span class="fa fa-calendar"></span> Lier à une tâche plannifiée
-							</button>
-
-							<br /><br />
 
 							<ul class="list-group">
 
@@ -681,6 +683,11 @@
 										<div class="pull-left">"{{action.name}}", sur {{action.child.name}}</div>
 
 										<div class="btn-group pull-right">
+
+											<!--<button type="button" class="btn btn-primary" data-ng-click="linkToCron(action);">
+												<span class="fa fa-calendar"></span> Lier à une tâche plannifiée
+											</button>-->
+
 											<button type="button" class="btn btn-primary fa fa-play"
 													data-ng-click="execute(action);"
 													data-toggle="tooltip" data-placement="auto" title="Exécuter l'action">
@@ -689,6 +696,7 @@
 													data-ng-click="delete(action);"
 													data-toggle="tooltip" data-placement="auto" title="Supprimer l'action">
 											</button>
+											
 										</div>
 
 									</div>
@@ -711,7 +719,7 @@
 
 		</div>
 			
-			<div id="modalAction" class="modal fade only-validated" data-ng-controller="ControllerAction">
+			<!--<div id="modalAction" class="modal fade only-validated" data-ng-controller="ControllerAction">
 
 				<div class="modal-dialog">
 
