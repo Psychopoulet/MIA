@@ -52,11 +52,12 @@
 						<a id="navUsers" href="#" class="nav-link"><span class="fa fa-user"></span> Utilisateurs</a>
 					</li>
 					<li class="nav-item">
-						<a id="navPlugins" href="#" class="nav-link"><span class="fa fa-paperclip"></span> Plugins</a>
-					</li>
-					<!--<li class="nav-item">
 						<a id="navCrons" href="#" class="nav-link"><span class="fa fa-calendar"></span> Tâches plannifiées</a>
 					</li>
+					<li class="nav-item">
+						<a id="navPlugins" href="#" class="nav-link"><span class="fa fa-paperclip"></span> Plugins</a>
+					</li>
+					<!--
 					<li class="nav-item">
 						<a id="navActions" href="#" class="nav-link"><span class="fa fa-fire"></span> Actions</a>
 					</li>
@@ -402,7 +403,7 @@
 
 		</div>
 		
-		<!--<div id="modalCrons" class="modal fade only-validated" data-ng-controller="ControllerCrons">
+		<div id="modalCrons" class="modal fade only-validated" data-ng-controller="ControllerCrons">
 
 			<div class="modal-dialog">
 
@@ -418,9 +419,9 @@
 							<span class="fa fa-plus"></span> Ajouter
 						</button>
 
-						<button type="button" class="btn btn-primary" data-ng-click="linkToAction();" data-ng-show="0 < crons.length">
+						<!--<button type="button" class="btn btn-primary" data-ng-click="linkToAction();" data-ng-show="0 < crons.length">
 							<span class="fa fa-fire"></span> Lier à une action
-						</button>
+						</button>-->
 
 						<br /><br />
 
@@ -468,7 +469,7 @@
 					<form class="modal-content">
 
 						<div class="modal-header">
-							<h5 class="modal-title"><span class="fa fa-fire"></span> {{cron.name}}</h5>
+							<h5 class="modal-title"><span class="fa fa-fire"></span>Tâche plannifiée "{{cron.name}}"</h5>
 						</div>
 
 						<div class="modal-body">
@@ -479,8 +480,66 @@
 							</div>
 
 							<div class="form-group">
-								<label for="formCronTimer">Timer</label>
-								<input id="formCronTimer" type="text" class="form-control" placeholder="Timer" data-ng-model="cron.timer">
+								<label for="formCronCode">Code</label>
+								<input id="formCronCode" type="text" class="form-control" placeholder="Nom" data-ng-model="cron.code">
+							</div>
+
+							<div class="form-group">
+
+								<label>Timer</label>
+
+								<div class="input-group">
+
+									<div class="input-group-btn">
+										<select class="form-control" data-ng-model="cron.timer.second">
+											<option value="*">Toutes les secondes</option>
+											<option data-ng-repeat="i in [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59 ]" data-ng-value="i">{{i}}</option>
+										</select>
+									</div>
+									
+									<div class="input-group-btn">
+										<select class="form-control" data-ng-model="cron.timer.minute">
+											<option value="*">Toutes les minutes</option>
+											<option data-ng-repeat="i in [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59 ]" data-ng-value="i">{{i}}</option>
+										</select>
+									</div>
+
+									<div class="input-group-btn">
+										<select class="form-control" data-ng-model="cron.timer.hour">
+											<option value="*">Toutes les heures</option>
+											<option data-ng-repeat="i in [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 ]" data-ng-value="i">{{i}}</option>
+										</select>
+									</div>
+
+								</div>
+								
+								<div class="input-group">
+
+									<div class="input-group-btn">
+										<select class="form-control" data-ng-model="cron.timer.monthday">
+											<option value="*">Tous les jours du mois</option>
+											<option data-ng-repeat="i in [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 ]" data-ng-value="i">{{i}}</option>
+										</select>
+									</div>
+									
+									<div class="input-group-btn">
+										<select class="form-control" data-ng-model="cron.timer.month">
+											<option value="*">Tous les mois</option>
+											<option data-ng-repeat="i in [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]" data-ng-value="i">{{i}}</option>
+										</select>
+									</div>
+
+									<div class="input-group-btn">
+										<select class="form-control" data-ng-model="cron.timer.weekday">
+											<option value="*">Touts les jours de la semaine</option>
+											<option data-ng-repeat="i in [ 1, 2, 3, 4, 5, 6, 7 ]" data-ng-value="i">{{i}}</option>
+											<option value="1-5">1-5</option>
+											<option value="6-7">6-7</option>
+										</select>
+									</div>
+
+								</div>
+								
 							</div>
 
 						</div>
@@ -496,7 +555,7 @@
 
 			</div>
 			
-			<div id="modalLinkCronsActions" class="modal fade only-validated" data-ng-controller="ControllerLinkCronsActions">
+			<!--<div id="modalLinkCronsActions" class="modal fade only-validated" data-ng-controller="ControllerLinkCronsActions">
 
 				<div class="modal-dialog">
 
