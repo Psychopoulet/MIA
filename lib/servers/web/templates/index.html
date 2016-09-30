@@ -439,6 +439,16 @@
 											<span class="fa fa-fire"></span> Lier à une action
 										</button>-->
 
+										<button type="button" class="btn btn-primary fa fa-play" data-ng-hide="cron.running"
+												data-ng-click="start(cron);"
+												data-toggle="tooltip" data-placement="auto" title="Lancer la tâche plannifiée">
+										</button>
+
+										<button type="button" class="btn btn-primary fa fa-stop" data-ng-show="cron.running"
+												data-ng-click="stop(cron);"
+												data-toggle="tooltip" data-placement="auto" title="Arrêter la tâche plannifiée">
+										</button>
+
 										<button type="button" class="btn btn-primary fa fa-trash"
 												data-ng-click="delete(cron);"
 												data-toggle="tooltip" data-placement="auto" title="Supprimer la tâche plannifiée">
