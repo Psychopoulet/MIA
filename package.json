@@ -31,7 +31,7 @@
     "node-confmanager": "^0.3.2",
     "node-multi-socketservers": "^0.2.4",
     "node-pluginsmanager": "^0.3.3",
-    "node-scenarios": "^1.2.0",
+    "node-scenarios": "^1.2.1",
     "node-logs": "^0.1.6",
     
     "simplessl": "^2.0.3"
