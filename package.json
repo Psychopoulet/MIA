@@ -21,25 +21,25 @@
     "express": "^4.14.0",
     "compression": "^1.6.2",
     "body-parser": "^1.15.2",
-    "helmet": "^2.3.0",
+    "helmet": "^3.1.0",
 
-    "cron": "^1.1.0",
-    "forever-monitor": "^1.7.0",
+    "cron": "^1.1.1",
 
-    "node-containerpattern": "^0.2.3",
-    "node-confmanager": "^0.3.2",
-    "node-logs": "^0.1.6",
+    "node-containerpattern": "^0.2.4",
+    "node-confmanager": "^0.3.4",
+    "node-logs": "^0.1.7",
     "node-multi-socketservers": "^0.2.4",
-    "node-pluginsmanager": "^0.3.4",
-    "node-promfs": "^1.0.2",
-    "node-scenarios": "^1.2.1",
+    "node-persistent-software": "^1.0.1",
+    "node-pluginsmanager": "^0.4.0",
+    "node-promfs": "^1.0.3",
+    "node-scenarios": "^1.2.2",
     
-    "simplessl": "^2.0.3"
+    "simplessl": "^2.1.0"
 
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "gulp-eslint": "^2.1.0",
+    "gulp-eslint": "^3.0.1",
     "gulp-exclude-gitignore": "^1.0.0",
     "gulp-plumber": "^1.1.0"
   },
