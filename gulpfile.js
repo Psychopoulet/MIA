@@ -23,14 +23,21 @@
 
 // tasks
 
-	gulp.task("eslint", function () {
+	gulp.task("eslint", () => {
 
 		return gulp.src(_allJSFiles)
 			.pipe(plumber())
 			.pipe(excludeGitignore())
 			.pipe(eslint({
+				"parserOptions": {
+					"ecmaVersion": 6
+				},
 				"rules": {
-					"indent": 0
+					"linebreak-style": 0,
+					"quotes": [ 1, "double" ],
+					"indent": 0,
+					// "indent": [ 2, "tab" ],
+					"semi": [ 2, "always" ]
 				},
 				"env": {
 					"node": true, "es6": true, "mocha": true
@@ -44,7 +51,7 @@
 
 // watcher
 
-	gulp.task("watch", function () {
+	gulp.task("watch", () => {
 		gulp.watch(_allJSFiles, ["eslint"]);
 	});
 
