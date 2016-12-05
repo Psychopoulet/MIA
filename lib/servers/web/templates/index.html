@@ -52,18 +52,23 @@
 						<a id="navUsers" href="#" class="nav-link"><span class="fa fa-user"></span> Utilisateurs</a>
 					</li>
 					<li class="nav-item">
-						<a id="navCrons" href="#" class="nav-link"><span class="fa fa-calendar"></span> Tâches plannifiées</a>
+						<a id="navPlugins" href="#" class="nav-link"><span class="fa fa-paperclip"></span> Plugins</a>
 					</li>
 					<li class="nav-item">
-						<a id="navPlugins" href="#" class="nav-link"><span class="fa fa-paperclip"></span> Plugins</a>
+						<a id="navDevices" href="#" class="nav-link"><span class="fa fa-home"></span> Périphériques</a>
+					</li>
+					<li class="nav-item">
+						<a id="navCrons" href="#" class="nav-link"><span class="fa fa-calendar"></span> Tâches plannifiées</a>
 					</li>
 					<li class="nav-item">
 						<a id="navActions" href="#" class="nav-link"><span class="fa fa-fire"></span> Actions</a>
 					</li>
-					<!--
+					<li class="nav-item">
+						<a id="navScenarios" href="#" class="nav-link"><span class="fa fa-cogs"></span> Scénarios</a>
+					</li>
 					<li class="nav-item">
 						<a id="navLogs" href="#" class="nav-link"><span class="fa fa-list"></span> Logs</a>
-					</li>-->
+					</li>
 				</ul>
 				
 			</div>
@@ -117,7 +122,7 @@
 						<div class="card-block">
 
 							<blockquote class="card-blockquote">
-								Enregistrement de votre périphérique...
+								Enregistrement de votre contrôleur...
 							</blockquote>
 
 						</div>
@@ -170,7 +175,7 @@
 
 					<div class="row">
 						
-						<div class="hidden-xs-down col-sm-12 col-lg-4 col-xl-3" data-ng-controller="ControllerDevices">
+						<div class="hidden-xs-down col-sm-12 col-lg-4 col-xl-3" data-ng-controller="ControllerControllers">
 
 							<div class="row">
 
@@ -184,27 +189,27 @@
 
 										<ul class="list-group">
 
-											<!-- <li class="list-group-item" data-ng-repeat="device in devices" data-ng-class="{ 'list-group-item-success': device.connected }"> -->
-											<li class="list-group-item" data-ng-repeat="device in devices | filter : { function: {code: 'CLIENT' } }">
+											<!-- <li class="list-group-item" data-ng-repeat="controller in controllers" data-ng-class="{ 'list-group-item-success': controller.connected }"> -->
+											<li class="list-group-item" data-ng-repeat="controller in controllers | filter : { function: {code: 'CLIENT' } }">
 
-												<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == device.status.code, 'fa-remove': 'BLOCKED' == device.status.code, 'fa-hourglass-start': 'WAITING' == device.status.code }"></span>
+												<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == controller.status.code, 'fa-remove': 'BLOCKED' == controller.status.code, 'fa-hourglass-start': 'WAITING' == controller.status.code }"></span>
 
-												<span>{{device.name}}</span>
-												<span data-ng-show="device.user.id"> ({{device.user.login}})</span>
+												<span>{{controller.name}}</span>
+												<span data-ng-show="controller.user.id"> ({{controller.user.login}})</span>
 
-												<button type="button" class="btn-link pull-xs-right" data-ng-click="delete(device);">
+												<button type="button" class="btn-link pull-xs-right" data-ng-click="delete(controller);">
 													<span class="fa fa-times-circle-o"></span>
 												</button>
 
-												<button type="button" class="btn-link pull-xs-right" data-ng-show="'ACCEPTED' == device.status.code || 'WAITING' == device.status.code" data-ng-click="block(device);">
+												<button type="button" class="btn-link pull-xs-right" data-ng-show="'ACCEPTED' == controller.status.code || 'WAITING' == controller.status.code" data-ng-click="block(controller);">
 													<span class="fa fa-ban"></span>
 												</button>
 
-												<button type="button" class="btn-link pull-xs-right" data-ng-show="'ACCEPTED' == device.status.code" data-ng-click="rename(device);">
+												<button type="button" class="btn-link pull-xs-right" data-ng-show="'ACCEPTED' == controller.status.code" data-ng-click="rename(controller);">
 													<span class="fa fa-file-text-o"></span>
 												</button>
 
-												<button type="button" class="btn-link pull-xs-right" data-ng-show="'WAITING' == device.status.code || 'BLOCKED' == device.status.code" data-ng-click="valid(device);">
+												<button type="button" class="btn-link pull-xs-right" data-ng-show="'WAITING' == controller.status.code || 'BLOCKED' == controller.status.code" data-ng-click="valid(controller);">
 													<span class="fa fa-check-circle-o"></span>
 												</button>
 
@@ -226,16 +231,16 @@
 
 										<ul class="list-group">
 
-											<li class="list-group-item" data-ng-repeat="device in devices | filter : { function: {code: 'CHILD' } }">
+											<li class="list-group-item" data-ng-repeat="controller in controllers | filter : { function: {code: 'CHILD' } }">
 
 												<div class="row">
 
 													<div class="col-xs-1">
-														<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == device.status.code, 'fa-remove': 'BLOCKED' == device.status.code, 'fa-hourglass-start': 'WAITING' == device.status.code }"></span>
+														<span class="fa" data-ng-class="{ 'fa-check': 'ACCEPTED' == controller.status.code, 'fa-remove': 'BLOCKED' == controller.status.code, 'fa-hourglass-start': 'WAITING' == controller.status.code }"></span>
 													</div>
 
 													<div class="col-xs-8">
-														<span>{{device.name}}</span>
+														<span>{{controller.name}}</span>
 													</div>
 
 												</div>
@@ -771,11 +776,11 @@
 
 				</div>
 
-			</div>
+			</div>-->
 			
 		<div id="modalLogs" class="modal fade only-validated" data-ng-controller="ControllerLogs">
 
-			<div class="modal-dialog">
+			<div class="modal-dialog modal-lg">
 
 				<div class="modal-content">
 
@@ -801,6 +806,22 @@
 
 											<div class="card-block">
 
+												<div class="btn-group">
+
+													<div class="btn-group" data-ng-repeat="(dayName, dayContent) in monthContent">
+
+														<button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">
+															{{dayName}}
+														</button>
+
+														<div class="dropdown-menu" data-ng-repeat="(logName, logContent) in dayContent">
+															<a class="dropdown-item" href="#">{{logName}}</a>
+														</div>
+														
+													</div>
+
+												</div>
+
 											</div>
 
 										</div>
@@ -823,7 +844,7 @@
 
 			</div>
 
-		</div>-->
+		</div>
 
 		<!-- JS -->
 
