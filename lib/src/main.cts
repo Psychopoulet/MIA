@@ -2,17 +2,32 @@
 
 	// natives
 	import { stat, readFile, mkdir } from "node:fs";
+    import { createServer as createServer } from "node:http";
 	import { homedir } from "node:os";
 	import { join } from "node:path";
 
     // externals
+
+    import compression from "compression";
+    import cors from "cors";
+    import express from "express";
+    import helmet from "helmet";
 	import ContainerPattern from "node-containerpattern";
 	import ConfManager from "node-confmanager";
 	import Pluginsmanager from "node-pluginsmanager";
 
+	// locals
+    import getRequestPath from "./tools/getRequestPath";
+
 // types & interfaces
 
+	// natives
+    import type { Server } from "node:http";
 	import type { Stats } from "node:fs";
+
+    // externals
+	import type { Orchestrator } from "node-pluginsmanager-plugin";
+    import type { Express, Request, Response, NextFunction } from "express";
 
 // consts
 
@@ -31,6 +46,8 @@
 			"warning": console.warn,
 			"error": console.error
 		});
+
+	// register app data
 
 	}).then((): Promise<void> => {
 
@@ -53,6 +70,8 @@
 			container.skeleton("plugins-directory", "string").set("plugins-directory", join(homedir(), container.get("app.name") as string, "plugins"));
 
 		});
+
+	// ensure app directories
 
 	}).then((): Promise<void> => {
 
@@ -135,59 +154,104 @@
 
 			pluginsManager.on("error", (err: Error): void => {
 				container.get("logs").error(err);
+			})
+
+			.on("loaded", (plugin: Orchestrator): void => {
+				container.get("log").debug("Plugin " + plugin.name + " (v" + plugin.version + ") loaded");
 			}).on("allloaded", (): void => {
 				container.get("log").success("All plugins loaded");
+			})
+
+			.on("initialized", (plugin: Orchestrator): void => {
+				container.get("log").debug("Plugin " + plugin.name + " (v" + plugin.version + ") initialized");
 			}).on("allinitialized", (): void => {
 				container.get("log").success("All plugins initialized");
+			})
+
+			.on("released", (plugin: Orchestrator): void => {
+				container.get("log").debug("Plugin " + plugin.name + " (v" + plugin.version + ") released");
+			}).on("allreleased", (): void => {
+				container.get("log").warning("All plugins released");
+			})
+
+			.on("released", (plugin: Orchestrator): void => {
+				container.get("log").debug("Plugin " + plugin.name + " (v" + plugin.version + ") released");
+			}).on("allreleased", (): void => {
+				container.get("log").warning("All plugins released");
+			})
+
+			.on("destroyed", (plugin: Orchestrator): void => {
+				container.get("log").warning("Plugin " + plugin.name + " (v" + plugin.version + ") destroyed");
+			}).on("alldestroyed", (): void => {
+				container.get("log").warning("All plugins destroyed");
+			})
+
+			.on("updated", (plugin: Orchestrator): void => {
+				container.get("log").success("Plugin " + plugin.name + " (v" + plugin.version + ") success");
+			})
+
+			.on("installed", (plugin: Orchestrator): void => {
+				container.get("log").success("Plugin " + plugin.name + " (v" + plugin.version + ") installed");
+			}).on("uninstalled", (plugin: Orchestrator): void => {
+				container.get("log").warning("Plugin " + plugin.name + " (v" + plugin.version + ") uninstalled");
 			});
-
-			// loading
-			// loaded
-			// (v) allloaded
-
-			// initializing
-			// initialized
-			// (v) allinitialized
-
-			// updated
-
-			// installed
-			// uninstalled
-
-			// released
-			// allreleased
-
-			// destroyed
-			// alldestroyed
-
-			/*
-			// load
-			.on("loaded", (plugin) => {
-				Container.get("logs").success("-- [plugins] : " + plugin.name + " (v" + plugin.version + ") loaded");
-			}).on("allloaded", () => {
-				Container.get("logs").success("-- [plugins] : all loaded");
-			}).on("unloaded", (plugin) => {
-				Container.get("logs").info("-- [plugins] : " + plugin.name + " (v" + plugin.version + ") unloaded");
-			})
-
-			// write
-			.on("installed", (plugin) => {
-				Container.get("logs").success("-- [plugins] : " + plugin.name + " (v" + plugin.version + ") installed");
-			}).on("updated", (plugin) => {
-				Container.get("logs").success("-- [plugins] : " + plugin.name + " (v" + plugin.version + ") updated");
-			}).on("uninstalled", (plugin) => {
-				Container.get("logs").success("-- [plugins] : " + plugin.name + " (v" + plugin.version + ") uninstalled");
-			})
-			*/
 
 		return pluginsManager.loadAll(container).then((): Promise<void> => {
 			return pluginsManager.initAll(container);
 		});
 
+	// create server
+
 	}).then((): void => {
 
-		// @WIP
-		container.get("log").warning("server web : WIP");
+		// create app
+
+		const app: Express = express()
+			.use(cors())
+			.use(helmet({
+				"contentSecurityPolicy": false
+			}))
+			.use(compression());
+
+		// basic roots
+
+		app.get([ "/", "/public/index.html" ], (req: Request, res: Response): void => {
+			return res.sendFile(join(__dirname, "..", "..", "public", "index.html"));
+		});
+
+		// pictures
+
+		app.get([ "favicon.ico", "/favicon.ico", "/public/pictures/favicon.ico" ], (req: Request, res: Response): void => {
+			return res.sendFile(join(__dirname, "..", "..", "public", "pictures", "favicon.ico"));
+		}).get([ "favicon.png", "/favicon.png", "/public/pictures/favicon.png" ], (req: Request, res: Response): void => {
+			return res.sendFile(join(__dirname, "..", "..", "public", "pictures", "favicon.png"));
+		});
+
+		// not found
+
+        app.use((req: Request, res: Response, next: NextFunction): void => {
+
+            container.get("log").warning(getRequestPath(req) + " not found");
+
+            if (res.headersSent) {
+                return next("Not found");
+            }
+            else {
+
+                res.status(404).json({
+                    "code": 404,
+                    "message": getRequestPath(req) + " not found"
+                });
+
+            }
+
+        });
+
+		const server: Server = createServer(app);
+
+        server.listen((container.get("conf") as ConfManager).get("port"), (): void => {
+            container.get("log").success("started on port " + (container.get("conf") as ConfManager).get("port"));
+        });
 
 	}).catch((err: Error): void => {
 
