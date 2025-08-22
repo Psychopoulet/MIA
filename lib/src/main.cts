@@ -1,9 +1,7 @@
 // deps
 
 	// natives
-	import { stat, readFile, mkdir } from "node:fs";
     import { createServer as createServer } from "node:http";
-	import { homedir } from "node:os";
 	import { join } from "node:path";
 
     // externals
@@ -12,22 +10,25 @@
     import cors from "cors";
     import express from "express";
     import helmet from "helmet";
-	import ContainerPattern from "node-containerpattern";
 	import ConfManager from "node-confmanager";
+	import ContainerPattern from "node-containerpattern";
 	import Pluginsmanager from "node-pluginsmanager";
 
 	// locals
     import getRequestPath from "./tools/getRequestPath";
+    import registerAppData from "./tools/registerAppData";
+    import ensureAppDirectories from "./tools/ensureAppDirectories";
+    import generateConf from "./tools/generateConf";
+    import generateLogger from "./tools/generateLogger";
 
 // types & interfaces
-
-	// natives
-    import type { Server } from "node:http";
-	import type { Stats } from "node:fs";
 
     // externals
 	import type { Orchestrator } from "node-pluginsmanager-plugin";
     import type { Express, Request, Response, NextFunction } from "express";
+
+	// locals
+	import type { iLogger } from "./tools/generateLogger";
 
 // consts
 
@@ -51,149 +52,86 @@
 
 	}).then((): Promise<void> => {
 
-		return new Promise((resolve: (content: { "name": string; "version": string; "description": string; }) => void, reject: (err: Error) => void): void => {
-
-			const packageFile: string = join(__dirname, "..", "..", "package.json");
-
-			return readFile(packageFile, "utf-8", (err: Error | null, content: string): void => {
-				return err ? reject(err) : resolve(JSON.parse(content));
-			});
-
-		}).then((packageData: { "name": string; "version": string; "description": string; }): void => {
-
-			container.skeleton("app", "object");
-			container.skeleton("app.name", "string").set("app.name", packageData.name);
-			container.skeleton("app.version", "string").set("app.version", packageData.version);
-			container.skeleton("app.description", "string").set("app.description", packageData.description);
-
-			container.skeleton("data-directory", "string").set("data-directory", join(homedir(), container.get("app.name") as string, "data"));
-			container.skeleton("plugins-directory", "string").set("plugins-directory", join(homedir(), container.get("app.name") as string, "plugins"));
-
-		});
+		return registerAppData(container);
 
 	// ensure app directories
 
 	}).then((): Promise<void> => {
 
-		// generate data directory
-
-		const dataDir: string = container.get("data-directory") as string;
-
-		return new Promise((resolve: (result: boolean) => void): void => {
-
-			return stat(dataDir, (err: Error | null, stats: Stats): void => {
-				return err || !stats.isDirectory() ? resolve(false) : resolve(true);
-			});
-
-		}).then((result: boolean): Promise<void> => {
-
-			return new Promise((resolve: () => void, reject: (err: Error) => void): void => {
-
-				if (result) {
-					return resolve();
-				}
-
-				container.get("log").warning("App data directory not detected, create one at", dataDir);
-
-				return mkdir(dataDir, {
-					"recursive": true
-				}, (err: Error | null): void => {
-					return err ? reject(err) : resolve();
-				});
-
-			});
-
-		});
+		return ensureAppDirectories(container);
 
 	// generate and load conf file
 
 	}).then((): Promise<void> => {
 
-		const confFile: string = join(container.get("data-directory") as string, "conf.json");
+		return generateConf(container);
 
-		const confManager: ConfManager = new ConfManager(confFile);
+	// generate advanced logger
 
-			container.set("conf", confManager);
+	}).then((): void => {
 
-			confManager.skeleton("port", "integer");
-			confManager.skeleton("debug", "boolean");
-
-		return confManager.fileExists().then((exists: boolean): Promise<void> => {
-
-			if (!exists) {
-
-				container.get("log").warning("Conf file not detected, create one at", confFile);
-
-				confManager.set("port", 8000);
-				confManager.set("debug", true);
-
-				return confManager.save();
-
-			}
-			else {
-				return confManager.load();
-			}
-
-		});
+		return generateLogger(container);
 
 	// load plugins
 
 	}).then((): Promise<void> => {
 
-		if (!(container.get("conf") as ConfManager).get("debug")) {
+		if (!(container.get("conf") as ConfManager).get("debug") as boolean) {
 			process.env.NODE_ENV = "production";
 		}
+
+		const logger: iLogger = container.get("log") as iLogger;
 
 		const pluginsManager: Pluginsmanager = new Pluginsmanager({
 			"directory": container.get("plugins-directory") as string,
 			"externalRessourcesDirectory": container.get("data-directory") as string,
-			"logger": container.get("log")
+			"logger": logger as any
 		});
 
 			container.set("plugins", pluginsManager);
 
 			pluginsManager.on("error", (err: Error): void => {
-				container.get("logs").error(err);
+				logger.error(err);
 			})
 
 			.on("loaded", (plugin: Orchestrator): void => {
-				container.get("log").debug("Plugin " + plugin.name + " (v" + plugin.version + ") loaded");
+				logger.debug("Plugin " + plugin.name + " (v" + plugin.version + ") loaded");
 			}).on("allloaded", (): void => {
-				container.get("log").success("All plugins loaded");
+				logger.success("All plugins loaded");
 			})
 
 			.on("initialized", (plugin: Orchestrator): void => {
-				container.get("log").debug("Plugin " + plugin.name + " (v" + plugin.version + ") initialized");
+				logger.debug("Plugin " + plugin.name + " (v" + plugin.version + ") initialized");
 			}).on("allinitialized", (): void => {
-				container.get("log").success("All plugins initialized");
+				logger.success("All plugins initialized");
 			})
 
 			.on("released", (plugin: Orchestrator): void => {
-				container.get("log").debug("Plugin " + plugin.name + " (v" + plugin.version + ") released");
+				logger.debug("Plugin " + plugin.name + " (v" + plugin.version + ") released");
 			}).on("allreleased", (): void => {
-				container.get("log").warning("All plugins released");
+				logger.warning("All plugins released");
 			})
 
 			.on("released", (plugin: Orchestrator): void => {
-				container.get("log").debug("Plugin " + plugin.name + " (v" + plugin.version + ") released");
+				logger.debug("Plugin " + plugin.name + " (v" + plugin.version + ") released");
 			}).on("allreleased", (): void => {
-				container.get("log").warning("All plugins released");
+				logger.warning("All plugins released");
 			})
 
 			.on("destroyed", (plugin: Orchestrator): void => {
-				container.get("log").warning("Plugin " + plugin.name + " (v" + plugin.version + ") destroyed");
+				logger.warning("Plugin " + plugin.name + " (v" + plugin.version + ") destroyed");
 			}).on("alldestroyed", (): void => {
-				container.get("log").warning("All plugins destroyed");
+				logger.warning("All plugins destroyed");
 			})
 
 			.on("updated", (plugin: Orchestrator): void => {
-				container.get("log").success("Plugin " + plugin.name + " (v" + plugin.version + ") success");
+				logger.success("Plugin " + plugin.name + " (v" + plugin.version + ") success");
 			})
 
 			.on("installed", (plugin: Orchestrator): void => {
-				container.get("log").success("Plugin " + plugin.name + " (v" + plugin.version + ") installed");
+				logger.success("Plugin " + plugin.name + " (v" + plugin.version + ") installed");
 			}).on("uninstalled", (plugin: Orchestrator): void => {
-				container.get("log").warning("Plugin " + plugin.name + " (v" + plugin.version + ") uninstalled");
+				logger.warning("Plugin " + plugin.name + " (v" + plugin.version + ") uninstalled");
 			});
 
 		return pluginsManager.loadAll(container).then((): Promise<void> => {
@@ -231,7 +169,7 @@
 
         app.use((req: Request, res: Response, next: NextFunction): void => {
 
-            container.get("log").warning(getRequestPath(req) + " not found");
+            (container.get("log") as iLogger).warning(getRequestPath(req) + " not found");
 
             if (res.headersSent) {
                 return next("Not found");
@@ -247,18 +185,16 @@
 
         });
 
-		const server: Server = createServer(app);
-
-        server.listen((container.get("conf") as ConfManager).get("port"), (): void => {
-            container.get("log").success("started on port " + (container.get("conf") as ConfManager).get("port"));
+		createServer(app).listen((container.get("conf") as ConfManager).get("port") as number, (): void => {
+            (container.get("log") as iLogger).success("started on port " + (container.get("conf") as ConfManager).get("port"));
         });
 
 	}).catch((err: Error): void => {
 
 		if (container && container.has("log")) {
 
-			container.get("log").error("Global script failed");
-			container.get("log").error(err);
+			(container.get("log") as iLogger).error("Global script failed");
+			(container.get("log") as iLogger).error(err);
 
 		}
 		else {
@@ -267,5 +203,8 @@
 			console.error(err);
 
 		}
+
+        process.exitCode = 1;
+        process.exit(1);
 
 	});
