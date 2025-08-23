@@ -1,7 +1,8 @@
 // deps
 
 	// natives
-    import { createServer as createServer } from "node:http";
+    import { readFile } from "node:fs";
+    import { createServer } from "node:http";
 	import { join } from "node:path";
 
     // externals
@@ -41,15 +42,27 @@ export default function generateServer (container: ContainerPattern): Promise<vo
         // basic roots
 
         app.get([ "/", "/public/index.html" ], (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "public", "index.html"));
+
+            const file: string = join(__dirname, "..", "..", "..", "public", "index.html");
+
+            readFile(file, "utf-8", (err: Error | null, content: string): void => {
+
+                res.status(200).send(content
+                        .replace("{{app.name}}", container.get("app.name") as string)
+                        .replace("{{app.version}}", container.get("app.version") as string)
+                        .replace("{{app.description}}", container.get("app.description") as string)
+                );
+
+            });
+
         });
 
         // pictures
 
         app.get([ "favicon.ico", "/favicon.ico", "/public/pictures/favicon.ico" ], (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "public", "pictures", "favicon.ico"));
+            return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.ico"));
         }).get([ "favicon.png", "/favicon.png", "/public/pictures/favicon.png" ], (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "public", "pictures", "favicon.png"));
+            return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.png"));
         });
 
         // not found
