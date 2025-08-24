@@ -31,7 +31,7 @@ export default function generateConf (container: ContainerPattern): Promise<void
 
         if (!exists) {
 
-            (container.get("log") as iLogger).warning("Conf file not detected, create one at", confFile);
+            (container.get("log") as iLogger).warning("Conf file not detected, create one at " + confFile);
 
             confManager.set("port", 8000);
             confManager.set("debug", true);

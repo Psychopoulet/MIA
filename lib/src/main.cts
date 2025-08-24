@@ -75,7 +75,8 @@
 		if (container && container.has("log")) {
 
 			(container.get("log") as iLogger).error("Global script failed");
-			(container.get("log") as iLogger).error(err);
+			(container.get("log") as iLogger).error(err.message);
+            (container.get("log") as iLogger).debug(err.stack as string);
 
 		}
 		else {

@@ -34,7 +34,7 @@ export default function ensureAppDirectories (container: ContainerPattern): Prom
                 return resolve();
             }
 
-            (container.get("log") as iLogger).warning("App data directory not detected, create one at", dataDir);
+            (container.get("log") as iLogger).warning("App data directory not detected, create one at " + dataDir);
 
             return mkdir(dataDir, {
                 "recursive": true
