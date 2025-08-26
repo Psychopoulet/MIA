@@ -34,8 +34,8 @@
     "helmet": "8.1.0",
     "node-confmanager": "1.9.0",
     "node-containerpattern": "1.8.0",
-    "node-pluginsmanager": "2.5.0",
-    "node-pluginsmanager-plugin": "6.4.3",
+    "node-pluginsmanager": "2.5.2",
+    "node-pluginsmanager-plugin": "6.4.5",
     "pm2": "6.0.8",
     "winston": "3.17.0"
   },
