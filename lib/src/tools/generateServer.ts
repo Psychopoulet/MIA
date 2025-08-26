@@ -20,6 +20,7 @@
 
     // externals
     import type { Express, Request, Response, NextFunction } from "express";
+	import type Pluginsmanager from "node-pluginsmanager";
 
     // locals
     import type { iLogger } from "./generateLogger";
@@ -63,6 +64,11 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.ico"));
         }).get([ "favicon.png", "/favicon.png", "/public/pictures/favicon.png" ], (req: Request, res: Response): void => {
             return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.png"));
+        });
+
+        // link to plugins
+        app.use((req: Request, res: Response, next: NextFunction): void => {
+            (container.get("plugins-manager") as Pluginsmanager).appMiddleware(req, res, next);
         });
 
         // not found

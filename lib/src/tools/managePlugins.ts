@@ -24,7 +24,7 @@ export default function managePlugins (container: ContainerPattern): Promise<voi
         "logger": logger as any
     });
 
-        container.set("plugins", pluginsManager);
+        container.set("plugins-manager", pluginsManager);
 
         pluginsManager.on("error", (err: Error): void => {
             logger.error(err.message);
