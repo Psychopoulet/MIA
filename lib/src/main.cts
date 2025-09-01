@@ -22,17 +22,19 @@
 
 // run
 
-	// generate logger
+	// generate basic logger
 
 	Promise.resolve().then((): void => {
 
-		container.set("log", {
-			"debug": console.debug,
-			"info": console.info,
-			"success": console.log,
-			"warning": console.warn,
-			"error": console.error
-		});
+		container
+			.set("log", {
+				"debug": console.debug,
+				"info": console.info,
+				"success": console.log,
+				"warning": console.warn,
+				"error": console.error
+			})
+			.document("log", "App logger");
 
 	// register app data
 
@@ -69,6 +71,14 @@
 	}).then((): Promise<void> => {
 
 		return generateServer(container);
+
+	// create sound reader basic data
+
+	}).then((): void => {
+
+		container
+			.set("sound-reader", null)
+			.document("sound-reader", "Sound reader method (if a plugin manage it, null by default, (path: string) => Promise<void>)");
 
 	}).catch((err: Error): void => {
 

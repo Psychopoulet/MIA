@@ -22,7 +22,9 @@ export default function generateConf (container: ContainerPattern): Promise<void
 
     const confManager: ConfManager = new ConfManager(confFile);
 
-        container.set("conf", confManager);
+        container
+            .set("conf", confManager)
+            .document("conf", "The application's configuration (instance of 'node-confmanager' package)");
 
         confManager.skeleton("port", "integer");
         confManager.skeleton("debug", "boolean");
