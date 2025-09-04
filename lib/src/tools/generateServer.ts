@@ -49,9 +49,9 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             readFile(file, "utf-8", (err: Error | null, content: string): void => {
 
                 res.status(200).send(content
-                        .replace("{{app.name}}", container.get("app.name") as string)
-                        .replace("{{app.version}}", container.get("app.version") as string)
-                        .replace("{{app.description}}", container.get("app.description") as string)
+                        .replace(/{{app.name}}/g, container.get("app.name") as string)
+                        .replace(/{{app.version}}/g, container.get("app.version") as string)
+                        .replace(/{{app.description}}/g, container.get("app.description") as string)
                 );
 
             });
