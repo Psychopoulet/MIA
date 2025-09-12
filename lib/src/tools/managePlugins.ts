@@ -1,12 +1,12 @@
 // deps
 
     // externals
-	import ContainerPattern from "node-containerpattern";
 	import Pluginsmanager from "node-pluginsmanager";
 
 // types & interfaces
 
     // externals
+	import type ContainerPattern from "node-containerpattern";
 	import type { Orchestrator } from "node-pluginsmanager-plugin";
 
     // locals

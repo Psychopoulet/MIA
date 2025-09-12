@@ -6,7 +6,6 @@
 	import { join } from "node:path";
 
     // externals
-    import ContainerPattern from "node-containerpattern";
     import compression from "compression";
     import cors from "cors";
     import express from "express";
@@ -24,6 +23,7 @@
     // externals
     import type { Express, Request, Response, NextFunction } from "express";
 	import type ConfManager from "node-confmanager";
+    import type ContainerPattern from "node-containerpattern";
 	import type Pluginsmanager from "node-pluginsmanager";
     import type { WebSocket } from "ws";
 
