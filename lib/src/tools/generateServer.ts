@@ -42,11 +42,15 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         // basic roots
 
-        app.get([ "/", "/public/index.html" ], (req: Request, res: Response): void => {
+        app.get([ "/", "/public/index.html" ], (req: Request, res: Response, next: NextFunction): void => {
 
             const file: string = join(__dirname, "..", "..", "..", "public", "index.html");
 
             readFile(file, "utf-8", (err: Error | null, content: string): void => {
+
+                if (err) {
+                    return next(err);
+                }
 
                 res.status(200).send(content
                         .replace(/{{app.name}}/g, container.get("app.name") as string)
@@ -56,6 +60,24 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
             });
 
+        }).get("/public/bundle.js", (req: Request, res: Response): void => {
+            return res.sendFile(join(__dirname, "..", "..", "..", "public", "bundle.js"));
+        });
+
+        // libs
+
+        app.get("/public/libs/bootstrap.min.css", (req: Request, res: Response): void => {
+            return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "css", "bootstrap.min.css"));
+        })
+
+        .get("/public/libs/bootstrap.min.js", (req: Request, res: Response): void => {
+            return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "js", "bootstrap.min.js"));
+        }).get("/public/libs/bootstrap.min.js.map", (req: Request, res: Response): void => {
+            return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "js", "bootstrap.min.js.map"));
+        })
+
+        .get("/public/libs/fontawesome.min.css", (req: Request, res: Response): void => {
+            return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "css", "fontawesome.min.css"));
         });
 
         // pictures
@@ -67,6 +89,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
         });
 
         // link to plugins
+
         app.use((req: Request, res: Response, next: NextFunction): void => {
             (container.get("plugins-manager") as Pluginsmanager).appMiddleware(req, res, next);
         });
