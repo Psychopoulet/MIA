@@ -71,21 +71,47 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         // libs
 
-        app.get("/public/libs/bootstrap.min.css", (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "css", "bootstrap.min.css"));
-        }).get("/public/libs/bootstrap.min.css.map", (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "css", "bootstrap.min.css.map"));
-        })
+            // bootstrap
 
-        .get("/public/libs/bootstrap.min.js", (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "js", "bootstrap.min.js"));
-        }).get("/public/libs/bootstrap.min.js.map", (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "js", "bootstrap.min.js.map"));
-        })
+                // css
 
-        .get("/public/libs/fontawesome.min.css", (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "css", "fontawesome.min.css"));
-        });
+                app.get("/public/libs/bootstrap.min.css", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "css", "bootstrap.min.css"));
+                }).get("/public/libs/bootstrap.min.css.map", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "css", "bootstrap.min.css.map"));
+                })
+
+                // js
+
+                .get("/public/libs/bootstrap.min.js", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "js", "bootstrap.min.js"));
+                }).get("/public/libs/bootstrap.min.js.map", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "js", "bootstrap.min.js.map"));
+                })
+
+            // fontawesome
+
+                // css
+
+                .get("/public/libs/fontawesome.min.css", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "css", "all.min.css"));
+                })
+
+                // webfonts
+
+                .get("/public/webfonts/fa-brands-400.ttf", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-brands-400.ttf"));
+                }).get("/public/webfonts/fa-brands-400.woff2", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-brands-400.woff2"));
+                }).get("/public/webfonts/fa-regular-400.ttf", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-regular-400.ttf"));
+                }).get("/public/webfonts/fa-regular-400.woff2", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-regular-400.woff2"));
+                }).get("/public/webfonts/fa-solid-900.ttf", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-solid-900.ttf"));
+                }).get("/public/webfonts/fa-solid-900.woff2", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-solid-900.woff2"));
+                });
 
         // pictures
 
