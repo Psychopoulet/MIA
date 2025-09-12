@@ -73,6 +73,8 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         app.get("/public/libs/bootstrap.min.css", (req: Request, res: Response): void => {
             return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "css", "bootstrap.min.css"));
+        }).get("/public/libs/bootstrap.min.css.map", (req: Request, res: Response): void => {
+            return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "css", "bootstrap.min.css.map"));
         })
 
         .get("/public/libs/bootstrap.min.js", (req: Request, res: Response): void => {
