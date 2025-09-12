@@ -144,7 +144,14 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             ws.on("close", (code: number, reason: Buffer): void => {
 
                 if (code) {
-                    (container.get("log") as iLogger).warning("Socket closed with code " + code + " (reason : " + reason.toString("utf-8") + ")");
+
+                    if (reason.length) {
+                        (container.get("log") as iLogger).warning("Socket closed with code " + code + " (reason : " + reason.toString("utf-8") + ")");
+                    }
+                    else {
+                        (container.get("log") as iLogger).warning("Socket closed with code " + code);
+                    }
+
                 }
                 else {
                     (container.get("log") as iLogger).debug("Socket closed");
