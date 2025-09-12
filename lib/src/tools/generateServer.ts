@@ -12,15 +12,20 @@
     import express from "express";
     import helmet from "helmet";
 	import ConfManager from "node-confmanager";
+    import { WebSocketServer } from "ws";
 
 	// locals
     import getRequestPath from "./getRequestPath";
 
 // types & interfaces
 
+	// natives
+    import type { Server } from "node:http";
+
     // externals
     import type { Express, Request, Response, NextFunction } from "express";
 	import type Pluginsmanager from "node-pluginsmanager";
+    import type { WebSocket } from "ws";
 
     // locals
     import type { iLogger } from "./generateLogger";
@@ -114,7 +119,46 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         });
 
-        createServer(app).listen((container.get("conf") as ConfManager).get("port") as number, (): void => {
+        // create http server
+
+        const server: Server = createServer(app);
+
+        // create socket server
+
+        const wss: WebSocketServer = new WebSocketServer({
+            "server": server
+        });
+
+        wss.on("error", (err: Error): void => {
+            (container.get("log") as iLogger).error(err.message);
+        }).on("connection", (ws: WebSocket): void => {
+
+            (container.get("log") as iLogger).debug("Socket created");
+
+            ws.on("error", (err: Error): void => {
+                (container.get("log") as iLogger).error(err.message);
+            });
+
+            ws.on("close", (code: number, reason: Buffer): void => {
+
+                if (code) {
+                    (container.get("log") as iLogger).warning("Socket closed with code " + code + " (reason : " + reason.toString("utf-8") + ")");
+                }
+                else {
+                    (container.get("log") as iLogger).debug("Socket closed");
+                }
+
+            });
+
+        });
+
+        container
+            .set("socket", wss)
+            .document("socket", "Socket server");
+
+        // run http server
+
+        server.listen((container.get("conf") as ConfManager).get("port") as number, (): void => {
 
             (container.get("log") as iLogger).success("started on port " + (container.get("conf") as ConfManager).get("port"));
 

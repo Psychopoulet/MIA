@@ -72,14 +72,6 @@
 
 		return generateServer(container);
 
-	// create sound reader basic data
-
-	}).then((): void => {
-
-		container
-			.set("sound-reader", null)
-			.document("sound-reader", "Sound reader method (if a plugin manage it, null by default, (path: string) => Promise<void>)");
-
 	}).catch((err: Error): void => {
 
 		if (container && container.has("log")) {

@@ -77,6 +77,8 @@ export default function generateLogger (container: ContainerPattern): void {
 
     }
 
+    // replace basic logger
+
     container.set("log", logger);
 
 }
