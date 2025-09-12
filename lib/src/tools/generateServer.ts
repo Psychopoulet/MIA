@@ -11,7 +11,6 @@
     import cors from "cors";
     import express from "express";
     import helmet from "helmet";
-	import ConfManager from "node-confmanager";
     import { WebSocketServer } from "ws";
 
 	// locals
@@ -24,6 +23,7 @@
 
     // externals
     import type { Express, Request, Response, NextFunction } from "express";
+	import type ConfManager from "node-confmanager";
 	import type Pluginsmanager from "node-pluginsmanager";
     import type { WebSocket } from "ws";
 
@@ -103,7 +103,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         app.use((req: Request, res: Response, next: NextFunction): void => {
 
-            (container.get("log") as iLogger).warning(getRequestPath(req) + " not found");
+            (container.get("log") as iLogger).warning(getRequestPath(container, req) + " not found");
 
             if (res.headersSent) {
                 return next("Not found");
@@ -112,7 +112,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
                 res.status(404).json({
                     "code": 404,
-                    "message": getRequestPath(req) + " not found"
+                    "message": getRequestPath(container, req) + " not found"
                 });
 
             }
