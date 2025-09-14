@@ -121,7 +121,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.png"));
         });
 
-        // link to plugins
+        // link request to plugins
 
         app.use((req: Request, res: Response, next: NextFunction): void => {
             (container.get("plugins-manager") as Pluginsmanager).appMiddleware(req, res, next);
@@ -187,9 +187,9 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         });
 
-        container
-            .set("socket", wss)
-            .document("socket", "Socket server");
+        // link socket to plugins
+
+        (container.get("plugins-manager") as Pluginsmanager).socketMiddleware(wss);
 
         // run http server
 
