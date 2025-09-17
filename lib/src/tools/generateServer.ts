@@ -134,7 +134,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             (container.get("log") as iLogger).warning(getRequestPath(container, req) + " not found");
 
             if (res.headersSent) {
-                return next("Not found");
+                return next(getRequestPath(container, req) + " not found");
             }
             else {
 
@@ -164,7 +164,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             (container.get("log") as iLogger).debug("Socket created");
 
             ws.on("error", (err: Error): void => {
-                (container.get("log") as iLogger).error(err.message);
+                (container.get("log") as iLogger).warning(err.message);
             });
 
             ws.on("close", (code: number, reason: Buffer): void => {
@@ -172,10 +172,10 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                 if (code) {
 
                     if (reason.length) {
-                        (container.get("log") as iLogger).warning("Socket closed with code " + code + " (reason : " + reason.toString("utf-8") + ")");
+                        (container.get("log") as iLogger).info("Socket closed with code " + code + " (reason : " + reason.toString("utf-8") + ")");
                     }
                     else {
-                        (container.get("log") as iLogger).warning("Socket closed with code " + code);
+                        (container.get("log") as iLogger).info("Socket closed with code " + code);
                     }
 
                 }

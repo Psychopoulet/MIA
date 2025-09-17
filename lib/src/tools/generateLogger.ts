@@ -55,7 +55,8 @@ export default function generateLogger (container: ContainerPattern): void {
         "error": "red",
         "warning": "yellow",
         "success": "green",
-        "info": "blue"
+        "info": "blue",
+        "debug": "grey"
     });
 
     if ((container.get("conf") as ConfManager).get("debug") as boolean) {

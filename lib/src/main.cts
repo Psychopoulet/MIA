@@ -60,6 +60,14 @@
 
 		return generateLogger(container);
 
+	// log basic data
+
+	}).then((): void => {
+
+		container.get("log").success(container.get("app.name") + " (v" + container.get("app.version") + ")");
+		container.get("log").debug("conf file : " + container.get("conf-file"));
+		container.get("log").debug("logs file : " + container.get("logs-file"));
+
 	// load plugins
 
 	}).then((): Promise<void> => {
@@ -72,6 +80,7 @@
 
 		return generateServer(container);
 
+	// fail to run
 	}).catch((err: Error): void => {
 
 		if (container && container.has("log")) {
