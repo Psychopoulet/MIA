@@ -1,2 +1,3 @@
 import type { Request } from "express";
-export default function getRequestPath(req: Request): string;
+import type ContainerPattern from "node-containerpattern";
+export default function getRequestPath(container: ContainerPattern, req: Request): string;
