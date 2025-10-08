@@ -1,1 +1,0 @@
-start /b chrome "https://localhost" && exit

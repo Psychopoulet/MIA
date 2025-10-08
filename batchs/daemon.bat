@@ -1,1 +1,0 @@
-cls && cd %~dp0\..\ && node lib/daemon.js

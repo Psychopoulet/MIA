@@ -1,12 +1,5 @@
-*.tmp
-*.key
-*.csr
-*.crt
-*backup.json
-lib/conf.json
-lib/database/MIA.sqlite3
-lib/plugins/
-lib/servers/ssl/
-lib/servers/web/public/
-logs/
+package-lock.json
+.husky/
+.nyc_output/
+coverage/
 node_modules/
