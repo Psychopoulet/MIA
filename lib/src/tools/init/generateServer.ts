@@ -68,11 +68,11 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                 // main page
 
                     app.get([ "/", "/public/index.html" ], (req: Request, res: Response): void => {
-                        res.redirect(301, "/mia-core/public/index.html");
+                        return res.redirect(301, "/mia-core/public/index.html");
                     }).get("/public/menu.min.js", (req: Request, res: Response): void => {
-                        return res.sendFile(join(PUBLIC_DIRECTORY, "dist", "menu.min.js"));
+                        return res.redirect(301, "/mia-core/public/menu.min.js");
                     }).get("/public/menu.min.js.map", (req: Request, res: Response): void => {
-                        return res.sendFile(join(PUBLIC_DIRECTORY, "dist", "menu.min.js.map"));
+                        return res.redirect(301, "/mia-core/public/menu.min.js.map");
                     });
 
                 // libs

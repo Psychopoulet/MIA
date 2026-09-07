@@ -7,7 +7,7 @@
     } from "react-bootstrap-fontawesome";
 
     // locals
-    import getSDK from "../../plugins/mia-core/public/src/SDK";
+    import getSDK from "../src/SDK";
     import ModalAddPluginFromGithub from "./ModalAddPluginFromGithub";
 
 // types & interfaces
@@ -16,8 +16,8 @@
     import type { iPropsNode } from "react-bootstrap-fontawesome";
 
     // locals
-    import type { SDK } from "../../plugins/mia-core/public/src/SDK";
-    import type { components, operations } from "../../plugins/mia-core/public/src/Descriptor";
+    import type { SDK } from "../src/SDK";
+    import type { components, operations } from "../src/Descriptor";
 
     interface iState {
         "status": "DISCONNECTED" | "CONNECTED" | "LOGGED";

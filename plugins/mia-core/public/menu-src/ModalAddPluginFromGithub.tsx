@@ -11,7 +11,7 @@
     } from "react-bootstrap-fontawesome";
 
     // locals
-    import getSDK from "../../plugins/mia-core/public/src/SDK";
+    import getSDK from "../src/SDK";
 
 // types & interfaces
 
@@ -19,8 +19,8 @@
     import type { iPropsNode, iGenerateFocusCallback } from "react-bootstrap-fontawesome";
 
     // locals
-    import type { SDK } from "../../plugins/mia-core/public/src/SDK";
-    import type { components } from "../../plugins/mia-core/public/src/Descriptor";
+    import type { SDK } from "../src/SDK";
+    import type { components } from "../src/Descriptor";
 
     interface iProps extends iPropsNode {
         "onClose": (e?: React.MouseEvent<HTMLButtonElement>) => void;
