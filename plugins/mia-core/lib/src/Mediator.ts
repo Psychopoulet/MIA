@@ -749,4 +749,17 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
     }
 
+    public getLogsLevels (): Promise<operations["getLogsLevels"]["responses"]["200"]["content"]["application/json"]> {
+
+        return Promise.resolve([
+            "critical",
+            "error",
+            "warning",
+            "success",
+            "info",
+            "debug"
+        ]);
+
+    }
+
 }
