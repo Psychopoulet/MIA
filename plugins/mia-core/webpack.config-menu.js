@@ -34,7 +34,7 @@ module.exports = {
                     {
                         "loader": "ts-loader",
                         "options": {
-                            "configFile": join(__dirname, "tsconfig-front.json")
+                            "configFile": join(__dirname, "tsconfig-menu.json")
                         }
                    }
                 ]

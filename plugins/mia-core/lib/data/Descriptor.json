@@ -2,7 +2,7 @@
 	"openapi": "3.1.2",
 	"info": {
 		"title": "mia-core",
-		"version": "2.2.0",
+		"version": "2.2.1",
 		"description": "MIA - easy IOT.",
 		"license": {
 			"name": "ISC",
@@ -10,66 +10,6 @@
 		}
 	},
 	"paths": {
-
-		"/public/menu.min.js": {
-			"get": {
-				"description": "",
-				"summary": "Global app menu",
-				"operationId": "getFrontMenu",
-				"responses": {
-					"200": {
-						"description": "Global app menu",
-						"content": {
-							"text/javascript": {
-								"schema": {
-									"type": "string"
-								}
-							}
-						}
-					},
-					"default": {
-						"description": "An error occurred",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Error"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/public/menu.min.js.map": {
-			"get": {
-				"description": "",
-				"summary": "Global app menu map",
-				"operationId": "getFrontMenuMap",
-				"responses": {
-					"200": {
-						"description": "Global app menu map",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"additionalProperties": true
-								}
-							}
-						}
-					},
-					"default": {
-						"description": "An error occurred",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Error"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
 
 		"/mia-core/public/index.html": {
 			"get": {
@@ -159,6 +99,66 @@
 				}
 			}
 		},
+		"/mia-core/public/menu.min.js": {
+			"get": {
+				"description": "",
+				"summary": "Global app menu",
+				"operationId": "getFrontMenu",
+				"responses": {
+					"200": {
+						"description": "Global app menu",
+						"content": {
+							"text/javascript": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/public/menu.min.js.map": {
+			"get": {
+				"description": "",
+				"summary": "Global app menu map",
+				"operationId": "getFrontMenuMap",
+				"responses": {
+					"200": {
+						"description": "Global app menu map",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"additionalProperties": true
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+
 		"/mia-core/api/descriptor": {
 			"get": {
 				"description": "",
@@ -753,8 +753,7 @@
 												"type": "string"
 											},
 											"createdAt": {
-												"type": "string",
-												"format": "date-time"
+												"$ref": "#/components/schemas/DateTime"
 											}
 										},
 										"required": [
@@ -838,8 +837,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "string",
-							"format": "date-time"
+							"$ref": "#/components/schemas/DateTime"
 						}
 					},
 					{
@@ -847,8 +845,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "string",
-							"format": "date-time"
+							"$ref": "#/components/schemas/DateTime"
 						}
 					},
 					{
@@ -906,8 +903,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "string",
-							"format": "date-time"
+							"$ref": "#/components/schemas/DateTime"
 						}
 					},
 					{
@@ -915,14 +911,93 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "string",
-							"format": "date-time"
+							"$ref": "#/components/schemas/DateTime"
 						}
 					}
 				],
 				"responses": {
 					"204": {
 						"description": "Logs purged"
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/logs/limits": {
+			"get": {
+				"description": "",
+				"summary": "Get logs limits",
+				"operationId": "getLogsLimits",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"responses": {
+					"200": {
+						"description": "Logs limits",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"oldest": {
+											"$ref": "#/components/schemas/DateTime"
+										},
+										"newest": {
+											"$ref": "#/components/schemas/DateTime"
+										}
+									},
+									"required": [
+										"oldest",
+										"newest"
+									]
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/logs/levels": {
+			"get": {
+				"description": "",
+				"summary": "Get logs levels",
+				"operationId": "getLogsLevels",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"responses": {
+					"200": {
+						"description": "Logs levels",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/LogLevel"
+									},
+									"uniqueItems": true
+								}
+							}
+						}
 					},
 					"default": {
 						"description": "An error occurred",
@@ -987,8 +1062,7 @@
 						"type": "boolean"
 					},
 					"createdAt": {
-						"type": "string",
-						"format": "date-time"
+						"$ref": "#/components/schemas/DateTime"
 					}
 				},
 				"required": [
@@ -1054,6 +1128,10 @@
 					"authors",
 					"license"
 				]
+			},
+			"DateTime": {
+				"type": "string",
+				"format": "date-time"
 			},
 			"LogLevel": {
 				"type": "string",

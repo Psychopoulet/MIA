@@ -215,7 +215,7 @@ export default class App extends React.Component<iPropsNode, iState> {
                 </Modal> }
 
                 { "INITIALIZED" === this.state.status && <Login /> }
-                { "LOGGED" === this.state.status && <>
+                { "LOGGED" === this.state.status && <CurrentUserProvider onError={ this._handleError }>
 
                     <NavTabs items={ [
                         "Plugins",
@@ -227,16 +227,10 @@ export default class App extends React.Component<iPropsNode, iState> {
                     />
 
                     { 0 === this.state.tabIndex && <Plugins onError={ this._handleError } /> }
+                    { 1 === this.state.tabIndex && <UsersManagement onError={ this._handleError } /> }
+                    { 2 === this.state.tabIndex && <LogsManagement onError={ this._handleError } /> }
 
-                    { 1 === this.state.tabIndex && <CurrentUserProvider onError={ this._handleError }>
-                        <UsersManagement onError={ this._handleError } />
-                    </CurrentUserProvider> }
-
-                    { 2 === this.state.tabIndex && <CurrentUserProvider onError={ this._handleError }>
-                        <LogsManagement onError={ this._handleError } />
-                    </CurrentUserProvider> }
-
-                </> }
+                </CurrentUserProvider> }
 
             </div>;
 

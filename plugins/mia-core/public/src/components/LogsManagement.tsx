@@ -23,6 +23,7 @@
 
     // locals
     import type { components } from "../Descriptor";
+    import type { SDK } from "../SDK";
 
     type User = components["schemas"]["User"];
     type LogLevel = components["schemas"]["LogLevel"];
@@ -36,40 +37,31 @@
         "logs": string | null;
         "from": string;
         "to": string;
+        "levels": LogLevel[];
         "level": "" | LogLevel;
         "limit": string;
-        "error": string | null;
         "purgeOpened": boolean;
     }
 
 // consts
 
-    const LEVELS: LogLevel[] = [
-        "critical",
-        "error",
-        "warning",
-        "success",
-        "info",
-        "debug"
-    ];
-
     const ONE_DAY: number = 24 * 60 * 60 * 1000;
 
 // private
 
-    function pad (value: number): string {
+    function _pad (value: number): string {
         return value.toString().padStart(2, "0");
     }
 
     // "datetime-local" inputs only understand a local "YYYY-MM-DDTHH:mm" value
-    function formatRangeBound (date: Date): string {
+    function _formatRangeBound (date: Date): string {
 
-        return date.getFullYear() + "-" + pad(date.getMonth() + 1) + "-" + pad(date.getDate())
-            + "T" + pad(date.getHours()) + ":" + pad(date.getMinutes());
+        return date.getFullYear() + "-" + _pad(date.getMonth() + 1) + "-" + _pad(date.getDate())
+            + "T" + _pad(date.getHours()) + ":" + _pad(date.getMinutes());
 
     }
 
-    function parseRangeBound (bound: string): string | null {
+    function _parseRangeBound (bound: string): string | null {
 
         const date: Date = new Date(bound);
 
@@ -102,15 +94,44 @@ export default class LogsManagement extends React.Component<iProps, iState> {
         const now: Date = new Date();
 
         this.state = {
-            "loading": false,
+            "loading": true,
             "logs": null,
-            "from": formatRangeBound(new Date(now.getTime() - ONE_DAY)),
-            "to": formatRangeBound(now),
+            "levels": [],
+            "from": _formatRangeBound(new Date(now.getTime() - ONE_DAY)),
+            "to": _formatRangeBound(now),
             "level": "",
             "limit": "",
-            "error": null,
             "purgeOpened": false
         };
+
+    }
+
+    public componentDidMount (): void {
+
+        const sdk: SDK = getSDK();
+
+        sdk.getLogsLimits().then((limits: { "oldest": string; "newest": string }): Promise<void> => {
+
+            return sdk.getLogsLevels().then((levels: LogLevel[]): void => {
+
+                this.setState({
+                    "loading": false,
+                    "levels": levels,
+                    "from": _formatRangeBound(new Date(limits.oldest)),
+                    "to": _formatRangeBound(new Date(limits.newest))
+                });
+
+            });
+
+        }).catch((err: Error): void => {
+
+            this.setState({
+                "loading": false
+            });
+
+            this.props.onError(err);
+
+        });
 
     }
 
@@ -118,41 +139,41 @@ export default class LogsManagement extends React.Component<iProps, iState> {
 
     private _loadLogs (): void {
 
-        const from: string | null = parseRangeBound(this.state.from);
-        const to: string | null = parseRangeBound(this.state.to);
+        const from: string | null = _parseRangeBound(this.state.from);
+        const to: string | null = _parseRangeBound(this.state.to);
 
         if (null === from || null === to) {
 
             this.setState({
                 "loading": false,
-                "logs": null,
-                "error": "Please enter a valid date range."
+                "logs": null
             });
+
+            this.props.onError(new Error("Please enter a valid date range."));
 
             return;
 
         }
 
         this.setState({
-            "loading": true,
-            "error": null
+            "loading": true
         });
 
         this._requestLogs(from, to).then((logs: string): void => {
 
             this.setState({
                 "loading": false,
-                "logs": logs,
-                "error": null
+                "logs": logs
             });
 
         }).catch((err: Error): void => {
 
             this.setState({
                 "loading": false,
-                "logs": null,
-                "error": err.message
+                "logs": null
             });
+
+            this.props.onError(err);
 
         });
 
@@ -281,8 +302,8 @@ export default class LogsManagement extends React.Component<iProps, iState> {
     public render (): React.JSX.Element {
 
         const me: User | null = this.context.user;
-        const fromIso: string | null = parseRangeBound(this.state.from);
-        const toIso: string | null = parseRangeBound(this.state.to);
+        const fromIso: string | null = _parseRangeBound(this.state.from);
+        const toIso: string | null = _parseRangeBound(this.state.to);
         const rangeValid: boolean = null !== fromIso && null !== toIso;
         const hasLogs: boolean = null !== this.state.logs && "" !== this.state.logs;
         const showPurge: boolean = Boolean(me && canPurgeLogs(me));
@@ -327,7 +348,7 @@ export default class LogsManagement extends React.Component<iProps, iState> {
 
                                 <option value="">All levels</option>
 
-                                { LEVELS.map((level: LogLevel): React.JSX.Element => {
+                                { this.state.levels.map((level: LogLevel): React.JSX.Element => {
                                     return <option key={ level } value={ level }>{ level }</option>;
                                 }) }
 
@@ -354,15 +375,7 @@ export default class LogsManagement extends React.Component<iProps, iState> {
 
                 </CardBody>
 
-                { !this.state.loading && null !== this.state.error && <CardBody>
-                    <Alert variant="danger">{ this.state.error }</Alert>
-                </CardBody> }
-
                 { this.state.loading && <CardBody><Alert variant="info">Loading logs...</Alert></CardBody> }
-
-                { !this.state.loading && null === this.state.error && "" === this.state.logs && <CardBody>
-                    <Alert variant="warning">No logs for this range</Alert>
-                </CardBody> }
 
                 { !this.state.loading && hasLogs && <CardBody>
                     <pre className="mb-0 overflow-auto" style={ { "maxHeight": "50vh", "whiteSpace": "pre-wrap" } }>

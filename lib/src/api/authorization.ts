@@ -176,7 +176,7 @@ export default function authorization (container: ContainerPattern, req: Request
 
     // public paths don't need authorization
 
-    if (req.path.includes("/public/")) {
+    if ("/" === req.path || req.path.includes("/public/")) {
         return next();
     }
 

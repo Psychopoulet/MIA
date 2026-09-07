@@ -24,7 +24,7 @@
 
 // module
 
-function rangeWhere (from: Date, to: Date): WhereOptions<LogAttributes> {
+function _rangeWhere (from: Date, to: Date): WhereOptions<LogAttributes> {
 
     return {
         "timestamp": {
@@ -32,6 +32,32 @@ function rangeWhere (from: Date, to: Date): WhereOptions<LogAttributes> {
             [Op.lte]: to
         }
     };
+
+}
+
+function _toLimitDate (value: unknown, name: string): Date {
+
+    if (null === value || undefined === value) {
+        throw new RangeError("No logs found");
+    }
+
+    let parsed: Date | null = null;
+
+    if (value instanceof Date) {
+        parsed = value;
+    }
+    else if ("string" === typeof value || "number" === typeof value) {
+        parsed = new Date(value);
+    }
+    else {
+        throw new RangeError("Invalid \"" + name + "\" log timestamp");
+    }
+
+    if (Number.isNaN(parsed.getTime())) {
+        throw new RangeError("Invalid \"" + name + "\" log timestamp");
+    }
+
+    return parsed;
 
 }
 
@@ -47,8 +73,8 @@ export default class Log extends Model<LogAttributes, LogCreationAttributes> imp
     public static countInRange (from: Date, to: Date, level?: string): Promise<number> {
 
         const where: WhereOptions<LogAttributes> = "string" === typeof level && "" !== level
-            ? { ...rangeWhere(from, to), "level": level }
-            : rangeWhere(from, to);
+            ? { ..._rangeWhere(from, to), "level": level }
+            : _rangeWhere(from, to);
 
         return Log.count({
             "where": where
@@ -59,8 +85,8 @@ export default class Log extends Model<LogAttributes, LogCreationAttributes> imp
     public static findInRange (from: Date, to: Date, level?: string, limit?: number): Promise<Log[]> {
 
         const where: WhereOptions<LogAttributes> = "string" === typeof level && "" !== level
-            ? { ...rangeWhere(from, to), "level": level }
-            : rangeWhere(from, to);
+            ? { ..._rangeWhere(from, to), "level": level }
+            : _rangeWhere(from, to);
 
         const options: FindOptions<LogAttributes> = {
             "where": where,
@@ -81,7 +107,26 @@ export default class Log extends Model<LogAttributes, LogCreationAttributes> imp
     public static destroyInRange (from: Date, to: Date): Promise<number> {
 
         return Log.destroy({
-            "where": rangeWhere(from, to)
+            "where": _rangeWhere(from, to)
+        });
+
+    }
+
+    public static getLogsLimits (): Promise<{
+        "oldest": Date;
+        "newest": Date;
+    }> {
+
+        return Promise.all([
+            Log.min("timestamp"),
+            Log.max("timestamp")
+        ]).then((bounds): { "oldest": Date; "newest": Date } => {
+
+            return {
+                "oldest": _toLimitDate(bounds[0], "oldest"),
+                "newest": _toLimitDate(bounds[1], "newest")
+            };
+
         });
 
     }

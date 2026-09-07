@@ -37,7 +37,7 @@
 
 // module
 
-function toDate (value: Date | string): Date {
+function _toDate (value: Date | string): Date {
 
     return "string" === typeof value
         ? new Date(value)
@@ -58,7 +58,7 @@ export default class Token extends Model<TokenAttributes, TokenCreationAttribute
         return {
             "token": this.token,
             "fingerprint": this.fingerprint,
-            "createdAt": toDate(this.createdAt)
+            "createdAt": _toDate(this.createdAt)
         };
 
     }
