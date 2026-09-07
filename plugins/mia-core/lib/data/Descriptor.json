@@ -753,8 +753,7 @@
 												"type": "string"
 											},
 											"createdAt": {
-												"type": "string",
-												"format": "date-time"
+												"$ref": "#/components/schemas/DateTime"
 											}
 										},
 										"required": [
@@ -838,8 +837,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "string",
-							"format": "date-time"
+							"$ref": "#/components/schemas/DateTime"
 						}
 					},
 					{
@@ -847,8 +845,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "string",
-							"format": "date-time"
+							"$ref": "#/components/schemas/DateTime"
 						}
 					},
 					{
@@ -906,8 +903,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "string",
-							"format": "date-time"
+							"$ref": "#/components/schemas/DateTime"
 						}
 					},
 					{
@@ -915,14 +911,57 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "string",
-							"format": "date-time"
+							"$ref": "#/components/schemas/DateTime"
 						}
 					}
 				],
 				"responses": {
 					"204": {
 						"description": "Logs purged"
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/logs/limits": {
+			"get": {
+				"description": "",
+				"summary": "Get logs limits",
+				"operationId": "getLogsLimits",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"responses": {
+					"200": {
+						"description": "Logs limits",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"oldest": {
+											"$ref": "#/components/schemas/DateTime"
+										},
+										"newest": {
+											"$ref": "#/components/schemas/DateTime"
+										}
+									},
+									"required": [
+										"oldest",
+										"newest"
+									]
+								}
+							}
+						}
 					},
 					"default": {
 						"description": "An error occurred",
@@ -987,8 +1026,7 @@
 						"type": "boolean"
 					},
 					"createdAt": {
-						"type": "string",
-						"format": "date-time"
+						"$ref": "#/components/schemas/DateTime"
 					}
 				},
 				"required": [
@@ -1054,6 +1092,10 @@
 					"authors",
 					"license"
 				]
+			},
+			"DateTime": {
+				"type": "string",
+				"format": "date-time"
 			},
 			"LogLevel": {
 				"type": "string",

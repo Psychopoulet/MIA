@@ -36,7 +36,7 @@
 
 // module
 
-function toDate (value: Date | string): Date {
+function _toDate (value: Date | string): Date {
 
     return "string" === typeof value
         ? new Date(value)
@@ -44,15 +44,15 @@ function toDate (value: Date | string): Date {
 
 }
 
-function isBcryptHash (value: string): boolean {
+function _isBcryptHash (value: string): boolean {
 
     return /^\$2[aby]\$\d{2}\$.{53}$/.test(value);
 
 }
 
-function hashPassword (plain: string): Promise<string> {
+function _hashPassword (plain: string): Promise<string> {
 
-    if (isBcryptHash(plain)) {
+    if (_isBcryptHash(plain)) {
         return Promise.resolve(plain);
     }
 
@@ -60,7 +60,7 @@ function hashPassword (plain: string): Promise<string> {
 
 }
 
-function destroyTokensByUserIds (idUsers: number[], transaction?: DestroyOptions<UserAttributes>["transaction"]): Promise<void> {
+function _destroyTokensByUserIds (idUsers: number[], transaction?: DestroyOptions<UserAttributes>["transaction"]): Promise<void> {
 
     if (0 === idUsers.length) {
         return Promise.resolve();
@@ -93,7 +93,7 @@ export default class User extends Model<UserAttributes, UserCreationAttributes> 
             "id": this.id,
             "name": this.name,
             "isAdmin": Boolean(this.isAdmin),
-            "createdAt": toDate(this.createdAt)
+            "createdAt": _toDate(this.createdAt)
         };
 
     }
@@ -132,7 +132,7 @@ export default class User extends Model<UserAttributes, UserCreationAttributes> 
 
 function hashUserPassword (user: User): Promise<void> {
 
-    return hashPassword(user.password).then((hash: string): void => {
+    return _hashPassword(user.password).then((hash: string): void => {
 
         user.setDataValue("password", hash);
 
@@ -225,7 +225,7 @@ export function registerUser (sequelize: Sequelize): void {
                     return Promise.resolve();
                 }
 
-                return hashPassword(password).then((hash: string): void => {
+                return _hashPassword(password).then((hash: string): void => {
 
                     attributes.password = hash;
 
@@ -235,7 +235,7 @@ export function registerUser (sequelize: Sequelize): void {
             "beforeDestroy" (user: User, options: DestroyOptions<UserAttributes>): Promise<void> {
 
                 // destroy tokens first: SQLite foreign_keys may be off
-                return destroyTokensByUserIds([ user.id ], options.transaction);
+                return _destroyTokensByUserIds([ user.id ], options.transaction);
 
             },
             "beforeBulkDestroy" (options: DestroyOptions<UserAttributes>): Promise<void> {
@@ -246,7 +246,7 @@ export function registerUser (sequelize: Sequelize): void {
                     "transaction": options.transaction
                 }).then((users: User[]): Promise<void> => {
 
-                    return destroyTokensByUserIds(users.map((user: User): number => {
+                    return _destroyTokensByUserIds(users.map((user: User): number => {
                         return user.id;
                     }), options.transaction);
 

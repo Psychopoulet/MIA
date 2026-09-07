@@ -729,4 +729,24 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
     }
 
+    public getLogsLimits (): Promise<operations["getLogsLimits"]["responses"]["200"]["content"]["application/json"]> {
+
+        return Promise.resolve().then((): Promise<{
+            "oldest": string;
+            "newest": string;
+        }> => {
+
+            return Log.getLogsLimits().then((limits: { "oldest": Date; "newest": Date }): { "oldest": string; "newest": string } => {
+
+                return {
+                    "oldest": limits.oldest.toISOString(),
+                    "newest": limits.newest.toISOString()
+                };
+
+            });
+
+        });
+
+    }
+
 }
