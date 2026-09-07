@@ -23,6 +23,7 @@
 
     // locals
     import type { components } from "../Descriptor";
+    import type { SDK } from "../SDK";
 
     type User = components["schemas"]["User"];
     type LogLevel = components["schemas"]["LogLevel"];
@@ -36,21 +37,13 @@
         "logs": string | null;
         "from": string;
         "to": string;
+        "levels": LogLevel[];
         "level": "" | LogLevel;
         "limit": string;
         "purgeOpened": boolean;
     }
 
 // consts
-
-    const LEVELS: LogLevel[] = [
-        "critical",
-        "error",
-        "warning",
-        "success",
-        "info",
-        "debug"
-    ];
 
     const ONE_DAY: number = 24 * 60 * 60 * 1000;
 
@@ -103,6 +96,7 @@ export default class LogsManagement extends React.Component<iProps, iState> {
         this.state = {
             "loading": true,
             "logs": null,
+            "levels": [],
             "from": _formatRangeBound(new Date(now.getTime() - ONE_DAY)),
             "to": _formatRangeBound(now),
             "level": "",
@@ -114,12 +108,19 @@ export default class LogsManagement extends React.Component<iProps, iState> {
 
     public componentDidMount (): void {
 
-        getSDK().getLogsLimits().then((limits: { "oldest": string; "newest": string }): void => {
+        const sdk: SDK = getSDK();
 
-            this.setState({
-                "loading": false,
-                "from": _formatRangeBound(new Date(limits.oldest)),
-                "to": _formatRangeBound(new Date(limits.newest))
+        sdk.getLogsLimits().then((limits: { "oldest": string; "newest": string }): Promise<void> => {
+
+            return sdk.getLogsLevels().then((levels: LogLevel[]): void => {
+
+                this.setState({
+                    "loading": false,
+                    "levels": levels,
+                    "from": _formatRangeBound(new Date(limits.oldest)),
+                    "to": _formatRangeBound(new Date(limits.newest))
+                });
+
             });
 
         }).catch((err: Error): void => {
@@ -347,7 +348,7 @@ export default class LogsManagement extends React.Component<iProps, iState> {
 
                                 <option value="">All levels</option>
 
-                                { LEVELS.map((level: LogLevel): React.JSX.Element => {
+                                { this.state.levels.map((level: LogLevel): React.JSX.Element => {
                                     return <option key={ level } value={ level }>{ level }</option>;
                                 }) }
 

@@ -659,6 +659,25 @@ export class SDK extends EventEmitter<{
 
     }
 
+    public getLogsLevels (): Promise<operations["getLogsLevels"]["responses"]["200"]["content"]["application/json"]> {
+
+        const url: keyof paths = "/mia-core/api/logs/levels";
+        const method: HttpMethodsOf<typeof url> = "get";
+
+        return fetch(url, {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this._token
+            }
+        }).then((res: Response): Promise<operations["getLogsLevels"]["responses"]["200"]["content"]["application/json"]> => {
+
+            return this._parseResponse(res) as Promise<operations["getLogsLevels"]["responses"]["200"]["content"]["application/json"]>;
+
+        });
+
+    }
+
     // only admins
     public deleteLogs (from: string, to: string): Promise<void> {
 
